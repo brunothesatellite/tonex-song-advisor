@@ -1,6 +1,6 @@
 # TODO — Tonex Song Advisor
 
-Version **0.1 testable** : la lecture des bibliothèques TONEX + l'IU sont en place.
+Version **1.0** : lecture V1/V2, conseil local, avis croisés multi-IA, installeur et portable.
 Ce document liste ce qui reste à faire.
 
 ---
@@ -18,7 +18,7 @@ Ce document liste ce qui reste à faire.
   en lecture seule, sections matériels masquables).
 - **UI** thème sombre « rock/metal » (`Themes/DarkRock.axaml`), DataGrid, disposition fixe
   (`DockPanel` : grille à gauche, carte de détail 400 px à droite).
-- **Tests** : 109 tests verts (données, readers V1/V2, tokeniseur, ranges, panneau de détail, filtres,
+- **Tests** : 169 tests verts (données, readers V1/V2, tokeniseur, ranges, panneau de détail, filtres,
   configuration IA).
 - **Barre de titre Windows** en mode sombre (`DwmSetWindowAttribute`).
 
@@ -47,6 +47,19 @@ Ce document liste ce qui reste à faire.
 
 ## 🔜 Reste à faire
 
+### Cycle : choix de la base de données (fait)
+
+- [x] Deux choix dans « Bases & réglages » : le **chemin manuel** (comme avant), ou la case
+      « Utiliser une base du dossier TONEX » + une **liste des bases du dossier officiel**.
+- [x] Dossier trouvé par le *Known Folder* « Documents » de Windows — correct même quand
+      Documents est redirigé vers OneDrive. Chaque ligne : nom, génération V1/V2, taille, date.
+- [x] Case cochée : le champ de chemin et « Ouvrir » sont **grisés**, la base choisie se charge
+      immédiatement. Case décochée : retour au chemin, qui est **rechargé** sans clic.
+- [x] Choix **mémorisé** dans `state.json` (mode, chemin, base sélectionnée) — retrouvé au
+      redémarrage.
+- [x] Correctif : le mode TONEX n'écrase plus le chemin du choix 1 (le rechargement recopiait le
+      chemin de la base ouverte dans le champ, qui était perdu au décochage).
+- [x] Les deux écrans lisent-modifient-écrivent le même `state.json` sans s'effacer mutuellement.
 ### Phase 3 - Recommandation locale (fait)
 - [x] `LibraryAdvisor` dans `TonexAdvisor.Core` : note presets et blocs capturés pour une
       chanson, un artiste ou un style (requête libre, aucun champ obligatoire).
@@ -79,7 +92,7 @@ Ce document liste ce qui reste à faire.
       message explicite et **repli sur le classement local**, qui reste affiché.
 - [x] Bouton « Demander à l'IA » branché à l'écran « Conseils », vérifié en réel par UIA :
       réponse française en ~50 s (`Conseil IA — LongCat 2.5 Preview Free`).
-### Phase 5 — Fiabilité et finitions
+### Phase 5 — Fiabilité et finitions (fait)
 - [x] Test d'intégrité **automatisé** : hash des 2 bases avant/après une session complète
       (lecture, conseil, clics dans l'IU) + aucun journal SQLite ni pages en attente.
 - [x] Persistance des filtres et de l'onglet actif (`%APPDATA%\TonexAdvisor\state.json`, hors dépôt).
@@ -95,7 +108,7 @@ Ce document liste ce qui reste à faire.
       Les tests dépendants des bases (jamais versionnées) sont ignorés automatiquement
       (`[LibraryFact]`), la CI vérifie le reste.
 
-### Phase 6 - Avis croises multi-IA (evolution)
+### Phase 6 - Avis croises multi-IA (fait)
 Objectif : ne plus s'en tenir a un seul modele. Croiser l'avis d'**OpenCode** (deja branche), de
 **Gemini (gratuit)** et de **Copilot (gratuit)**, puis faire arbitrer les trois avis pour ne
 garder que les **3 meilleures propositions**. Gemini et Copilot sont explicitement invites a
@@ -122,7 +135,7 @@ confirmer : c'est le desaccord qui fait la valeur de ce mode.
       tourne, a une seule voix on affiche son avis, a zéro on garde le classement local.
 - [x] Tests : connecteurs factices (succes, erreur, timeout), selection des voix d'apres les
       cles renseignees, arbitrage a partir d'avis ecrits, catalogue des fournisseurs.
-### Phase 7 - Réglages des potards en génération 2 (V2)
+### Phase 7 - Réglages des potards en génération 2 (V2) (fait)
 
 **Analyse faite (lecture seule, bases + dossier TONEX) — résultats :**
 
@@ -185,6 +198,17 @@ Quelques tests assertent sur des textes français.
    sans redémarrage, marqueurs de format intacts, non-régression des écrans.
 8. **Hors périmètre pour l'instant** : traduire le README / le manuel, langues RTL (arabe,
    hébreu) — à réexaminer si une telle langue est ajoutée.
+### Autres évolutions demandées
+
+- [ ] **Colonnes redimensionnables à la main** : la mécanique existe déjà (`CanUserResizeColumns`
+      sur la grille, `CanUserResize` par colonne, poignée en bord d'en-tête), mais les largeurs
+      en `*` (`1.7*`, `1.3*`…) se partagent l'espace et **reprennent la main** quand la fenêtre
+      change de taille, ce qui annule le redimensionnement. Trois niveaux possibles :
+      1. forcer `CanUserResizeColumns="True"` (une ligne) ;
+      2. largeurs en **pixels fixes** + barre de défilement horizontale — prévisible, mais plus
+         d'adaptation à la largeur de fenêtre ;
+      3. **mémoriser les largeurs** dans `state.json` et neutraliser le `*` des colonnes touchées
+         — le confort attendu, dans la continuité de la persistance déjà en place.
 ### Références externes (pour la suite)
 - Format V1/V2 : `https://git.codence.de/pub/tonex-library-sync` (open-source, lit le format V1).
 - Les outils de référence `bcho/` (Bcho-Suite-Pro, seul outil connu lisant la V2) et
