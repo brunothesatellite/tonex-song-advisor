@@ -209,15 +209,21 @@ db\Library2.db    ← format V2 (métadonnées)
 |---|---|
 | `src\TonexAdvisor.Core` | lecture des bases (read-only), DTOs, index, tokeniseur, ranges |
 | `src\TonexAdvisor.App` | UI Avalonia, thème `Themes\DarkRock.axaml`, ViewModels |
-| `tests\TonexAdvisor.Core.Tests` | 130 tests |
+| `tests\TonexAdvisor.Core.Tests` | 151 tests |
 | `TODO.md` | état d'avancement et travail restant |
 
 ## Avancement
 
-Voir [TODO.md](TODO.md) — v0.1 : lecture + navigateur + détail des presets, réglages IA
-(clé API + modèles gratuits + test de connexion). Voir [TODO.md](TODO.md) - v0.1 : lecture + navigateur + détail des presets, réglages IA
-(clé API + modèles gratuits + test de connexion), recommandation locale avec l'onglet
-« Conseils » (meilleurs presets + bloc capturé et baffle). Voir [TODO.md](TODO.md) - v0.1 : lecture + navigateur + détail des presets, réglages IA
-(clé API + modèles gratuits + test de connexion), recommandation locale avec l'onglet
-« Conseils » (meilleurs presets + bloc capturé et baffle) et conseil IA en streaming à partir
-de cette sélection. Reste : fiabilité et finitions (Phase 5).
+**v1.0** — le détail est dans [TODO.md](TODO.md) :
+
+- lecture **strictement en lecture seule** des bibliothèques TONEX **V1 et V2**, navigateur
+  (presets et tone models), tri, filtres mémorisés, panneau de détail ;
+- **Conseil local** : le meilleur preset et le meilleur bloc capturé (stomp + ampli) avec son
+  baffle, chaque point expliqué — hors ligne, en quelques millisecondes ;
+- **Avis croisés** : OpenCode et les voix que vous renseignez (Gemini, Mistral, Groq) choisissent
+  dans le catalogue de vos blocs et baffles, puis un **verdict arbitré par OpenCode** entre sa
+  proposition et celle des voix, avec son conseil libre (le matériel réel du morceau) ;
+- **Installateur** et **version portable**, CI GitHub Actions, 151 tests, garantie de lecture
+  seule vérifiée par empreinte SHA-256.
+
+Reste (Phase 7) : retrouver les réglages des potards en génération 2.
