@@ -27,3 +27,4 @@ config.json
 Thumbs.db
 desktop.ini
 .DS_Store
+tools/Setup/payload.zip

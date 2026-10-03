@@ -9,6 +9,26 @@ preset / la meilleure combinaison **ampli + stomp + cab** pour une chanson ou un
 > (`SELECT`/`WITH`/`EXPLAIN` uniquement), et empreintes SHA-256 capturées à l'ouverture puis
 > revérifiées à la fermeture.
 
+## Installation
+
+Deux formats sont publiés à chaque [release](https://github.com/brunothesatellite/tonex-song-advisor/releases) :
+
+| Fichier | Usage |
+|---|---|
+| `TonexSongAdvisor-x.y-setup.exe` | **Installation** : par utilisateur, sans droits administrateur — raccourcis menu Démarrer et bureau, entrée « Ajout ou suppression de programmes » avec désinstallation. |
+| `TonexSongAdvisor-x.y-portable.zip` | **Portable** : décompresser et lancer `TonexAdvisor.App.exe`, rien n'est installé. |
+
+Windows 10/11 x64, aucune installation de .NET nécessaire (application autonome).
+
+> **Exécution non signée** : les exécutables ne sont pas signés — Windows SmartScreen affiche
+> « Application non reconnue » : « Plus d'infos » puis « Exécuter quand même ».
+
+L'installateur (`tools/Setup`) est du **code du projet** : aucun utilitaire tiers n'est utilisé
+pour le construire. Rappel de la règle de licence du projet — WiX est sous MS-RL (copyleft
+réciproque), NSIS et Inno Setup sous des licences hors liste : nous fabriquons donc notre propre
+installeur, en MIT comme le reste.
+
+Pour reconstruire les deux artefacts : `powershell -ExecutionPolicy Bypass -File tools\build-release.ps1 -Version x.y`.
 ## Manuel utilisateur
 
 Les captures viennent d'une bibliothèque d'exemple : les noms de presets changent selon la vôtre.

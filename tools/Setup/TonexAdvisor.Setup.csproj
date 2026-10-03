@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>setup</AssemblyName>
+    <RootNamespace>TonexAdvisor.Setup</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Surchargé par tools\build-release.ps1 (-p:Version=x.y.0). -->
+    <Version>0.3.0</Version>
+  </PropertyGroup>
+
+  <!-- La charge utile (publication autonome de l'application) est incorporée à l'exécution. -->
+  <ItemGroup>
+    <EmbeddedResource Include="payload.zip" Condition="Exists('payload.zip')" LogicalName="payload.zip" />
+  </ItemGroup>
+
+</Project>
