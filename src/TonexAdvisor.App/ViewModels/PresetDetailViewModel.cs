@@ -90,6 +90,17 @@ public sealed partial class PresetDetailViewModel : ViewModelBase
         : "Bibliothèque de génération 2 : TONEX n'y stocke aucun réglage numérique. " +
           "Seuls le preset, le tone model, le baffle et l'ordre des blocs sont connus.";
 
+    /// <summary>
+    /// Quand les réglages viennent d'une bibliothèque jointe, on le dit : ce ne sont pas ceux du
+    /// fichier ouvert, et l'utilisateur a le droit de le savoir.
+    /// </summary>
+    public string SettingsOriginNote => Preset.Settings?.Origin is { Length: > 0 } origin
+        ? $"Réglages lus dans {origin} : la génération 2 ne stocke pas ces valeurs, " +
+          "elles sont chiffrées dans les fichiers .txp d'IK."
+        : "";
+
+    public bool HasSettingsOrigin => SettingsOriginNote.Length > 0;
+
     public string TagsLine
     {
         get

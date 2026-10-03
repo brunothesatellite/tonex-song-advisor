@@ -223,6 +223,9 @@ db\Library2.db    ← format V2 (métadonnées)
 - **Avis croisés** : OpenCode et les voix que vous renseignez (Gemini, Mistral, Groq) choisissent
   dans le catalogue de vos blocs et baffles, puis un **verdict arbitré par OpenCode** entre sa
   proposition et celle des voix, avec son conseil libre (le matériel réel du morceau) ;
+- **Réglages en génération 2** : les valeurs ne sont pas dans Library2.db (chiffrées dans les
+  .txp d'IK) — quand une bibliothèque V1 est à côté, elles sont jointes automatiquement
+  (2 313 presets sur la bibliothèque d'exemple), avec la mention de leur origine.
 - **Installateur** et **version portable**, CI GitHub Actions, 151 tests, garantie de lecture
   seule vérifiée par empreinte SHA-256.
 

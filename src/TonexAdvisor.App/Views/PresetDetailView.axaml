@@ -91,6 +91,12 @@
                 <TextBlock Text="{Binding SettingsNote}" TextWrapping="Wrap" FontSize="12" />
             </Border>
 
+            <!-- Reglages empruntes a une bibliotheque V1 : on dit d'ou ils viennent. -->
+            <Border Classes="chip-static" IsVisible="{Binding HasSettingsOrigin}"
+                    HorizontalAlignment="Stretch" Padding="12,9">
+                <TextBlock Text="{Binding SettingsOriginNote}" TextWrapping="Wrap" FontSize="12" />
+            </Border>
+
             <!-- ── Signal path ────────────────────────────────────────── -->
             <StackPanel Spacing="8" IsVisible="{Binding HasSettings}">
                 <TextBlock Text="CHAÎNE DU PRESET" Classes="faint" Margin="4,4,0,0" />

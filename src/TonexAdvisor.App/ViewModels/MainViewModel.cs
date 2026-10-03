@@ -112,7 +112,11 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
             StatusMessage =
                 $"{DatabaseLabel} · {loaded.Index.PresetCount:N0} presets · " +
                 $"{loaded.Index.ToneModelCount:N0} tone models" +
-                (HasKnobSettingsAvailable ? "" : " · réglages non disponibles (V2)");
+                (HasKnobSettingsAvailable
+                    ? ""
+                    : loaded.Joined > 0
+                        ? $" · réglages V1 joints à {loaded.Joined:N0} presets"
+                        : " · réglages non disponibles (V2)");
 
             NotifyDatabaseChanged();
             ShowLibrary();
@@ -131,13 +135,40 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
         }
     }
 
-    private static (ToneXDatabase Database, LibraryIndex Index) LoadOffUiThread(string path)
+    private static (ToneXDatabase Database, LibraryIndex Index, int Joined) LoadOffUiThread(string path)
     {
         var database = ToneXDatabase.Open(path);
         try
         {
-            var index = new LibraryIndex(database.LoadPresets(), database.LoadToneModels());
-            return (database, index);
+            var presets = database.LoadPresets();
+            var models = database.LoadToneModels();
+            var joined = 0;
+
+            // Génération 2 : les valeurs de potards n'y sont pas — elles sont chiffrées dans les
+            // fichiers .txp d'IK. Quand la bibliothèque V1 est à côté, on les reprend là : la
+            // jointe se fait en mémoire, aucune base n'est modifiée.
+            if (database.Format == DatabaseFormat.V2)
+            {
+                var companion = SettingsJoin.FindCompanionPath(path);
+                if (companion is not null)
+                {
+                    using var source = ToneXDatabase.Open(companion);
+
+                    var enriched = SettingsJoin.WithSettingsFrom(
+                        presets,
+                        models,
+                        source.LoadPresets(),
+                        source.LoadToneModels());
+
+                    joined = enriched.Count(preset => preset.HasKnobSettings)
+                             - presets.Count(preset => preset.HasKnobSettings);
+                    presets = enriched;
+
+                    source.VerifyUnchanged();
+                }
+            }
+
+            return (database, new LibraryIndex(presets, models), joined);
         }
         catch
         {

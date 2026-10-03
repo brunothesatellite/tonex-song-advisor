@@ -138,13 +138,13 @@ confirmer : c'est le desaccord qui fait la valeur de ce mode.
 3. **Ce qui est récupérable légitimement : la jointure V1 ↔ V2.** Ta base V2 est un upgrade de la
    V1 : **2 489 presets V2 sur ~2 513 existent en V1**, où les valeurs sont en clair.
 
-**Reste à implémenter :**
-- [ ] Quand une base V2 est ouverte et qu'une base V1 est disponible, enrichir les presets V2 avec
+**Implémenté :**
+- [x] Quand une base V2 est ouverte et qu'une base V1 est disponible, enrichir les presets V2 avec
       les réglages V1 (jointure par nom de preset, secours par GUID du tone model).
-- [ ] Afficher les potentiomètres pour ces presets, avec la mention honnête « réglages issus de la
+- [x] Afficher les potentiomètres pour ces presets, avec la mention honnête « réglages issus de la
       bibliothèque V1 — les valeurs V2 sont chiffrées dans les fichiers .txp ».
-- [ ] Les ~200 presets présents seulement en V2 restent sans réglage (valeur chiffrée, non lisible).
-- [ ] Tests : jointure sur les deux bases, non-régression V1 et V2, hash des bases inchangé.
+- [x] Les ~200 presets présents seulement en V2 restent sans réglage (valeur chiffrée, non lisible).
+- [x] Tests : jointure sur les deux bases (2 313 presets enrichis), non-régression V1 et V2, hash des bases inchangé. Règle : la jointe ne remplit que ce qui manque, une base V1 garde ses propres valeurs.
 ### Références externes (pour la suite)
 - Format V1/V2 : `https://git.codence.de/pub/tonex-library-sync` (open-source, lit le format V1).
 - Les outils de référence `bcho/` (Bcho-Suite-Pro, seul outil connu lisant la V2) et

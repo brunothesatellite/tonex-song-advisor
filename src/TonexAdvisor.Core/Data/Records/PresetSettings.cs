@@ -18,14 +18,22 @@ public sealed class PresetSettings
 
     public PresetSettings(
         IReadOnlyDictionary<string, double> numbers,
-        IReadOnlyDictionary<string, string> texts)
+        IReadOnlyDictionary<string, string> texts,
+        string origin = "")
     {
         ArgumentNullException.ThrowIfNull(numbers);
         ArgumentNullException.ThrowIfNull(texts);
 
         _numbers = new Dictionary<string, double>(numbers, StringComparer.OrdinalIgnoreCase);
         _texts = new Dictionary<string, string>(texts, StringComparer.OrdinalIgnoreCase);
+        Origin = origin;
     }
+
+    /// <summary>
+    /// Where these values come from : the library itself (empty), or a library joined to it —
+    /// a generation 2 library has none of its own.
+    /// </summary>
+    public string Origin { get; }
 
     public static PresetSettings Empty { get; } = new(
         new Dictionary<string, double>(),
