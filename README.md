@@ -43,6 +43,9 @@ Les captures viennent d'une bibliothèque d'exemple : les noms de presets change
   étoile dans TONEX.
 - **Réinitialiser** efface recherche et filtres.
 - Les colonnes se **trient** : un clic sur l'en-tête trie en croissant, un second en décroissant.
+- La chaîne capturée se lit de gauche à droite : **Stomp → Ampli → Baffle**. Le stomp et l'ampli
+  viennent de la même capture et sont inséparables ; le baffle est le seul élément interchangeable
+  — y compris pour un « rig complet », dont le stomp reste affiché même sans ampli nommé.
 - Le **panneau de droite** détaille la ligne sélectionnée : métadonnées, tone model lié,
   potentiomètres en lecture seule, sections matériel masquables.
 - La colonne **Réglages** indique (coche orange ou tiret) si le preset embarque des réglages
@@ -186,7 +189,7 @@ confronte les avis et classe les **3 meilleures propositions** avec leur niveau 
 ## Données de test
 
 Les bases TONEX ne sont **pas versionnées** (bibliothèque personnelle, 89 Mo). Pour exécuter les
-126 tests, copie tes propres fichiers dans `db/` :
+130 tests, copie tes propres fichiers dans `db/` :
 
 ```
 db\Library.db     ← format V1 (réglages numériques complets)
@@ -199,7 +202,7 @@ db\Library2.db    ← format V2 (métadonnées)
 |---|---|
 | `src\TonexAdvisor.Core` | lecture des bases (read-only), DTOs, index, tokeniseur, ranges |
 | `src\TonexAdvisor.App` | UI Avalonia, thème `Themes\DarkRock.axaml`, ViewModels |
-| `tests\TonexAdvisor.Core.Tests` | 126 tests |
+| `tests\TonexAdvisor.Core.Tests` | 130 tests |
 | `TODO.md` | état d'avancement et travail restant |
 
 ## Avancement

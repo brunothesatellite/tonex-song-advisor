@@ -52,19 +52,29 @@ public sealed class ToneModelCardViewModel
 
     public bool HasCab { get; }
 
+    /// <summary>
+    /// La chaine capturee, dans l'ordre du signal : stomp puis ampli. Un « rig complet » n'a
+    /// pas toujours d'ampli nomme : le stomp doit alors rester visible, sinon la capture reste
+    /// muette sur ce qu'elle contient.
+    /// </summary>
     public string AmpLine
     {
         get
         {
-            if (AmpName.Length == 0)
-                return Name;
+            var parts = new List<string>();
 
-            var line = AmpName;
-            if (Channel.Length > 0)
-                line += " · canal " + Channel;
             if (HasStomp)
-                line += " + " + StompName;
-            return line;
+                parts.Add(StompName);
+
+            if (AmpName.Length > 0)
+            {
+                var amp = AmpName;
+                if (Channel.Length > 0)
+                    amp += " - canal " + Channel;
+                parts.Add(amp);
+            }
+
+            return parts.Count > 0 ? string.Join(" -> ", parts) : Name;
         }
     }
 

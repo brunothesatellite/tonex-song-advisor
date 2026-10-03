@@ -18,6 +18,7 @@ public sealed class PresetRowViewModel
         Folders = preset.Folders.Count > 0 ? preset.Folders[0] : "";
         Author = preset.UserName;
         Amp = JoinDistinct(toneModels, model => model.AmpName);
+        Stomp = JoinDistinct(toneModels, model => model.StompName);
         Cab = JoinDistinct(toneModels, model => model.CabName);
         Mics = JoinDistinct(toneModels, model => model.Mic1);
         Kind = string.Join(" + ", toneModels
@@ -52,6 +53,8 @@ public sealed class PresetRowViewModel
     public string Author { get; }
 
     public string Amp { get; }
+
+    public string Stomp { get; }
 
     public string Cab { get; }
 

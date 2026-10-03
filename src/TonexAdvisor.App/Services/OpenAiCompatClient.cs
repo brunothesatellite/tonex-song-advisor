@@ -65,7 +65,7 @@ public sealed class OpenAiCompatClient : IAiClient
         if (!response.IsSuccessStatusCode)
         {
             var errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            throw new InvalidOperationException(DescribeError(response.StatusCode, errorBody));
+            throw new AiRequestException((int)response.StatusCode, DescribeError(response.StatusCode, errorBody));
         }
 
         var mediaType = response.Content.Headers.ContentType?.MediaType;

@@ -132,6 +132,8 @@
                             <DataGridTextColumn Header="Genre" Binding="{Binding Genre}" Width="96" />
                             <DataGridTextColumn Header="Artiste" Binding="{Binding Artist}" Width="132" />
                             <DataGridTextColumn Header="Chanson" Binding="{Binding Song}" Width="124" />
+                            <DataGridTextColumn Header="Stomp" Binding="{Binding Stomp}"
+                                                Width="1.3*" MinWidth="110" />
                             <DataGridTextColumn Header="Ampli" Binding="{Binding Amp}"
                                                 Width="1.3*" MinWidth="110" />
                             <DataGridTextColumn Header="Baffle" Binding="{Binding Cab}"
@@ -177,6 +179,8 @@
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Nom" Binding="{Binding Name}"
                                                 Width="1.5*" MinWidth="140" />
+                            <DataGridTextColumn Header="Stomp" Binding="{Binding Stomp}"
+                                                Width="1.3*" MinWidth="110" />
                             <DataGridTextColumn Header="Ampli" Binding="{Binding Amp}"
                                                 Width="1.4*" MinWidth="120" />
                             <DataGridTextColumn Header="Baffle" Binding="{Binding Cab}"
