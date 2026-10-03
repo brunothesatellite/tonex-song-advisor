@@ -82,6 +82,47 @@ public class AiConsultationTests
     }
 
     [Fact]
+    public async Task Consultation_RetriesAVoiceThatFailedOnHighDemand()
+    {
+        var calls = 0;
+        var flaky = new FakeClient("Gemini (Google)", _ =>
+        {
+            calls++;
+            if (calls == 1)
+                throw new AiRequestException(503, "This model is currently experiencing high demand.");
+
+            return Task.FromResult("Réponse après nouvel essai.");
+        });
+
+        var opinions = await AiConsultation.ConsultAsync(
+            new IAiClient[] { flaky }, _ => "test-model", "prompt", 100, TimeSpan.FromSeconds(30));
+
+        var opinion = Assert.Single(opinions);
+        Assert.True(opinion.Ok, opinion.Error ?? "");
+        Assert.Equal("Réponse après nouvel essai.", opinion.Text);
+        Assert.Equal(2, calls);
+    }
+
+    [Fact]
+    public async Task Consultation_DoesNotRetryARejectedKey()
+    {
+        var calls = 0;
+        var rejected = new FakeClient("Groq", _ =>
+        {
+            calls++;
+            throw new AiRequestException(401, "invalid api key");
+        });
+
+        var opinions = await AiConsultation.ConsultAsync(
+            new IAiClient[] { rejected }, _ => "test-model", "prompt", 100, TimeSpan.FromSeconds(30));
+
+        var opinion = Assert.Single(opinions);
+        Assert.False(opinion.Ok);
+        Assert.True(calls == 1, "a bad key will not become good by asking twice");
+        Assert.Contains("invalid api key", opinion.Error ?? "");
+    }
+
+    [Fact]
     public void BuildClients_TakesOnlyTheVoicesWithAKey()
     {
         var silent = new AppConfig { ApiKey = "" };

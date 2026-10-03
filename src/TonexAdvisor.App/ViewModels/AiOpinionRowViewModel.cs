@@ -12,11 +12,12 @@ public sealed class AiOpinionRowViewModel
         Provider = opinion.Provider;
         HasError = opinion.Error is not null;
 
-        Status = HasError
-            ? opinion.Error ?? ""
-            : $"{opinion.ElapsedMs / 1000d:0.0} s";
+        // Une voix en échec est ignorée : les autres suffisent, et un pavé d'erreur fait croire à
+        // un blocage général. Le diagnostic complet reste dans Bases & réglages (« Tester les
+        // voix »), qui lui affiche les messages tels quels.
+        Status = HasError ? "indisponible" : $"{opinion.ElapsedMs / 1000d:0.0} s";
 
-        Text = opinion.Text;
+        Text = HasError ? "" : opinion.Text;
     }
 
     public AiOpinion Opinion { get; }

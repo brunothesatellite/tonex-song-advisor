@@ -104,40 +104,52 @@ public static class AiConsultation
     {
         var stopwatch = Stopwatch.StartNew();
 
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(timeout);
+        // Une panne transitoire (forte affluence, quota) mérite un second essai ; une clé
+        // invalide ou un modèle retiré, non.
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            deadline.CancelAfter(timeout);
 
-        try
-        {
-            var text = await client.AskStreamAsync(
-                model,
-                prompt,
-                maxTokens,
-                delta => onDelta?.Invoke(client.Provider, delta),
-                deadline.Token).ConfigureAwait(false);
+            try
+            {
+                var text = await client.AskStreamAsync(
+                    model,
+                    prompt,
+                    maxTokens,
+                    delta => onDelta?.Invoke(client.Provider, delta),
+                    deadline.Token).ConfigureAwait(false);
 
-            stopwatch.Stop();
-            return Publish(new AiOpinion(client.Provider, text, null, stopwatch.ElapsedMilliseconds), onOpinion);
+                stopwatch.Stop();
+                return Publish(new AiOpinion(client.Provider, text, null, stopwatch.ElapsedMilliseconds), onOpinion);
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                stopwatch.Stop();
+                return Publish(new AiOpinion(
+                    client.Provider,
+                    "",
+                    $"Délai dépassé ({timeout.TotalSeconds:0} s)",
+                    stopwatch.ElapsedMilliseconds), onOpinion);
+            }
+            catch (OperationCanceledException)
+            {
+                stopwatch.Stop();
+                return Publish(new AiOpinion(client.Provider, "", "Annulé", stopwatch.ElapsedMilliseconds), onOpinion);
+            }
+            catch (AiRequestException exception) when (exception.IsTransient && attempt == 0)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                stopwatch.Stop();
+                return Publish(new AiOpinion(client.Provider, "", exception.Message, stopwatch.ElapsedMilliseconds), onOpinion);
+            }
         }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-        {
-            stopwatch.Stop();
-            return Publish(new AiOpinion(
-                client.Provider,
-                "",
-                $"Délai dépassé ({timeout.TotalSeconds:0} s)",
-                stopwatch.ElapsedMilliseconds), onOpinion);
-        }
-        catch (OperationCanceledException)
-        {
-            stopwatch.Stop();
-            return Publish(new AiOpinion(client.Provider, "", "Annulé", stopwatch.ElapsedMilliseconds), onOpinion);
-        }
-        catch (Exception exception)
-        {
-            stopwatch.Stop();
-            return Publish(new AiOpinion(client.Provider, "", exception.Message, stopwatch.ElapsedMilliseconds), onOpinion);
-        }
+
+        stopwatch.Stop();
+        return Publish(new AiOpinion(client.Provider, "", "Toujours en erreur après un second essai", stopwatch.ElapsedMilliseconds), onOpinion);
     }
 
     /// <summary>Reports an opinion as soon as it is ready, then returns it.</summary>

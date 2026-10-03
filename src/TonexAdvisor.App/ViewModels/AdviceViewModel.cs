@@ -237,10 +237,10 @@ public partial class AdviceViewModel : ViewModelBase
 
             if (usable.Count == 0)
             {
-                var failure = opinions.FirstOrDefault();
-                AiStatus = failure is null
-                    ? "Aucune voix disponible."
-                    : $"{failure.Provider} : {failure.Error} — le classement local reste affiché.";
+                // Aucune voix disponible : on le dit sans détailler les erreurs, qui n'ajoutent
+                // rien au conseil et donnent l'impression d'un blocage général.
+                var names = string.Join(", ", opinions.Select(opinion => opinion.Provider));
+                AiStatus = $"Voix indisponibles ({names}) — le classement local reste affiché.";
                 return;
             }
 
