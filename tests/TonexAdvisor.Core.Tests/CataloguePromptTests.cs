@@ -60,7 +60,7 @@ public class CataloguePromptTests
         // minute, réponse comprise — il faut donc rester loin en dessous.
         var prompt = CataloguePrompt.Build(new AdviceQuery { Style = "metal" }, index);
         Assert.True(prompt.Length < 25_000, $"the prompt grew to {prompt.Length} characters");
-        Assert.Equal(3000, CataloguePrompt.MaxTokens);
+        Assert.Equal(4000, CataloguePrompt.MaxTokens);
     }
 
     [LibraryFact]

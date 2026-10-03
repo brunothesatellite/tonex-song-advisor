@@ -60,6 +60,20 @@ public static class AnswerCleaner
             }
         }
 
-        return string.Join("\n", lines[start..end]).Trim();
+        var answer = string.Join("\n", lines[start..end]).Trim();
+
+        // Une réponse coupée en plein milieu par la limite de tokens se remarque d'un coup d'œil.
+        return MarkIfTruncated(answer);
+    }
+
+    /// <summary>Adds a visible ellipsis to an answer the model never finished writing.</summary>
+    private static string MarkIfTruncated(string answer)
+    {
+        if (answer.Length == 0)
+            return answer;
+
+        return answer[^1] is '.' or '!' or '?' or ':' or '»' or '"' or '\''
+            ? answer
+            : answer + " …";
     }
 }

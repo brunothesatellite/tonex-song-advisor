@@ -17,8 +17,12 @@ public sealed record Opinion(string Provider, string Text);
 /// </remarks>
 public static class ArbitrationPrompt
 {
-    /// <summary>The referee quotes several voices and ranks three proposals.</summary>
-    public const int MaxTokens = 4000;
+    /// <summary>
+    /// The referee quotes several voices, ranks three proposals and adds its free advice: its
+    /// answer is the longest of the panel, and its thinking is billed in the same budget. Cut it
+    /// short and the verdict stops mid-sentence.
+    /// </summary>
+    public const int MaxTokens = 8000;
 
     public static string Build(
         AdviceQuery query,

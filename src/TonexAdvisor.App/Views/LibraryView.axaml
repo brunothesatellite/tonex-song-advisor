@@ -353,12 +353,24 @@
                                                                         FontSize="11" Padding="8,1"
                                                                         IsVisible="{Binding HasError}"
                                                                         ToolTip.Tip="Afficher le détail de l'erreur" />
+
+                                                                <!-- Sortie complète du modèle, même bouton : le travail, pas la réponse. -->
+                                                                <Button Content="thinking"
+                                                                        Command="{Binding ToggleThinkingCommand}"
+                                                                        FontSize="11" Padding="8,1"
+                                                                        IsVisible="{Binding CanShowRaw}"
+                                                                        ToolTip.Tip="Afficher la sortie complète du modèle" />
                                                             </StackPanel>
                                                         </Grid>
 
                                                         <TextBlock Text="{Binding Text}" Classes="dim"
                                                                    FontSize="11" TextWrapping="Wrap"
                                                                    IsVisible="{Binding HasText}" />
+
+                                                        <!-- La sortie complète, repliée : c'est le travail du modèle. -->
+                                                        <TextBlock Text="{Binding RawText}" Classes="faint"
+                                                                   FontSize="11" TextWrapping="Wrap"
+                                                                   IsVisible="{Binding ShowRawText}" />
 
                                                         <!-- La réflexion s'écrit en direct, puis laisse la réponse seule. -->
                                                         <TextBlock Text="{Binding Thinking}" Classes="faint"
@@ -379,8 +391,17 @@
                                                FontStyle="Italic" FontSize="11" TextWrapping="Wrap"
                                                IsVisible="{Binding Advice.HasAiThinking}" />
 
-                                    <TextBlock Text="{Binding Advice.AiTitle}" Classes="faint"
-                                               FontSize="11" IsVisible="{Binding Advice.HasAiTitle}" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"
+                                          IsVisible="{Binding Advice.HasAiTitle}">
+                                        <TextBlock Grid.Column="0" Text="{Binding Advice.AiTitle}"
+                                                   Classes="faint" FontSize="11"
+                                                   VerticalAlignment="Center" />
+                                        <Button Grid.Column="1" Content="thinking" FontSize="11"
+                                                Padding="8,1"
+                                                Command="{Binding Advice.ToggleAiThinkingCommand}"
+                                                IsVisible="{Binding Advice.CanShowAiThinking}"
+                                                ToolTip.Tip="Afficher la sortie complète de l'arbitre" />
+                                    </Grid>
 
                                     <TextBlock Text="{Binding Advice.AiText}" FontSize="13"
                                                LineHeight="21" TextWrapping="Wrap"

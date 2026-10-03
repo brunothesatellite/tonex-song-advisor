@@ -79,11 +79,15 @@ public partial class AdviceViewModel : ViewModelBase
     private string _aiThinking = "";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAiThinking))]
+    private bool _isAiThinkingExpanded;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasAiStatus))]
     private string _aiStatus = "";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsAiEnabled), nameof(HasAiThinking))]
+    [NotifyPropertyChangedFor(nameof(IsAiEnabled), nameof(HasAiThinking), nameof(CanShowAiThinking))]
     private bool _isAiBusy;
 
     private readonly Func<AppConfig> _configLoader;
@@ -114,10 +118,17 @@ public partial class AdviceViewModel : ViewModelBase
     public bool HasAiTitle => AiTitle.Length > 0;
 
     /// <summary>
-    /// The chain of thought is shown while generating only: once the answer is there, it is
-    /// noise for the user.
+    /// The referee's thinking streams live while it works; once the verdict is there, it only
+    /// comes back on the « thinking » button.
     /// </summary>
-    public bool HasAiThinking => AiThinking.Length > 0 && (IsAiBusy || AiText.Length == 0);
+    public bool HasAiThinking => AiThinking.Length > 0 && (IsAiBusy || IsAiThinkingExpanded);
+
+    /// <summary>The verdict's « thinking » button: the referee's full output.</summary>
+    public bool CanShowAiThinking => AiThinking.Length > 0 && !IsAiBusy;
+
+    [RelayCommand]
+    private void ToggleAiThinking()
+        => IsAiThinkingExpanded = !IsAiThinkingExpanded;
 
     public bool HasAiStatus => AiStatus.Length > 0;
 

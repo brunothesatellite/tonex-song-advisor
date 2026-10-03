@@ -104,6 +104,15 @@ public class AnswerCleanerTests
         Assert.DoesNotContain("Draft the Verdict", cleaned, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void AnAnswerCutByTheTokenBudget_IsMarkedAsTruncated()
+    {
+        // Le verdict s'arrêtait en plein milieu de phrase quand la limite de tokens tombait.
+        var cleaned = AnswerCleaner.Extract("VERDICT : 1. Mesa Boogie Dual Rectifier (1/3). C'est Drop", "VERDICT :", End);
+
+        Assert.EndsWith(" …", cleaned, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("   ")]

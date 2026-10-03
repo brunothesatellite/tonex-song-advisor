@@ -62,6 +62,31 @@ public class AiOpinionRowViewModelTests
     }
 
     [Fact]
+    public void AVoiceKeepsItsFullOutput_OneClickAway()
+    {
+        var row = new AiOpinionRowViewModel("OpenCode Go");
+        row.Complete(new AiOpinion(
+            "OpenCode Go",
+            "1. Analyze the Request:\n   Let me check the list...\nBLOC : BOSS MT-2W -> Peavey 5150\nCONSEIL LIBRE : le vrai matériel est un Mark III.",
+            null,
+            5000));
+
+        // La réponse nettoyée...
+        Assert.DoesNotContain("Analyze the Request", row.Text, StringComparison.Ordinal);
+
+        // ...et la sortie complète, repliée par défaut, au bouton « thinking ».
+        Assert.False(row.ShowRawText);
+        Assert.True(row.CanShowRaw);
+        Assert.Contains("Analyze the Request", row.RawText, StringComparison.Ordinal);
+
+        row.ToggleThinkingCommand.Execute(null);
+        Assert.True(row.ShowRawText);
+
+        row.ToggleThinkingCommand.Execute(null);
+        Assert.False(row.ShowRawText);
+    }
+
+    [Fact]
     public void AVoiceThatAnswered_ShowsItsTextAndHowLongItTook()
     {
         var row = new AiOpinionRowViewModel(new AiOpinion("Groq", "Prends le preset 2.", null, 1500));

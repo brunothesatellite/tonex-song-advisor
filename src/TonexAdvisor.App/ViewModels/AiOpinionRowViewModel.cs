@@ -45,6 +45,15 @@ public partial class AiOpinionRowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isErrorExpanded;
 
+    /// <summary>La sortie complète du modèle, travail compris — opposée à la réponse nettoyée.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowRawText), nameof(CanShowRaw))]
+    private string _rawText = "";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowRawText))]
+    private bool _isThinkingExpanded;
+
     /// <summary>A voice that has not answered yet.</summary>
     public AiOpinionRowViewModel(string provider)
     {
@@ -61,6 +70,12 @@ public partial class AiOpinionRowViewModel : ViewModelBase
 
     /// <summary>La réflexion s'affiche pendant qu'elle s'écrit, puis laisse la réponse seule.</summary>
     public bool HasThinking => IsPending && Thinking.Length > 0;
+
+    /// <summary>Le bouton « thinking » n'apparaît qu'une fois la réponse arrivée.</summary>
+    public bool CanShowRaw => !IsPending && RawText.Length > 0;
+
+    /// <summary>La sortie complète, repliée par défaut : c'est le travail, pas la réponse.</summary>
+    public bool ShowRawText => IsThinkingExpanded && RawText.Length > 0;
 
     /// <summary>True when the row carries a message worth unfolding.</summary>
     public bool HasErrorDetail => HasError && ErrorDetail.Length > 0;
@@ -84,11 +99,16 @@ public partial class AiOpinionRowViewModel : ViewModelBase
 
         // Un modèle raisonneur écrit son travail dans sa réponse : brouillons, vérifications,
         // comptages. On ne garde que le bloc de réponse, du marqueur de format à la fin du
-        // CONSEIL LIBRE.
+        // CONSEIL LIBRE — la sortie complète, elle, reste consultable au bouton « thinking ».
+        RawText = opinion.Text;
         Text = HasError ? "" : AnswerCleaner.Extract(opinion.Text, "BLOC :", "CONSEIL LIBRE");
         ErrorDetail = opinion.Error ?? "";
         IsErrorExpanded = false;
     }
+
+    [RelayCommand]
+    private void ToggleThinking()
+        => IsThinkingExpanded = !IsThinkingExpanded;
 
     [RelayCommand]
     private void ToggleError()

@@ -27,10 +27,12 @@ namespace TonexAdvisor.Core.Advice;
 public static class CataloguePrompt
 {
     /// <summary>
-    /// Answer budget. The imposed answer is four lines, but a reasoning model spends most of its
-    /// budget before writing the first word — cutting it short returns the thinking instead.
+    /// Answer budget. Deliberately generous: a reasoning model spends most of it on its chain of
+    /// thought before writing the first word, and cutting it short truncates the answer mid-word.
+    /// Still fits the free tier of Groq (3 400 tokens of catalogue + 4 000 here, under its 8 000
+    /// tokens per minute).
     /// </summary>
-    public const int MaxTokens = 3000;
+    public const int MaxTokens = 4000;
 
     /// <summary>Amplifiers sent to the AIs, most used first.</summary>
     public const int MaxAmps = 200;
