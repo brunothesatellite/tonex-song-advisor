@@ -70,6 +70,9 @@ public static class ArbitrationPrompt
         builder.AppendLine();
         builder.AppendLine("Commence par « VERDICT : », sans rien écrire avant : ni préambule, ni analyse des avis.");
         builder.AppendLine(
+            "Écris le verdict directement : pas d'évaluation d'avis en liste, pas de brouillon, pas de " +
+            "vérification de ton propre format, ni de commentaire sur ce que tu t'apprêtes à répondre.");
+        builder.AppendLine(
             "Si tous les avis se trompent, dis-le et tranche avec tes propres arguments : un accord " +
             "unanime n'est pas une preuve.");
         builder.AppendLine(

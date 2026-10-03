@@ -247,6 +247,7 @@ public partial class AdviceViewModel : ViewModelBase
                 prompt,
                 CataloguePrompt.MaxTokens,
                 VoiceTimeout,
+                onDelta: (provider, delta) => Dispatch(() => AppendThinking(provider, delta)),
                 onOpinion: opinion => Dispatch(() => AppendOpinion(opinion)),
                 cancellationToken: _aiCts.Token);
 
@@ -264,7 +265,7 @@ public partial class AdviceViewModel : ViewModelBase
             // 2. Une seule voix : pas d'arbitrage utile, on affiche son avis.
             if (usable.Count == 1)
             {
-                AiText = AnswerCleaner.TrimTo(usable[0].Text, "BLOC :");
+                AiText = AnswerCleaner.Extract(usable[0].Text, "BLOC :", "CONSEIL LIBRE");
                 AiTitle = $"AVIS — {usable[0].Provider}";
                 AiStatus = $"Conseil IA - {usable[0].Provider}";
                 return;
@@ -293,8 +294,9 @@ public partial class AdviceViewModel : ViewModelBase
             if (AiText.Length == 0 && text.Length > 0)
                 AiText = text;
 
-            // L'arbitre écrit souvent sa réflexion avant son verdict : on ne garde que le verdict.
-            AiText = AnswerCleaner.TrimTo(AiText, "VERDICT :");
+            // L'arbitre écrit son travail (évaluation des avis, brouillons) dans sa sortie : on ne
+            // garde que son verdict, du marqueur à la fin du CONSEIL LIBRE.
+            AiText = AnswerCleaner.Extract(AiText, "VERDICT :", "CONSEIL LIBRE");
             AiTitle = $"VERDICT — ARBITRÉ PAR {referee.Provider}";
 
             AiStatus = AiText.Length > 0
@@ -321,6 +323,18 @@ public partial class AdviceViewModel : ViewModelBase
 
     [RelayCommand]
     private void CancelAi() => _aiCts?.Cancel();
+
+    /// <summary>
+    /// Fait défiler la réflexion d'une voix dans sa propre ligne, en direct : on voit le modèle
+    /// travailler, puis sa ligne se réduit à la réponse quand il a fini.
+    /// </summary>
+    private void AppendThinking(string provider, SseDelta delta)
+    {
+        var row = Opinions.FirstOrDefault(candidate =>
+            string.Equals(candidate.Provider, provider, StringComparison.Ordinal));
+
+        row?.AddThinking(delta);
+    }
 
     /// <summary>
     /// Complète la ligne d'une voix depuis le thread réseau : la ligne existe déjà (elle tourne),

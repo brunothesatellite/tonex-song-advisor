@@ -360,6 +360,12 @@
                                                                    FontSize="11" TextWrapping="Wrap"
                                                                    IsVisible="{Binding HasText}" />
 
+                                                        <!-- La réflexion s'écrit en direct, puis laisse la réponse seule. -->
+                                                        <TextBlock Text="{Binding Thinking}" Classes="faint"
+                                                                   FontStyle="Italic" FontSize="11"
+                                                                   TextWrapping="Wrap"
+                                                                   IsVisible="{Binding HasThinking}" />
+
                                                         <TextBlock Text="{Binding ErrorDetail}" Classes="faint"
                                                                    FontSize="11" TextWrapping="Wrap"
                                                                    IsVisible="{Binding IsErrorExpanded}" />

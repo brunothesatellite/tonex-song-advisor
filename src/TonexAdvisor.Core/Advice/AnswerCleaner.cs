@@ -1,26 +1,65 @@
+using System.Text;
+
 namespace TonexAdvisor.Core.Advice;
 
 /// <summary>
-/// A reasoning model writes its thinking before its answer, sometimes right inside the answer:
-/// the panel shows the verdict, not the working.
+/// A reasoning model writes its working before its answer — drafts, self-checks, sentence counts,
+/// sometimes after the answer too. The panel shows the conclusion, not the working.
 /// </summary>
 /// <remarks>
-/// Rather than guessing where the answer starts, we lean on the format the prompts impose: an
-/// answer begins at its marker (<c>BLOC :</c> for a voice, <c>VERDICT :</c> for the arbitration).
-/// A model that does not follow the format is shown as it wrote it — cutting blindly would be
-/// worse than a long answer.
+/// Rather than guessing what is thinking and what is answer, we lean on the format the prompts
+/// impose: the answer is the block that starts at its marker (<c>BLOC :</c> for a voice,
+/// <c>VERDICT :</c> for the arbitration) and ends with the <c>CONSEIL LIBRE</c> paragraph. A
+/// model that repeats its answer three times while polishing it is therefore reduced to the last
+/// one — and a model that ignores the format entirely is shown as it wrote it, because cutting
+/// blindly would be worse than a long answer.
 /// </remarks>
 public static class AnswerCleaner
 {
-    /// <summary>Keeps what starts at the first marker; whatever comes before is thinking.</summary>
-    public static string TrimTo(string? text, string marker)
+    /// <summary>
+    /// Keeps the answer block: from the <b>last</b> line starting at <paramref name="startMarker"/>
+    /// to the end of the <paramref name="endMarker"/> paragraph.
+    /// </summary>
+    public static string Extract(string? text, string startMarker, string endMarker)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(marker);
+        ArgumentException.ThrowIfNullOrWhiteSpace(startMarker);
+        ArgumentException.ThrowIfNullOrWhiteSpace(endMarker);
 
         if (string.IsNullOrWhiteSpace(text))
             return "";
 
-        var index = text.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
-        return index > 0 ? text[index..].TrimStart() : text.Trim();
+        var lines = text.Replace("\r\n", "\n").Split('\n');
+
+        // Dernier bloc : les répétitions qui précèdent sont des brouillons.
+        var start = -1;
+        for (var i = 0; i < lines.Length; i++)
+        {
+            if (lines[i].TrimStart().StartsWith(startMarker, StringComparison.OrdinalIgnoreCase))
+                start = i;
+        }
+
+        if (start < 0)
+            return text.Trim();
+
+        // Fin : après le paragraphe qui porte la fin du format, tout le reste est du travail.
+        var end = lines.Length;
+        var seenEndMarker = false;
+
+        for (var i = start; i < lines.Length; i++)
+        {
+            if (lines[i].TrimStart().StartsWith(endMarker, StringComparison.OrdinalIgnoreCase))
+            {
+                seenEndMarker = true;
+                continue;
+            }
+
+            if (seenEndMarker && string.IsNullOrWhiteSpace(lines[i]))
+            {
+                end = i;
+                break;
+            }
+        }
+
+        return string.Join("\n", lines[start..end]).Trim();
     }
 }

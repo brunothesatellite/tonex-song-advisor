@@ -54,6 +54,9 @@ public static class CataloguePrompt
         builder.AppendLine("Tu es un conseiller guitare (rock/metal) qui connaît les bibliothèques TONEX.");
         builder.AppendLine("Réponds en français, en 8 à 12 phrases, ton direct et concret.");
         builder.AppendLine("Va droit au but : ni préambule, ni analyse de la demande.");
+        builder.AppendLine(
+            "Écris uniquement les lignes du format ci-dessous : ni brouillon, ni vérification de ton " +
+            "propre format, ni décompte de phrases, ni commentaire sur ce que tu t'apprêtes à répondre.");
         builder.AppendLine();
 
         builder.Append("La demande :");
