@@ -48,6 +48,20 @@ public class AiOpinionRowViewModelTests
     }
 
     [Fact]
+    public void AVoiceThatWroteItsThinkingBeforeItsAnswer_ShowsOnlyTheAnswer()
+    {
+        var row = new AiOpinionRowViewModel("OpenCode Go");
+        row.Complete(new AiOpinion(
+            "OpenCode Go",
+            "1. Analyze the Request:\n   Let me look at the list...\nBLOC : BOSS MT-2W -> Peavey 5150\nBAFFLE : Mesa Boogie 4x12 OS",
+            null,
+            4200));
+
+        Assert.StartsWith("BLOC : BOSS MT-2W", row.Text, StringComparison.Ordinal);
+        Assert.DoesNotContain("Analyze the Request", row.Text, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void AVoiceThatAnswered_ShowsItsTextAndHowLongItTook()
     {
         var row = new AiOpinionRowViewModel(new AiOpinion("Groq", "Prends le preset 2.", null, 1500));

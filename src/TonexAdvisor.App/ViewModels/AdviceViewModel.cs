@@ -261,10 +261,10 @@ public partial class AdviceViewModel : ViewModelBase
                 return;
             }
 
-            // 2. A single voice has nothing to contradict: its opinion is the answer.
+            // 2. Une seule voix : pas d'arbitrage utile, on affiche son avis.
             if (usable.Count == 1)
             {
-                AiText = usable[0].Text;
+                AiText = AnswerCleaner.TrimTo(usable[0].Text, "BLOC :");
                 AiTitle = $"AVIS — {usable[0].Provider}";
                 AiStatus = $"Conseil IA - {usable[0].Provider}";
                 return;
@@ -293,10 +293,12 @@ public partial class AdviceViewModel : ViewModelBase
             if (AiText.Length == 0 && text.Length > 0)
                 AiText = text;
 
-            AiTitle = $"AVIS CONVERGÉ — {string.Join(" + ", usable.Select(opinion => opinion.Provider))}";
+            // L'arbitre écrit souvent sa réflexion avant son verdict : on ne garde que le verdict.
+            AiText = AnswerCleaner.TrimTo(AiText, "VERDICT :");
+            AiTitle = $"VERDICT — ARBITRÉ PAR {referee.Provider}";
 
             AiStatus = AiText.Length > 0
-                ? $"Synthèse de {usable.Count} avis ({string.Join(", ", usable.Select(opinion => opinion.Provider))})"
+                ? $"Verdict sur {usable.Count} avis ({string.Join(", ", usable.Select(opinion => opinion.Provider))})"
                 : "L'arbitre n'a rien renvoyé : les avis restent affichés.";
         }
         catch (OperationCanceledException)

@@ -60,26 +60,21 @@ public static class ArbitrationPrompt
         }
 
         builder.AppendLine();
-        builder.AppendLine("Ta mission :");
-        builder.AppendLine(
-            "1. Confronte les avis : cite ce qui cloche chez chacun (un nom absent du catalogue, un " +
-            "stomp associé à un ampli d'un autre bloc, un baffle qui ne va pas avec le style).");
-        builder.AppendLine(
-            "2. Classe les 3 meilleures propositions, uniquement issues du catalogue. Pour chacune : " +
-            "le bloc, le baffle, pourquoi, et le niveau de consensus (3/3, 2/3, 1/3).");
-        builder.AppendLine(
-            "3. Termine par 2 à 3 réglages concrets (gain, EQ, réverb/delay).");
-        builder.AppendLine(
-            "4. Puis ajoute ton CONSEIL LIBRE : ce que tu utiliserais toi, sans contrainte de " +
-            "bibliothèque — le matériel réel du morceau ou du style si tu le connais, et les " +
-            "réglages typiques qui vont avec. C'est la partie la plus utile quand la bibliothèque " +
-            "n'a rien de vraiment proche.");
+        builder.AppendLine("Ta mission, dans ce format exact :");
+        builder.AppendLine("  VERDICT : les 3 meilleures propositions classées — pour chacune : le bloc, le baffle,");
+        builder.AppendLine("            pourquoi, et le niveau de consensus (3/3, 2/3, 1/3). Confronte les avis au passage :");
+        builder.AppendLine("            cite ce qui cloche chez chacun (un nom absent du catalogue, un stomp associé à un");
+        builder.AppendLine("            ampli d'un autre bloc, un baffle qui ne va pas avec le style).");
+        builder.AppendLine("  CONSEIL LIBRE : ce que tu utiliserais toi, sans contrainte de bibliothèque — le matériel");
+        builder.AppendLine("            réel du morceau ou du style si tu le connais, et les réglages typiques qui vont avec.");
+        builder.AppendLine();
+        builder.AppendLine("Commence par « VERDICT : », sans rien écrire avant : ni préambule, ni analyse des avis.");
         builder.AppendLine(
             "Si tous les avis se trompent, dis-le et tranche avec tes propres arguments : un accord " +
             "unanime n'est pas une preuve.");
         builder.AppendLine(
-            "N'invente aucun bloc ni baffle absent du catalogue — cette contrainte ne vaut que pour " +
-            "les propositions classées ; le CONSEIL LIBRE est ouvert à tout ton savoir.");
+            "N'invente aucun bloc ni baffle absent du catalogue pour les propositions classées — le " +
+            "CONSEIL LIBRE, lui, est ouvert à tout ton savoir.");
 
         return builder.ToString();
     }

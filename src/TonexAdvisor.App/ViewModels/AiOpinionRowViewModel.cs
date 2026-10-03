@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TonexAdvisor.App.Services;
+using TonexAdvisor.Core.Advice;
 
 namespace TonexAdvisor.App.ViewModels;
 
@@ -65,7 +66,10 @@ public partial class AiOpinionRowViewModel : ViewModelBase
         IsPending = false;
         HasError = opinion.Error is not null;
         Status = HasError ? "indisponible" : $"{opinion.ElapsedMs / 1000d:0.0} s";
-        Text = HasError ? "" : opinion.Text;
+
+        // Le thinking qu'un modèle écrit dans sa réponse ne doit pas arriver jusqu'à l'écran :
+        // on garde ce qui commence au format imposé.
+        Text = HasError ? "" : AnswerCleaner.TrimTo(opinion.Text, "BLOC :");
         ErrorDetail = opinion.Error ?? "";
         IsErrorExpanded = false;
     }

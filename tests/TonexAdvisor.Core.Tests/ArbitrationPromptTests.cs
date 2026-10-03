@@ -41,6 +41,10 @@ public class ArbitrationPromptTests
         Assert.Contains("CONSEIL LIBRE", prompt, StringComparison.Ordinal);
         Assert.Contains("N'invente aucun bloc", prompt, StringComparison.Ordinal);
 
+        // The referee must answer at the marker: that is what lets the app drop its thinking.
+        Assert.Contains("VERDICT :", prompt, StringComparison.Ordinal);
+        Assert.Contains("Commence par « VERDICT : »", prompt, StringComparison.Ordinal);
+
         // And the captured block rule is recalled to the referee itself.
         Assert.Contains("indissociable", prompt, StringComparison.Ordinal);
     }
