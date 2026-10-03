@@ -349,6 +349,9 @@
                                                FontStyle="Italic" FontSize="11" TextWrapping="Wrap"
                                                IsVisible="{Binding Advice.HasAiThinking}" />
 
+                                    <TextBlock Text="{Binding Advice.AiTitle}" Classes="faint"
+                                               FontSize="11" IsVisible="{Binding Advice.HasAiTitle}" />
+
                                     <TextBlock Text="{Binding Advice.AiText}" FontSize="13"
                                                LineHeight="21" TextWrapping="Wrap"
                                                IsVisible="{Binding Advice.HasAiText}" />

@@ -62,6 +62,14 @@ public partial class AdviceViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(HasAiText), nameof(HasAiThinking))]
     private string _aiText = "";
 
+    /// <summary>
+    /// Ce que contient <see cref="AiText"/> : l'avis d'une seule voix, ou l'avis convergé quand
+    /// plusieurs voix se sont exprimées.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAiTitle))]
+    private string _aiTitle = "";
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasAiThinking))]
     private string _aiThinking = "";
@@ -99,6 +107,8 @@ public partial class AdviceViewModel : ViewModelBase
     /// <summary>The answer: the arbitration when several voices spoke, their opinion otherwise.</summary>
     public bool HasAiText => AiText.Length > 0;
 
+    public bool HasAiTitle => AiTitle.Length > 0;
+
     /// <summary>
     /// The chain of thought is shown while generating only: once the answer is there, it is
     /// noise for the user.
@@ -123,6 +133,7 @@ public partial class AdviceViewModel : ViewModelBase
         AiText = "";
         AiThinking = "";
         AiStatus = "";
+        AiTitle = "";
         Opinions.Clear();
         OnPropertyChanged(nameof(HasPresets));
         OnPropertyChanged(nameof(HasOpinions));
@@ -185,6 +196,7 @@ public partial class AdviceViewModel : ViewModelBase
         AiText = "";
         AiThinking = "";
         AiStatus = "";
+        AiTitle = "";
         Opinions.Clear();
         OnPropertyChanged(nameof(HasOpinions));
 
@@ -248,7 +260,8 @@ public partial class AdviceViewModel : ViewModelBase
             if (usable.Count == 1)
             {
                 AiText = usable[0].Text;
-                AiStatus = $"Conseil IA — {usable[0].Provider}";
+                AiTitle = $"AVIS — {usable[0].Provider}";
+                AiStatus = $"Conseil IA - {usable[0].Provider}";
                 return;
             }
 
@@ -277,6 +290,8 @@ public partial class AdviceViewModel : ViewModelBase
             if (AiText.Length == 0 && text.Length > 0)
                 AiText = text;
 
+            AiTitle = $"AVIS CONVERGÉ — {string.Join(" + ", usable.Select(opinion => opinion.Provider))}";
+
             AiStatus = AiText.Length > 0
                 ? $"Synthèse de {usable.Count} avis ({string.Join(", ", usable.Select(opinion => opinion.Provider))})"
                 : "L'arbitre n'a rien renvoyé : les avis restent affichés.";
@@ -298,10 +313,19 @@ public partial class AdviceViewModel : ViewModelBase
     [RelayCommand]
     private void CancelAi() => _aiCts?.Cancel();
 
-    /// <summary>Adds one voice to the panel, from the network thread.</summary>
+    /// <summary>
+    /// Ajoute une voix au panneau, depuis le thread réseau, à sa place : l'avis d'OpenCode
+    /// s'affiche en premier, puis les voix challengeres, puis seulement vient l'avis convergé.
+    /// </summary>
     private void AppendOpinion(AiOpinion opinion)
     {
-        Opinions.Add(new AiOpinionRowViewModel(opinion));
+        var rank = OpinionOrder.Rank(opinion.Provider);
+        var index = 0;
+
+        while (index < Opinions.Count && OpinionOrder.Rank(Opinions[index].Provider) <= rank)
+            index++;
+
+        Opinions.Insert(index, new AiOpinionRowViewModel(opinion));
         OnPropertyChanged(nameof(HasOpinions));
     }
 
