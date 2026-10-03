@@ -109,7 +109,7 @@ confirmer : c'est le desaccord qui fait la valeur de ce mode.
       README et dans les reglages.
 - [x] **Copilot ecarte** : pas d'API publique gratuite. Remplace par **Mistral** et **Groq**,
       qui ont de vrais quotas gratuits avec une cle utilisable depuis une application tierce.
-- [x] Consultation **en parallele** (`AiConsultation`) : meme contexte `AdvicePrompt`, delai de
+- [x] Consultation **en parallele** (`AiConsultation`) : meme contexte `CataloguePrompt` (catalogue complet, noms seuls), delai de
       60 s par voix, chaque echec/depassement devient l'avis de cette voix et n'arrete rien.
 - [x] **Confrontation sans ancrag** : les voix repondent independamment (pas de reponse de
       reference a commenter, cela evite de les aligner dessus), puis `ArbitrationPrompt` demande

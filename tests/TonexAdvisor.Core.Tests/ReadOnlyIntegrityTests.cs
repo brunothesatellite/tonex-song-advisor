@@ -27,7 +27,7 @@ public class ReadOnlyIntegrityTests
             var query = new AdviceQuery { Artist = "ACDZ", Song = "Back", Style = "metal" };
             var presets = advisor.RankPresets(query, 3);
             var combinations = advisor.RankCombinations(query, 3);
-            AdvicePrompt.Build(query, presets, combinations.Count > 0 ? combinations[0] : null, index);
+            CataloguePrompt.Build(query, index);
         }
 
         // 2. A UI session: open, filter, reset, ask for advice, open a recommendation.

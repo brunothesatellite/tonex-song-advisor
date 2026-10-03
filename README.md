@@ -80,9 +80,11 @@ sélection alimente le même panneau de détail.
 
 <img src="docs/images/04-conseils-ia.png" alt="Conseil IA en streaming à partir de la sélection locale" width="780">
 
-- **Demander à l'IA** n'envoie au modèle que la demande + les 3 presets + le bloc capturé,
-  **jamais toute la bibliothèque** ; le modèle doit rester dans cette liste et respecter la règle
-  « stomp + ampli inséparables ».
+- **Demander à l'IA** envoie la demande + le **catalogue complet** de la bibliothèque :
+  les blocs capturés (`stomp → ampli`) et les baffles, **noms uniquement** (~894 blocs et 557
+  baffles, ≈ 9 600 tokens). L'IA choisit donc en connaissance de cause, y compris sur les noms
+  que la recherche locale ne peut pas deviner — tout en respectant la règle « stomp + ampli
+  inséparables », le baffle restant libre.
 - La réponse s'écrit **au fil de l'eau** ; la chaîne de pensée s'affiche pendant la génération
   puis disparaît quand la réponse arrive.
 - Clé absente, réseau en panne, quota dépassé : message explicite et **le classement local reste
@@ -165,8 +167,8 @@ vérifie la clé et le modèle choisi par une vraie requête.
 ## Clés IA (avis croisés)
 
 Le conseil peut croiser plusieurs avis : **OpenCode** (la référence) et, **si vous renseignez leur
-clé**, **Gemini**, **Mistral** et **Groq**. Chaque voix reçoit la même sélection locale (3 presets
-+ le bloc capturé) et répond indépendamment — donc souvent en désaccord — puis un arbitre
+clé**, **Gemini**, **Mistral** et **Groq**. Chaque voix reçoit la même demande et le même
+catalogue de blocs et de baffles, puis répond indépendamment — donc souvent en désaccord — puis un arbitre
 confronte les avis et classe les **3 meilleures propositions** avec leur niveau de consensus.
 
 | Voix | Où demander une clé API | Modèle gratuit par défaut |

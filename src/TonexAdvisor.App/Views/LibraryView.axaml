@@ -307,7 +307,7 @@
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                         <StackPanel Grid.Column="0" Spacing="3">
                                             <TextBlock Text="AVIS CROISÉS — OPENCODE, GEMINI, MISTRAL, GROQ" Classes="faint" />
-                                            <TextBlock Text="Chaque voix ne reçoit que les presets et le bloc ci-dessus, jamais toute la bibliothèque. Les voix challengent la référence, puis un arbitre classe les 3 meilleures propositions."
+                                            <TextBlock Text="Chaque voix reçoit la demande et le catalogue complet des blocs (stomp → ampli) et des baffles, noms uniquement. Les voix challengent la référence, puis un arbitre classe les 3 meilleures propositions."
                                                        Classes="dim" FontSize="11" TextWrapping="Wrap" />
                                         </StackPanel>
 

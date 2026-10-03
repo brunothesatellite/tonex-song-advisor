@@ -4,7 +4,7 @@ namespace TonexAdvisor.Core.Tests;
 
 /// <summary>
 /// The referee hears everyone and believes no one: the prompt must carry every voice, the
-/// instruction to challenge them, and the constraint they all have to respect.
+/// instruction to challenge them, and the catalogue they all have to choose from.
 /// </summary>
 public class ArbitrationPromptTests
 {
@@ -12,19 +12,16 @@ public class ArbitrationPromptTests
     public void Referee_HearsEveryVoice_AndIsToldToChallengeThem()
     {
         var index = SampleLibraries.Gen1;
-        var advisor = new LibraryAdvisor(index);
         var query = new AdviceQuery { Style = "metal" };
-        var presets = advisor.RankPresets(query, 3);
-        var combination = advisor.RankCombinations(query, 1)[0];
 
         var opinions = new[]
         {
-            new Opinion("Gemini (Google)", "Prends le preset 1, le bloc est idéal."),
-            new Opinion("Mistral", "Non : le preset 1 associe un stomp à un ampli d'une autre capture."),
-            new Opinion("Groq", "Je préfère le preset 3."),
+            new Opinion("Gemini (Google)", "BLOC : Ibanez Tube Screamer TS808 -> Mesa Boogie Triple Rectifier"),
+            new Opinion("Mistral", "Non : ce stomp vient d'une autre capture que cet ampli."),
+            new Opinion("Groq", "Je préfère un Marshall JCM 800."),
         };
 
-        var prompt = ArbitrationPrompt.Build(query, presets, combination, opinions, index);
+        var prompt = ArbitrationPrompt.Build(query, opinions, index);
 
         // Every voice is quoted, with what it said.
         foreach (var opinion in opinions)
@@ -33,33 +30,28 @@ public class ArbitrationPromptTests
             Assert.Contains(opinion.Text, prompt, StringComparison.Ordinal);
         }
 
-        // The mission: confront, rank three proposals, stay inside the selection.
+        // The catalogue is there: the opinions can only be judged against it.
+        Assert.Contains("Blocs capturés disponibles", prompt, StringComparison.Ordinal);
+        Assert.Contains("Baffles disponibles", prompt, StringComparison.Ordinal);
+
+        // The mission: confront, rank three proposals, stay inside the catalogue.
         Assert.Contains("Confronte les avis", prompt, StringComparison.Ordinal);
         Assert.Contains("3 meilleures propositions", prompt, StringComparison.Ordinal);
         Assert.Contains("consensus", prompt, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("N'invente aucun preset", prompt, StringComparison.Ordinal);
+        Assert.Contains("N'invente aucun bloc", prompt, StringComparison.Ordinal);
 
-        // The captured block rule is recalled to the referee itself.
-        Assert.Contains("inséparables", prompt, StringComparison.Ordinal);
-
-        // The shortlist is there: the opinions can only be judged against it.
-        foreach (var scored in presets)
-            Assert.Contains(scored.Preset.Name, prompt, StringComparison.Ordinal);
+        // And the captured block rule is recalled to the referee itself.
+        Assert.Contains("inséparable", prompt, StringComparison.Ordinal);
     }
 
     [LibraryFact]
     public void Referee_IsToldThatUnanimityIsNotProof()
     {
         var index = SampleLibraries.Gen1;
-        var advisor = new LibraryAdvisor(index);
-        var query = new AdviceQuery { Style = "blues" };
-        var presets = advisor.RankPresets(query, 3);
 
         var prompt = ArbitrationPrompt.Build(
-            query,
-            presets,
-            null,
-            [new Opinion("Gemini (Google)", "Tout le monde a raison, prenez le 1.")],
+            new AdviceQuery { Style = "blues" },
+            [new Opinion("Gemini (Google)", "Tout le monde a raison, prenez le même bloc.")],
             index);
 
         Assert.Contains("unanime n'est pas une preuve", prompt, StringComparison.Ordinal);
@@ -69,18 +61,13 @@ public class ArbitrationPromptTests
     public void Referee_ToleratesAVoiceThatSaidNothing()
     {
         var index = SampleLibraries.Gen1;
-        var advisor = new LibraryAdvisor(index);
-        var query = new AdviceQuery { Style = "clean" };
-        var presets = advisor.RankPresets(query, 3);
 
         var prompt = ArbitrationPrompt.Build(
-            query,
-            presets,
-            null,
-            [new Opinion("Mistral", ""), new Opinion("Groq", "Le preset 2.")],
+            new AdviceQuery { Style = "clean" },
+            [new Opinion("Mistral", ""), new Opinion("Groq", "Le bloc Fender 65 Deluxe Reverb.")],
             index);
 
-        Assert.Contains("Le preset 2.", prompt, StringComparison.Ordinal);
+        Assert.Contains("Le bloc Fender 65 Deluxe Reverb.", prompt, StringComparison.Ordinal);
         Assert.DoesNotContain("--- Mistral ---", prompt, StringComparison.Ordinal);
     }
 }

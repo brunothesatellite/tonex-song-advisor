@@ -207,15 +207,11 @@ public partial class AdviceViewModel : ViewModelBase
             return;
         }
 
-        // The local ranking first: it is what the voices are given to work with.
+        // Le classement local reste affiché, mais le contexte envoyé aux IA est le catalogue
+        // complet de la bibliothèque : c'est là qu'elles peuvent choisir ce que la correspondance
+        // locale ignore (« un son Slash » → « AFD100 »).
         if (!HasPresets && Combination is null)
             Advise();
-
-        if (!HasPresets && Combination is null)
-        {
-            AiStatus = "Rien à soumettre à l'IA : aucun preset de cette bibliothèque ne correspond.";
-            return;
-        }
 
         var config = _configLoader();
         var clients = AiConsultation.BuildClients(config);
@@ -226,8 +222,7 @@ public partial class AdviceViewModel : ViewModelBase
             return;
         }
 
-        var shortlist = Presets.Select(row => row.Scored).ToList();
-        var prompt = AdvicePrompt.Build(query, shortlist, Combination?.Scored, _owner.Index);
+        var prompt = CataloguePrompt.Build(query, _owner.Index!);
 
         _aiCts?.Cancel();
         _aiCts = new CancellationTokenSource();
@@ -240,7 +235,7 @@ public partial class AdviceViewModel : ViewModelBase
                 clients,
                 client => AiConsultation.ModelFor(config, client.Provider),
                 prompt,
-                AdvicePrompt.MaxTokens,
+                CataloguePrompt.MaxTokens,
                 VoiceTimeout,
                 onOpinion: opinion => Dispatch(() => AppendOpinion(opinion)),
                 cancellationToken: _aiCts.Token);
@@ -268,10 +263,8 @@ public partial class AdviceViewModel : ViewModelBase
             // 3. Several voices: a referee confronts them and ranks the three best proposals.
             var arbitration = ArbitrationPrompt.Build(
                 query,
-                shortlist,
-                Combination?.Scored,
                 usable.Select(opinion => new Opinion(opinion.Provider, opinion.Text)).ToList(),
-                _owner.Index);
+                _owner.Index!);
 
             var referee = clients[0];
             var text = await referee.AskStreamAsync(

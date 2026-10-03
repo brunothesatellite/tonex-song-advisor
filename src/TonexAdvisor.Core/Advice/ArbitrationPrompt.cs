@@ -11,9 +11,9 @@ public sealed record Opinion(string Provider, string Text);
 /// Builds the arbitration prompt: the referee hears every voice and must defend none of them.
 /// </summary>
 /// <remarks>
-/// Gemini, Mistral and Groq are asked to <b>contradict</b>, not to agree — a panel where
-/// everyone nods is worth one voice. The referee then keeps the three best proposals, each with
-/// its level of consensus, and never leaves the local shortlist.
+/// Gemini, Mistral and Groq are asked to <b>contradict</b>, not to agree — a panel where everyone
+/// nods is worth one voice. The referee then keeps the three best proposals, each with its level
+/// of consensus, and never leaves the catalogue.
 /// </remarks>
 public static class ArbitrationPrompt
 {
@@ -22,24 +22,33 @@ public static class ArbitrationPrompt
 
     public static string Build(
         AdviceQuery query,
-        IReadOnlyList<ScoredPreset> presets,
-        ScoredCombination? combination,
         IReadOnlyList<Opinion> opinions,
-        LibraryIndex? index = null)
+        LibraryIndex index)
     {
         ArgumentNullException.ThrowIfNull(opinions);
 
-        var builder = new StringBuilder(3200);
+        var builder = new StringBuilder(60_000);
 
         builder.AppendLine("Tu es l'arbitre d'un comité de conseillers guitare (rock/metal).");
-        builder.AppendLine("Chacun a donné son avis sur la même demande et la même sélection locale.");
+        builder.AppendLine("Chacun a donné son avis sur la même demande et le même catalogue.");
         builder.AppendLine("Réponds en français, ton direct, en 10 à 15 phrases.");
         builder.AppendLine();
 
-        builder.Append(AdvicePrompt.DescribeShortlist(query, presets, combination, index));
-        AdvicePrompt.AppendRules(builder);
-        builder.AppendLine();
+        var demand = new List<string>();
+        if (!string.IsNullOrWhiteSpace(query.Artist))
+            demand.Add($"artiste « {query.Artist} »");
+        if (!string.IsNullOrWhiteSpace(query.Song))
+            demand.Add($"chanson « {query.Song} »");
+        if (!string.IsNullOrWhiteSpace(query.Style))
+            demand.Add($"style « {query.Style} »");
 
+        builder.AppendLine("La demande : " + string.Join(", ", demand));
+
+        builder.AppendLine();
+        builder.Append(CataloguePrompt.DescribeCatalogue(index));
+        CataloguePrompt.AppendRules(builder);
+
+        builder.AppendLine();
         builder.AppendLine("Les avis reçus :");
         foreach (var opinion in opinions)
         {
@@ -53,17 +62,17 @@ public static class ArbitrationPrompt
         builder.AppendLine();
         builder.AppendLine("Ta mission :");
         builder.AppendLine(
-            "1. Confronte les avis : cite ce qui cloche chez chacun (un preset absent de la liste, " +
-            "un stomp associé à un ampli d'une autre capture, un réglage contredit par les valeurs).");
+            "1. Confronte les avis : cite ce qui cloche chez chacun (un nom absent du catalogue, un " +
+            "stomp associé à un ampli d'un autre bloc, un baffle qui ne va pas avec le style).");
         builder.AppendLine(
-            "2. Classe les 3 meilleures propositions, uniquement issues de la sélection ci-dessus. " +
-            "Pour chacune : le preset ou le bloc, pourquoi, et le niveau de consensus (3/3, 2/3, 1/3).");
+            "2. Classe les 3 meilleures propositions, uniquement issues du catalogue. Pour chacune : " +
+            "le bloc, le baffle, pourquoi, et le niveau de consensus (3/3, 2/3, 1/3).");
         builder.AppendLine(
-            "3. Termine par 2 à 3 réglages concrets (gain, EQ, réverb/delay) et une alternative.");
+            "3. Termine par 2 à 3 réglages concrets (gain, EQ, réverb/delay).");
         builder.AppendLine(
             "Si tous les avis se trompent, dis-le et tranche avec tes propres arguments : un accord " +
             "unanime n'est pas une preuve.");
-        builder.AppendLine("N'invente aucun preset, ampli ou baffle hors sélection.");
+        builder.AppendLine("N'invente aucun bloc ni aucun baffle absent du catalogue.");
 
         return builder.ToString();
     }
