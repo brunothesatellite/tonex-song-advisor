@@ -1,0 +1,84 @@
+using TonexAdvisor.Core.Data;
+using TonexAdvisor.Core.Data.Records;
+
+namespace TonexAdvisor.App.ViewModels;
+
+/// <summary>Compact card describing a tone model inside a preset detail panel.</summary>
+public sealed class ToneModelCardViewModel
+{
+    public ToneModelCardViewModel(ToneModelRecord model)
+    {
+        Key = model.Key;
+        Name = model.Name.Length > 0 ? model.Name : model.Key;
+        AmpName = model.AmpName;
+        StompName = model.StompName;
+        CabName = model.CabName;
+        Micros = Join(model.Mic1, model.Mic2);
+        KindLabel = Kind(model.Kind);
+        Category = model.Category;
+        Author = model.Author;
+        Folders = model.Folders.Count > 0 ? string.Join(" · ", model.Folders) : "";
+        Skin = model.Skin;
+        Channel = model.AmpChannel;
+        HasStomp = model.StompName.Length > 0;
+        HasCab = model.CabName.Length > 0;
+    }
+
+    public string Key { get; }
+
+    public string Name { get; }
+
+    public string AmpName { get; }
+
+    public string StompName { get; }
+
+    public string CabName { get; }
+
+    public string Micros { get; }
+
+    public string KindLabel { get; }
+
+    public string Category { get; }
+
+    public string Author { get; }
+
+    public string Folders { get; }
+
+    public string Skin { get; }
+
+    public string Channel { get; }
+
+    public bool HasStomp { get; }
+
+    public bool HasCab { get; }
+
+    public string AmpLine
+    {
+        get
+        {
+            if (AmpName.Length == 0)
+                return Name;
+
+            var line = AmpName;
+            if (Channel.Length > 0)
+                line += " · canal " + Channel;
+            if (HasStomp)
+                line += " + " + StompName;
+            return line;
+        }
+    }
+
+    private static string Join(string first, string second)
+        => second.Length > 0 ? first + " + " + second : first;
+
+    private static string Kind(ToneModelKind kind) => kind switch
+    {
+        ToneModelKind.Stomp => "Stomp",
+        ToneModelKind.StompAndAmp => "Stomp + Amp",
+        ToneModelKind.Amp => "Amp",
+        ToneModelKind.AmpAndCab => "Amp + Cab",
+        ToneModelKind.ComplexRig => "Rig complet",
+        ToneModelKind.CustomIR => "IR / Cab",
+        _ => kind.ToString(),
+    };
+}

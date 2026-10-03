@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TonexAdvisor.App.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="440" d:DesignHeight="700"
+             x:Class="TonexAdvisor.App.Views.ToneModelDetailView"
+             x:DataType="vm:ToneModelDetailViewModel">
+
+    <ScrollViewer Padding="2,0,6,14">
+        <StackPanel Spacing="10">
+
+            <StackPanel Spacing="3">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Path Classes="favStar" Width="15" Height="15"
+                          IsVisible="{Binding Favorite}" />
+                    <TextBlock Text="{Binding Name}" Classes="h1" TextWrapping="Wrap" />
+                </StackPanel>
+                <TextBlock Text="{Binding Category}" Classes="dim" />
+            </StackPanel>
+
+            <!-- ── Signal path of this capture ─────────────────────────── -->
+            <Border Classes="card" Padding="12,10">
+                <StackPanel Spacing="7">
+                    <TextBlock Text="CHAÎNE CAPTURÉE" Classes="faint" />
+
+                    <StackPanel Spacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Classes="chip-static">
+                                <TextBlock Text="{Binding Kind}" Classes="faint" />
+                            </Border>
+                            <Border Classes="chip-static">
+                                <TextBlock Text="{Binding KindOrder}" Classes="faint" />
+                            </Border>
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="96,*" RowDefinitions="Auto,Auto,Auto,Auto"
+                              ColumnSpacing="10" RowSpacing="5">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Stomp" Classes="faint" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding StompName}"
+                                       IsVisible="{Binding HasStomp}" TextWrapping="Wrap" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="—"
+                                       IsVisible="{Binding !HasStomp}" Classes="faint" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Ampli" Classes="faint" />
+                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding AmpName}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Channel}" Classes="faint" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Baffle" Classes="faint" />
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding CabName}" IsVisible="{Binding HasCab}" />
+                                <TextBlock Text="{Binding CabCategory}" Classes="faint" />
+                                <TextBlock Text="{Binding Micros}" Classes="faint" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Sortie" Classes="faint" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Outboard}" />
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Identity ────────────────────────────────────────────── -->
+            <Border Classes="card" Padding="12,10">
+                <Grid ColumnDefinitions="96,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                      ColumnSpacing="10" RowSpacing="5">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Auteur" Classes="faint" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Author}" TextWrapping="Wrap" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Dossiers" Classes="faint" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Folders}" TextWrapping="Wrap" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Collection" Classes="faint" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Collection}"
+                               IsVisible="{Binding HasCollection}" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="—"
+                               IsVisible="{Binding !HasCollection}" Classes="faint" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Skin / visuel" Classes="faint" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Skin}" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Ajouté le" Classes="faint" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DateAdded}" />
+                </Grid>
+            </Border>
+
+            <!-- ── Free text ───────────────────────────────────────────── -->
+            <Border Classes="card" Padding="12,10">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="DESCRIPTION" Classes="faint" />
+                    <TextBlock Text="{Binding Description}" Classes="dim" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Keywords}" Classes="faint" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding ModelComment}" Classes="faint" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding CabComment}" Classes="faint" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <!-- ── Usage ───────────────────────────────────────────────── -->
+            <Border Classes="card" Padding="12,10">
+                <StackPanel Spacing="6">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="UTILISÉ PAR" Classes="faint" />
+                        <Border Grid.Column="1" Classes="chip-static">
+                            <TextBlock Text="{Binding PresetCount}" Classes="faint" />
+                        </Border>
+                    </Grid>
+                    <TextBlock Text="{Binding PresetNames}" Classes="dim" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="{Binding Guid}" Classes="faint" TextWrapping="Wrap" Margin="4,4,0,0" />
+
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

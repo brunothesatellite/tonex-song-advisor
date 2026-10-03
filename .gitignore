@@ -1,0 +1,19 @@
+# ── Build .NET ────────────────────────────────────────────────────────────────
+bin/
+obj/
+artifacts/
+*.user
+*.suo
+.vs/
+
+# ── Bases TONEX (bibliothèque personnelle, non versionnées) ───────────────────
+# Pour lancer les tests : copier ta propre Library.db / Library2.db dans db/.
+db/*.db
+db/*.db-shm
+db/*.db-wal
+
+# ── Divers ────────────────────────────────────────────────────────────────────
+*.log
+Thumbs.db
+desktop.ini
+.DS_Store

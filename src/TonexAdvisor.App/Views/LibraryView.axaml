@@ -1,0 +1,184 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TonexAdvisor.App.ViewModels"
+             xmlns:converters="using:Avalonia.Data.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1360" d:DesignHeight="740"
+             x:Class="TonexAdvisor.App.Views.LibraryView"
+             x:DataType="vm:LibraryViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="18,14,18,14">
+
+        <!-- ── Filters ────────────────────────────────────────────────── -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,170,170,230,Auto,Auto" ColumnSpacing="10">
+
+            <StackPanel Grid.Column="0" Spacing="4">
+                <TextBlock Text="RECHERCHE" Classes="faint" />
+                <TextBox Text="{Binding SearchText}"
+                         PlaceholderText="Nom, artiste, chanson, ampli, dossier…"
+                         Classes="search" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Spacing="4">
+                <TextBlock Text="CATÉGORIE" Classes="faint" />
+                <ComboBox ItemsSource="{Binding Categories}"
+                          SelectedItem="{Binding SelectedCategory}"
+                          HorizontalAlignment="Stretch" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Spacing="4">
+                <TextBlock Text="GENRE" Classes="faint" />
+                <ComboBox ItemsSource="{Binding Genres}"
+                          SelectedItem="{Binding SelectedGenre}"
+                          HorizontalAlignment="Stretch" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="3" Spacing="4">
+                <TextBlock Text="DOSSIER" Classes="faint" />
+                <ComboBox ItemsSource="{Binding Folders}"
+                          SelectedItem="{Binding SelectedFolder}"
+                          HorizontalAlignment="Stretch" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="4" Spacing="4">
+                <TextBlock Text=" " Classes="faint" />
+                <ToggleButton Classes="chip" IsChecked="{Binding OnlyFavorites}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Path Classes="favStar" Width="11" Height="11" />
+                        <TextBlock Text="Favoris" />
+                    </StackPanel>
+                </ToggleButton>
+            </StackPanel>
+
+            <StackPanel Grid.Column="5" Spacing="4">
+                <TextBlock Text=" " Classes="faint" />
+                <Button Command="{Binding ClearFiltersCommand}">Réinitialiser</Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- ── Summary ────────────────────────────────────────────────── -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,10,0,10">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="{Binding Summary}" Classes="dim" VerticalAlignment="Center" />
+                <Border Classes="chip-static" IsVisible="{Binding KnobSettingsAvailable}">
+                    <TextBlock Text="Réglages numériques disponibles" Classes="faint" />
+                </Border>
+                <Border Classes="chip-static warn" IsVisible="{Binding !KnobSettingsAvailable}">
+                    <TextBlock Text="Génération 2 : aucun réglage stocké par TONEX" Classes="faint" />
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- ── Grids + detail ─────────────────────────────────────────── -->
+        <!--
+            A DockPanel rather than a two-column Grid: Avalonia floors a star column at the
+            natural width of its child, and a DataGrid naturally wants to be wide enough for all
+            its columns. That pushed the detail panel off the right edge of the window. The
+            docked card is placed from the final arrange size instead, so it can never drift.
+        -->
+        <DockPanel Grid.Row="2" LastChildFill="True">
+
+            <!-- Detail panel -->
+            <Border DockPanel.Dock="Right" Width="400" Classes="card" Padding="14">
+                <Grid>
+                    <ContentControl Content="{Binding DetailContent}" />
+
+                    <StackPanel Spacing="6"
+                                IsVisible="{Binding !HasDetail}"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                MaxWidth="280">
+                        <TextBlock Text="Sélectionnez une ligne" Classes="dim"
+                                   HorizontalAlignment="Center" />
+                        <TextBlock Text="Le détail du preset s'affiche ici : réglages, baffle, micros et tone models liés."
+                                   Classes="faint" TextWrapping="Wrap" TextAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--
+                ClipToBounds: the DataGrid lays its columns out from its own measure pass and
+                will happily paint past the width it was given, straight over the detail card.
+            -->
+            <TabControl SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}"
+                        Margin="0,0,12,0"
+                        ClipToBounds="True">
+
+                <TabItem Header="Presets">
+                    <DataGrid ItemsSource="{Binding Presets}"
+                              SelectedItem="{Binding SelectedPreset}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserSortColumns="True"
+                              GridLinesVisibility="Horizontal"
+                              BorderThickness="0"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Fav" Width="64">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:PresetRowViewModel">
+                                        <Panel>
+                                            <Path Classes="favStar" ToolTip.Tip="Favori" />
+                                            <Path Classes="favStar favOff"
+                                                  IsVisible="{Binding Favorite, Converter={x:Static converters:BoolConverters.Not}}" />
+                                        </Panel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Nom" Binding="{Binding Name}"
+                                                Width="1.7*" MinWidth="150" />
+                            <DataGridTextColumn Header="Catégorie" Binding="{Binding Category}" Width="104" />
+                            <DataGridTextColumn Header="Genre" Binding="{Binding Genre}" Width="96" />
+                            <DataGridTextColumn Header="Artiste" Binding="{Binding Artist}" Width="132" />
+                            <DataGridTextColumn Header="Chanson" Binding="{Binding Song}" Width="124" />
+                            <DataGridTextColumn Header="Ampli" Binding="{Binding Amp}"
+                                                Width="1.3*" MinWidth="110" />
+                            <DataGridTextColumn Header="Baffle" Binding="{Binding Cab}"
+                                                Width="1.3*" MinWidth="110" />
+                            <DataGridTextColumn Header="Réglages" Binding="{Binding SettingsBadge}" Width="88" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+                <TabItem Header="Tone models">
+                    <DataGrid ItemsSource="{Binding ToneModels}"
+                              SelectedItem="{Binding SelectedToneModel}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserSortColumns="True"
+                              GridLinesVisibility="Horizontal"
+                              BorderThickness="0"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Fav" Width="64">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:ToneModelRowViewModel">
+                                        <Panel>
+                                            <Path Classes="favStar" ToolTip.Tip="Favori" />
+                                            <Path Classes="favStar favOff"
+                                                  IsVisible="{Binding Favorite, Converter={x:Static converters:BoolConverters.Not}}" />
+                                        </Panel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Nom" Binding="{Binding Name}"
+                                                Width="1.5*" MinWidth="140" />
+                            <DataGridTextColumn Header="Ampli" Binding="{Binding Amp}"
+                                                Width="1.4*" MinWidth="120" />
+                            <DataGridTextColumn Header="Baffle" Binding="{Binding Cab}"
+                                                Width="1.4*" MinWidth="120" />
+                            <DataGridTextColumn Header="Micros" Binding="{Binding Mics}" Width="104" />
+                            <DataGridTextColumn Header="Catégorie" Binding="{Binding Category}" Width="104" />
+                            <DataGridTextColumn Header="Type" Binding="{Binding Kind}" Width="100" />
+                            <DataGridTextColumn Header="Presets" Binding="{Binding PresetCount}" Width="62" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+            </TabControl>
+
+        </DockPanel>
+
+    </Grid>
+
+</UserControl>

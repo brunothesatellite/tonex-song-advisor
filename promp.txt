@@ -1,0 +1,12 @@
+Travaille dans D:\VS_Code_Workspaces\tonex-song-advisor
+Je veux faire un programme C# qui me permettra de 
+1. lire (readonly) le contenu d'une base de données du logiciel IK Multimedia Tonex pour l'afficher sous forme d'une table
+2. si je donne une chanson / artiste : cela me conseillera le meilleur Preset présent dans ma base à utiliser et quels réglages lui appliquer ou toujours en utilisant les informations de ma base, me proposer la meilleur combinaison de tone model d'amp ou amp+stomp et de cab ainsi que les réglages à appliquer pour avoir le son le plus fidèle à la partition guitare de la chanson. Pour le conseil je voudrai connecter l'application à mon compte opencode go via l'api pour utiliser l'ia.
+Tout cela doit être dans une interface moderne, state of the art, pour un programme dédié à la musique et à la guitare électrique rock / metal.
+
+Je ne connais pas le format de la base de données, il y a deux versions : V1 (Library.db) et V2 (library2.db). Le programme doit être compatible des deux format ou au pire du V1 dans un premier temps.
+dans tonexdbexplorer il y a un exécutable qui sait lire le format v1, mais il est compilé windows et je n'ai pas le source.
+dans bcho il y a un exécutable qui sait lire le format v1 et v2, mais il est compilé windows et linux et je n'ai pas le source.
+oldsoft.txt référence un programme opensource qui sait lire le format v1.
+
+Fait un plan pour réaliser ces taches, recherche le format V1 et V2 (c'est du sqlite3)

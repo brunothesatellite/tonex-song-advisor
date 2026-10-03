@@ -1,0 +1,103 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TonexAdvisor.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1360" d:DesignHeight="860"
+        x:Class="TonexAdvisor.App.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Tonex Song Advisor"
+        Width="1500" Height="900"
+        MinWidth="1180" MinHeight="660"
+        WindowStartupLocation="CenterScreen">
+
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="64,*,30">
+
+        <!-- ── Top bar ─────────────────────────────────────────────────── -->
+        <Border Grid.Row="0" Classes="rail" BorderThickness="0,0,0,1" Padding="20,0">
+            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <Border Classes="badge-mark">
+                        <TextBlock Text="TX" Classes="badge-mark-text" />
+                    </Border>
+                    <StackPanel Spacing="1">
+                        <TextBlock Text="TONEX SONG ADVISOR" Classes="h1" FontSize="17" />
+                        <TextBlock Text="Bibliothèque · réglages · conseil tonalité" Classes="faint" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Border Classes="chip"
+                            IsVisible="{Binding HasDatabase}"
+                            VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <Border Classes="dot" />
+                            <TextBlock Text="{Binding DatabaseLabel}" Classes="dim" />
+                            <TextBlock Text="{Binding FormatLabel}" Classes="accent" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="chip" IsVisible="{Binding HasDatabase}">
+                        <TextBlock Text="{Binding FormatDescription}" Classes="faint" />
+                    </Border>
+                </StackPanel>
+
+            </Grid>
+        </Border>
+
+        <!-- ── Body ────────────────────────────────────────────────────── -->
+        <Grid Grid.Row="1" ColumnDefinitions="212,*">
+
+            <!-- Navigation rail -->
+            <Border Grid.Column="0" Classes="rail" BorderThickness="0,0,1,0" Padding="12,16">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="NAVIGATION" Classes="faint" Margin="8,0,0,10" />
+
+                    <Button Classes="nav" Classes.active="{Binding IsLibrarySection}"
+                            Command="{Binding ShowLibraryCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="▤" />
+                            <TextBlock Text="Bibliothèque" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="nav" Classes.active="{Binding IsSettingsSection}"
+                            Command="{Binding ShowSettingsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="⚙" />
+                            <TextBlock Text="Bases &amp; réglages" />
+                        </StackPanel>
+                    </Button>
+
+                    <Separator Margin="6,16,6,14" />
+
+                    <TextBlock Text="LECTURE" Classes="faint" Margin="8,0,0,8" />
+                    <TextBlock Text="Mode lecture seule uniquement." Classes="faint"
+                               TextWrapping="Wrap" Margin="8,0,8,0" />
+                    <TextBlock Text="Aucune écriture possible dans vos" Classes="faint"
+                               TextWrapping="Wrap" Margin="8,0,8,0" />
+                    <TextBlock Text="fichiers TONEX." Classes="faint"
+                               TextWrapping="Wrap" Margin="8,0,8,0" />
+                </StackPanel>
+            </Border>
+
+            <!-- Page host -->
+            <ContentControl Grid.Column="1" Content="{Binding CurrentPage}" />
+        </Grid>
+
+        <!-- ── Status bar ──────────────────────────────────────────────── -->
+        <Border Grid.Row="2" Classes="rail" BorderThickness="0,1,0,0" Padding="20,0">
+            <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Classes="faint" />
+                <TextBlock Grid.Column="1" Text="SHA-256 vérifié à l'ouverture" Classes="faint" />
+            </Grid>
+        </Border>
+
+    </Grid>
+
+</Window>

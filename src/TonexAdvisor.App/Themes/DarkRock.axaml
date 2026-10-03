@@ -1,0 +1,351 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+
+        <!-- ── Palette ─────────────────────────────────────────────────────── -->
+        <Color x:Key="C.Background">#08080A</Color>
+        <Color x:Key="C.Surface">#111116</Color>
+        <Color x:Key="C.SurfaceAlt">#17171E</Color>
+        <Color x:Key="C.SurfaceLift">#1E1E27</Color>
+        <Color x:Key="C.Border">#262630</Color>
+        <Color x:Key="C.BorderStrong">#34343F</Color>
+
+        <Color x:Key="C.Text">#E9E9F0</Color>
+        <Color x:Key="C.TextDim">#8C8C9B</Color>
+        <Color x:Key="C.TextFaint">#5C5C6B</Color>
+
+        <Color x:Key="C.Accent">#FF6A00</Color>
+        <Color x:Key="C.AccentDim">#B34A00</Color>
+        <Color x:Key="C.Hot">#E10600</Color>
+        <Color x:Key="C.Ok">#3DDC84</Color>
+        <Color x:Key="C.Cool">#4FA8FF</Color>
+
+        <!-- ── Brushes ─────────────────────────────────────────────────────── -->
+        <SolidColorBrush x:Key="B.Background" Color="{StaticResource C.Background}" />
+        <SolidColorBrush x:Key="B.Surface" Color="{StaticResource C.Surface}" />
+        <SolidColorBrush x:Key="B.SurfaceAlt" Color="{StaticResource C.SurfaceAlt}" />
+        <SolidColorBrush x:Key="B.SurfaceLift" Color="{StaticResource C.SurfaceLift}" />
+        <SolidColorBrush x:Key="B.Border" Color="{StaticResource C.Border}" />
+        <SolidColorBrush x:Key="B.BorderStrong" Color="{StaticResource C.BorderStrong}" />
+
+        <SolidColorBrush x:Key="B.Text" Color="{StaticResource C.Text}" />
+        <SolidColorBrush x:Key="B.TextDim" Color="{StaticResource C.TextDim}" />
+        <SolidColorBrush x:Key="B.TextFaint" Color="{StaticResource C.TextFaint}" />
+
+        <SolidColorBrush x:Key="B.Accent" Color="{StaticResource C.Accent}" />
+        <SolidColorBrush x:Key="B.AccentDim" Color="{StaticResource C.AccentDim}" />
+        <SolidColorBrush x:Key="B.Hot" Color="{StaticResource C.Hot}" />
+        <SolidColorBrush x:Key="B.Ok" Color="{StaticResource C.Ok}" />
+        <SolidColorBrush x:Key="B.Cool" Color="{StaticResource C.Cool}" />
+
+        <LinearGradientBrush x:Key="B.Panel" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Color="#15151C" Offset="0" />
+            <GradientStop Color="#0E0E13" Offset="1" />
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="B.Header" StartPoint="0%,0%" EndPoint="100%,0%">
+            <GradientStop Color="#1A1A22" Offset="0" />
+            <GradientStop Color="#101015" Offset="1" />
+        </LinearGradientBrush>
+
+        <FontFamily x:Key="F.Display">Inter, Segoe UI, Arial</FontFamily>
+
+    </Styles.Resources>
+
+    <!-- ── Base surfaces ───────────────────────────────────────────────────── -->
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{StaticResource B.Background}" />
+        <Setter Property="FontFamily" Value="{StaticResource F.Display}" />
+        <Setter Property="Foreground" Value="{StaticResource B.Text}" />
+    </Style>
+
+    <Style Selector="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource B.Text}" />
+    </Style>
+
+    <Style Selector="TextBlock.h1">
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource B.Text}" />
+    </Style>
+
+    <Style Selector="TextBlock.h2">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="LetterSpacing" Value="0.4" />
+        <Setter Property="Foreground" Value="{StaticResource B.Text}" />
+    </Style>
+
+    <Style Selector="TextBlock.dim">
+        <Setter Property="Foreground" Value="{StaticResource B.TextDim}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="TextBlock.faint">
+        <Setter Property="Foreground" Value="{StaticResource B.TextFaint}" />
+        <Setter Property="FontSize" Value="11" />
+    </Style>
+
+    <Style Selector="TextBlock.accent">
+        <Setter Property="Foreground" Value="{StaticResource B.Accent}" />
+    </Style>
+
+    <!-- ── Cards ───────────────────────────────────────────────────────────── -->
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{StaticResource B.Panel}" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="14" />
+    </Style>
+
+    <Style Selector="Border.rail">
+        <Setter Property="Background" Value="{StaticResource B.Header}" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Border}" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+    </Style>
+
+    <!-- ── Buttons ─────────────────────────────────────────────────────────── -->
+    <Style Selector="Button">
+        <Setter Property="Background" Value="{StaticResource B.SurfaceLift}" />
+        <Setter Property="Foreground" Value="{StaticResource B.Text}" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.BorderStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="14,8" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#26262F" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.AccentDim}" />
+    </Style>
+
+    <Style Selector="Button.accent">
+        <Setter Property="Background" Value="{StaticResource B.Accent}" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Accent}" />
+        <Setter Property="Foreground" Value="#120800" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.accent:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#FF8124" />
+        <Setter Property="BorderBrush" Value="#FF8124" />
+    </Style>
+
+    <Style Selector="Button.nav">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="14,11" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="Foreground" Value="{StaticResource B.TextDim}" />
+    </Style>
+
+    <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#1C1C24" />
+    </Style>
+
+    <Style Selector="Button.nav.active">
+        <Setter Property="Background" Value="#20202A" />
+        <Setter Property="Foreground" Value="{StaticResource B.Accent}" />
+    </Style>
+
+    <!-- ── Inputs ──────────────────────────────────────────────────────────── -->
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="{StaticResource B.SurfaceAlt}" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Foreground" Value="{StaticResource B.Text}" />
+        <Setter Property="CaretBrush" Value="{StaticResource B.Accent}" />
+        <Setter Property="SelectionBrush" Value="{StaticResource B.AccentDim}" />
+        <Setter Property="Padding" Value="10,7" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="BorderBrush" Value="{StaticResource B.Accent}" />
+    </Style>
+
+    <Style Selector="ComboBox">
+        <Setter Property="Background" Value="{StaticResource B.SurfaceAlt}" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Border}" />
+        <Setter Property="Foreground" Value="{StaticResource B.Text}" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <!-- ── Brand marks ──────────────────────────────────────────────────────── -->
+    <Style Selector="Border.badge-mark">
+        <Setter Property="Background" Value="{StaticResource B.Accent}" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBlock.badge-mark-text">
+        <Setter Property="FontWeight" Value="Black" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="#150800" />
+    </Style>
+
+    <Style Selector="Border.dot">
+        <Setter Property="Background" Value="{StaticResource B.Ok}" />
+        <Setter Property="Width" Value="7" />
+        <Setter Property="Height" Value="7" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ── Chips ───────────────────────────────────────────────────────────── -->
+    <Style Selector="ToggleButton.chip">
+        <Setter Property="Background" Value="{StaticResource B.SurfaceLift}" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="12,5" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{StaticResource B.TextDim}" />
+    </Style>
+
+    <Style Selector="ToggleButton.chip:checked">
+        <Setter Property="Background" Value="#33FF6A00" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Accent}" />
+        <Setter Property="Foreground" Value="{StaticResource B.Accent}" />
+    </Style>
+
+    <!-- ── Static chips (read-only state markers) ─────────────────────────── -->
+    <Style Selector="Border.chip-static">
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="8,3" />
+        <Setter Property="Background" Value="{StaticResource B.SurfaceLift}" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.chip-static.on">
+        <Setter Property="Background" Value="#1E3DDC84" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Ok}" />
+    </Style>
+
+    <Style Selector="Border.chip-static.off">
+        <Setter Property="Background" Value="#18FFFFFF" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.BorderStrong}" />
+    </Style>
+
+    <Style Selector="Border.chip-static.warn">
+        <Setter Property="Background" Value="#22FF6A00" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Accent}" />
+    </Style>
+
+    <Style Selector="Border.knob-card">
+        <Setter Property="Background" Value="#0DFFFFFF" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="6,8" />
+    </Style>
+
+    <!-- ── Tabs ────────────────────────────────────────────────────────────── -->
+    <Style Selector="TabControl">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="TabItem">
+        <Setter Property="Foreground" Value="{StaticResource B.TextDim}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="16,9" />
+    </Style>
+
+    <Style Selector="TabItem:selected">
+        <Setter Property="Foreground" Value="{StaticResource B.Accent}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- ── DataGrid ────────────────────────────────────────────────────────── -->
+    <Style Selector="DataGrid">
+        <Setter Property="Background" Value="{StaticResource B.Surface}" />
+        <Setter Property="Foreground" Value="{StaticResource B.Text}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource C.Border}" />
+        <Setter Property="RowBackground" Value="Transparent" />
+        <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="RowHeight" Value="30" />
+        <Setter Property="ColumnHeaderHeight" Value="32" />
+    </Style>
+
+    <Style Selector="DataGridColumnHeader">
+        <Setter Property="Background" Value="{StaticResource B.SurfaceAlt}" />
+        <Setter Property="Foreground" Value="{StaticResource B.TextDim}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="10,0" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Border}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="DataGridRow">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="DataGridRow:selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="#2EFF6A00" />
+    </Style>
+
+    <Style Selector="DataGridRow:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#14FFFFFF" />
+    </Style>
+
+    <Style Selector="DataGridCell">
+        <Setter Property="Padding" Value="10,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource B.Text}" />
+    </Style>
+
+    <Style Selector="DataGridCell:focus">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- ── Favorite star ───────────────────────────────────────────────────── -->
+    <!-- Vectorielle : le glyphe ★ (U+2605) est absent d'Inter et de la police -->
+    <!-- système, il ne serait donc jamais rendu. -->
+    <Style Selector="Path.favStar">
+        <Setter Property="Data"
+                Value="M6.5,0 L8.09,4.32 L12.68,4.49 L9.07,7.33 L10.32,11.76 L6.5,9.2 L2.68,11.76 L3.93,7.33 L0.32,4.49 L4.91,4.32 Z" />
+        <Setter Property="Stretch" Value="Fill" />
+        <Setter Property="Width" Value="13" />
+        <Setter Property="Height" Value="13" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Fill" Value="{StaticResource B.Accent}" />
+    </Style>
+
+    <Style Selector="Path.favStar.favOff">
+        <Setter Property="Fill" Value="#3A3A46" />
+        <Setter Property="Opacity" Value="0.9" />
+    </Style>
+
+    <!-- ── ScrollBar ───────────────────────────────────────────────────────── -->
+    <Style Selector="ScrollBar">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- ── Separators / misc ───────────────────────────────────────────────── -->
+    <Style Selector="Separator">
+        <Setter Property="Background" Value="{StaticResource B.Border}" />
+    </Style>
+
+    <Style Selector="ProgressBar">
+        <Setter Property="Foreground" Value="{StaticResource B.Accent}" />
+        <Setter Property="Background" Value="{StaticResource B.SurfaceLift}" />
+    </Style>
+
+</Styles>

@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TonexAdvisor.App.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1360" d:DesignHeight="740"
+             x:Class="TonexAdvisor.App.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <ScrollViewer Padding="18,14">
+        <StackPanel Spacing="14" MaxWidth="880" HorizontalAlignment="Left">
+
+            <StackPanel Spacing="3">
+                <TextBlock Text="Bases TONEX" Classes="h1" />
+                <TextBlock Text="L'application lit vos bibliothèques ; elle n'y écrit jamais."
+                           Classes="dim" />
+            </StackPanel>
+
+            <!-- ── Path + actions ──────────────────────────────────────── -->
+            <Border Classes="card">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="FICHIER DE BIBLIOTHÈQUE" Classes="faint" />
+
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding DatabasePath}"
+                                 PlaceholderText="C:\…\TONEX\Library.db ou Library2.db" />
+                        <Button Grid.Column="1" Click="OnBrowseClick">Parcourir…</Button>
+                        <Button Grid.Column="2" Classes="accent"
+                                Command="{Binding LoadCommand}">Ouvrir</Button>
+                    </Grid>
+
+                    <Border Classes="chip-static warn"
+                            HorizontalAlignment="Stretch"
+                            Padding="10,7"
+                            IsVisible="{Binding HasError}">
+                        <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" FontSize="12" />
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Read-only guarantee ─────────────────────────────────── -->
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Classes="chip-static on">
+                            <TextBlock Text="LECTURE SEULE" Classes="faint" />
+                        </Border>
+                        <TextBlock Text="Garantie technique" Classes="h2" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding ReadOnlyNotice}" Classes="dim" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <!-- ── What was opened ─────────────────────────────────────── -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="CONTENU OUVERT" Classes="faint" />
+
+                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+                          ColumnSpacing="12" RowSpacing="7">
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Format" Classes="dim" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding FormatLabel}" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Fichier" Classes="dim" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding FileLabel}"
+                                   TextWrapping="Wrap" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Contenu" Classes="dim" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CountsLabel}" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Réglages" Classes="dim" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SettingsLabel}"
+                                   TextWrapping="Wrap" />
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="SHA-256" Classes="dim" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding HashLabel}" />
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Tables" Classes="dim" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding TablesLabel}"
+                                   Classes="faint" TextWrapping="Wrap" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Version differences ─────────────────────────────────── -->
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="DIFFÉRENCES ENTRE GÉNÉRATIONS" Classes="faint" />
+                    <TextBlock Text="{Binding FormatHint}" Classes="dim" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

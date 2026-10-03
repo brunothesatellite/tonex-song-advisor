@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <Product>Tonex Song Advisor</Product>
+    <Description>Read-only explorer and tone advisor for IK Multimedia TONEX libraries.</Description>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,325 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TonexAdvisor.App.ViewModels"
+             xmlns:controls="using:TonexAdvisor.App.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="440" d:DesignHeight="700"
+             x:Class="TonexAdvisor.App.Views.PresetDetailView"
+             x:DataType="vm:PresetDetailViewModel">
+
+    <ScrollViewer Padding="2,0,6,14">
+        <StackPanel Spacing="10">
+
+            <!-- ── Header ─────────────────────────────────────────────── -->
+            <StackPanel Spacing="3">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Path Classes="favStar" Width="15" Height="15"
+                          IsVisible="{Binding Favorite}" />
+                    <TextBlock Text="{Binding Name}" Classes="h1" TextWrapping="Wrap" />
+                </StackPanel>
+                <TextBlock Text="{Binding TagsLine}" Classes="dim" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <!-- ── Metadata ───────────────────────────────────────────── -->
+            <Border Classes="card" Padding="12,10">
+                <Grid ColumnDefinitions="96,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="5">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Auteur" Classes="faint" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding UserName}" TextWrapping="Wrap" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Dossiers" Classes="faint" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Folders}" TextWrapping="Wrap" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Ajouté le" Classes="faint" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DateAdded}" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Instrument" Classes="faint" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Instrument}" TextWrapping="Wrap" />
+                </Grid>
+            </Border>
+
+            <!-- ── Tone models ────────────────────────────────────────── -->
+            <ItemsControl ItemsSource="{Binding ToneModels}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ToneModelCardViewModel">
+                        <Border Classes="card" Margin="0,0,0,8" Padding="12,10">
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Grid.Column="0" Text="{Binding Name}"
+                                               Classes="h2" TextWrapping="Wrap" />
+                                    <Border Grid.Column="1" Classes="chip-static">
+                                        <TextBlock Text="{Binding KindLabel}" Classes="faint" />
+                                    </Border>
+                                </Grid>
+
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="{Binding AmpLine}" Classes="dim" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding CabName}" Classes="dim"
+                                                   IsVisible="{Binding HasCab}" />
+                                        <TextBlock Text="{Binding Micros}" Classes="faint" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding Category}" Classes="faint" />
+                                    <TextBlock Text="{Binding Skin}" Classes="faint" />
+                                    <TextBlock Text="{Binding Author}" Classes="faint" />
+                                </StackPanel>
+
+                                <TextBlock Text="{Binding Folders}" Classes="faint" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- ── Chain (generation 2) ───────────────────────────────── -->
+            <Border Classes="card" IsVisible="{Binding HasChain}" Padding="12,10">
+                <StackPanel Spacing="5">
+                    <TextBlock Text="CHAÎNE DE BLOCS" Classes="faint" />
+                    <TextBlock Text="{Binding ChainSummary}" Classes="dim" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding ActiveBlockLine}" Classes="faint" />
+                    <TextBlock Text="Identifiants de blocs TONEX : la correspondance exacte avec les modules n'est pas documentée."
+                               Classes="faint" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <!-- ── Missing settings notice (generation 2) ─────────────── -->
+            <Border Classes="chip-static warn" IsVisible="{Binding !HasSettings}"
+                    HorizontalAlignment="Stretch" Padding="12,9">
+                <TextBlock Text="{Binding SettingsNote}" TextWrapping="Wrap" FontSize="12" />
+            </Border>
+
+            <!-- ── Signal path ────────────────────────────────────────── -->
+            <StackPanel Spacing="8" IsVisible="{Binding HasSettings}">
+                <TextBlock Text="CHAÎNE DU PRESET" Classes="faint" Margin="4,4,0,0" />
+
+                <ItemsControl ItemsSource="{Binding Sections}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SettingSectionViewModel">
+                            <Border Classes="card section" Classes.dimmed="{Binding IsDimmed}"
+                                    Margin="0,0,0,8">
+                                <StackPanel Spacing="6">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                        <TextBlock Grid.Column="0" Text="{Binding Title}"
+                                                   Classes="h2" VerticalAlignment="Center" />
+                                        <Border Grid.Column="1" Classes="chip-static"
+                                                IsVisible="{Binding HasSwitch}">
+                                            <TextBlock Text="{Binding SwitchLabel}" Classes="faint" />
+                                        </Border>
+                                        <TextBlock Grid.Column="2" Text="{Binding PositionLabel}"
+                                                   Classes="faint" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <ItemsControl ItemsSource="{Binding Knobs}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:KnobViewModel">
+                                                <Border Classes="knob-card" Width="94" Margin="0,0,6,6">
+                                                    <StackPanel Spacing="3">
+                                                        <TextBlock Text="{Binding Label}"
+                                                                   Classes="faint"
+                                                                   TextAlignment="Center"
+                                                                   TextWrapping="Wrap"
+                                                                   MaxHeight="30"
+                                                                   FontSize="10.5" />
+
+                                                        <Grid Height="56">
+                                                            <controls:NumericKnob
+                                                                IsVisible="{Binding IsKnob}"
+                                                                Value="{Binding Value}"
+                                                                Minimum="{Binding Minimum}"
+                                                                Maximum="{Binding Maximum}" />
+
+                                                            <Border Classes="chip-static"
+                                                                    IsVisible="{Binding IsSelector}"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Display}"
+                                                                           Classes="dim" />
+                                                            </Border>
+
+                                                            <Border Classes="chip-static on"
+                                                                    IsVisible="{Binding IsSwitchOn}"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="ACTIF" Classes="faint" />
+                                                            </Border>
+
+                                                            <Border Classes="chip-static off"
+                                                                    IsVisible="{Binding IsSwitchOff}"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="BYPASS" Classes="faint" />
+                                                            </Border>
+                                                        </Grid>
+
+                                                        <StackPanel Orientation="Horizontal"
+                                                                    HorizontalAlignment="Center"
+                                                                    Spacing="2"
+                                                                    IsVisible="{Binding IsKnob}">
+                                                            <TextBlock Text="{Binding Display}"
+                                                                       Classes="h2" />
+                                                            <TextBlock Text="{Binding Unit}"
+                                                                       Classes="faint"
+                                                                       VerticalAlignment="Bottom"
+                                                                       Margin="0,0,0,2" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <!-- ── Hardware slots ─────────────────────────────────────── -->
+            <Separator IsVisible="{Binding HasHardware}" Margin="0,6" />
+
+            <ToggleButton Classes="chip"
+                          IsVisible="{Binding HasHardware}"
+                          IsChecked="{Binding ShowHardware}"
+                          HorizontalAlignment="Left">
+                <TextBlock Text="{Binding HardwareSummary}" FontSize="12" />
+            </ToggleButton>
+
+            <StackPanel Spacing="8" IsVisible="{Binding ShowHardware}">
+                <ItemsControl ItemsSource="{Binding HardwareASections}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SettingSectionViewModel">
+                            <Border Classes="card" Margin="0,0,0,8" Padding="12,10">
+                                <StackPanel Spacing="6">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <TextBlock Grid.Column="0" Text="{Binding Title}"
+                                                   Classes="h2" />
+                                        <Border Grid.Column="1" Classes="chip-static">
+                                            <TextBlock Text="{Binding SwitchLabel}" Classes="faint" />
+                                        </Border>
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{Binding Knobs}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:KnobViewModel">
+                                                <Border Classes="knob-card" Width="94" Margin="0,0,6,6">
+                                                    <StackPanel Spacing="3">
+                                                        <TextBlock Text="{Binding Label}" Classes="faint"
+                                                                   TextAlignment="Center"
+                                                                   TextWrapping="Wrap" MaxHeight="30"
+                                                                   FontSize="10.5" />
+                                                        <Grid Height="56">
+                                                            <controls:NumericKnob
+                                                                IsVisible="{Binding IsKnob}"
+                                                                Value="{Binding Value}"
+                                                                Minimum="{Binding Minimum}"
+                                                                Maximum="{Binding Maximum}" />
+                                                            <Border Classes="chip-static"
+                                                                    IsVisible="{Binding IsSelector}"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Display}" Classes="dim" />
+                                                            </Border>
+                                                            <Border Classes="chip-static on"
+                                                                    IsVisible="{Binding IsSwitchOn}"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="ACTIF" Classes="faint" />
+                                                            </Border>
+                                                            <Border Classes="chip-static off"
+                                                                    IsVisible="{Binding IsSwitchOff}"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="BYPASS" Classes="faint" />
+                                                            </Border>
+                                                        </Grid>
+                                                        <StackPanel Orientation="Horizontal"
+                                                                    HorizontalAlignment="Center"
+                                                                    Spacing="2"
+                                                                    IsVisible="{Binding IsKnob}">
+                                                            <TextBlock Text="{Binding Display}" Classes="h2" />
+                                                            <TextBlock Text="{Binding Unit}" Classes="faint"
+                                                                       VerticalAlignment="Bottom"
+                                                                       Margin="0,0,0,2" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <ItemsControl ItemsSource="{Binding HardwareBSections}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SettingSectionViewModel">
+                            <Border Classes="card" Margin="0,0,0,8" Padding="12,10">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{Binding Title}" Classes="h2" />
+                                    <ItemsControl ItemsSource="{Binding Knobs}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:KnobViewModel">
+                                                <Border Classes="knob-card" Width="94" Margin="0,0,6,6">
+                                                    <StackPanel Spacing="3">
+                                                        <TextBlock Text="{Binding Label}" Classes="faint"
+                                                                   TextAlignment="Center"
+                                                                   TextWrapping="Wrap" MaxHeight="30"
+                                                                   FontSize="10.5" />
+                                                        <Grid Height="56">
+                                                            <controls:NumericKnob
+                                                                IsVisible="{Binding IsKnob}"
+                                                                Value="{Binding Value}"
+                                                                Minimum="{Binding Minimum}"
+                                                                Maximum="{Binding Maximum}" />
+                                                            <Border Classes="chip-static"
+                                                                    IsVisible="{Binding IsSelector}"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Display}" Classes="dim" />
+                                                            </Border>
+                                                            <Border Classes="chip-static on"
+                                                                    IsVisible="{Binding IsSwitchOn}"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="ACTIF" Classes="faint" />
+                                                            </Border>
+                                                            <Border Classes="chip-static off"
+                                                                    IsVisible="{Binding IsSwitchOff}"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="BYPASS" Classes="faint" />
+                                                            </Border>
+                                                        </Grid>
+                                                        <StackPanel Orientation="Horizontal"
+                                                                    HorizontalAlignment="Center"
+                                                                    Spacing="2"
+                                                                    IsVisible="{Binding IsKnob}">
+                                                            <TextBlock Text="{Binding Display}" Classes="h2" />
+                                                            <TextBlock Text="{Binding Unit}" Classes="faint"
+                                                                       VerticalAlignment="Bottom"
+                                                                       Margin="0,0,0,2" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <TextBlock Text="{Binding Key}" Classes="faint" TextWrapping="Wrap" Margin="4,4,0,0" />
+
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>
