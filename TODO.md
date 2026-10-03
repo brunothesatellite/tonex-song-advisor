@@ -18,7 +18,7 @@ Ce document liste ce qui reste à faire.
   en lecture seule, sections matériels masquables).
 - **UI** thème sombre « rock/metal » (`Themes/DarkRock.axaml`), DataGrid, disposition fixe
   (`DockPanel` : grille à gauche, carte de détail 400 px à droite).
-- **Tests** : 77 tests verts (données, readers V1/V2, tokeniseur, ranges, panneau de détail, filtres,
+- **Tests** : 95 tests verts (données, readers V1/V2, tokeniseur, ranges, panneau de détail, filtres,
   configuration IA).
 - **Barre de titre Windows** en mode sombre (`DwmSetWindowAttribute`).
 
@@ -47,14 +47,23 @@ Ce document liste ce qui reste à faire.
 
 ## 🔜 Reste à faire
 
-### Phase 3 — Recommandation locale (priorité haute)
-- [ ] `Scorer` dans `TonexAdvisor.Core` : noter presets/tone models pour une chanson/artist donnés.
-- [ ] Signaux à combiner : genres, tags, artiste/chanson déjà associés, catégorie, dossiers,
-      plage de réglages (gain/volume/master), nom du preset.
-- [ ] Classement « meilleur preset » + « meilleure combinaison ampli + stomp + cab ».
-- [ ] Explication lisible de chaque conseil (« pourquoi ce preset »).
-- [ ] Onglet/section « Conseils » dans l'IU avec les 3 meilleures propositions cliquables.
-
+### Phase 3 - Recommandation locale (fait)
+- [x] `LibraryAdvisor` dans `TonexAdvisor.Core` : note presets et blocs capturés pour une
+      chanson, un artiste ou un style (requête libre, aucun champ obligatoire).
+- [x] Signaux combinés : catégorie/saturation (`HI-GAIN`, `DRIVE`, `CLEAN`, `STOMP - …`), genre,
+      artiste, chanson, mots-clés/dossiers/auteur, favoris, réglages exploitables. Le gain
+      numérique (`ModelGain`) a été testé puis écarté : médiane à 5 partout, il ne dit rien.
+- [x] Classement « meilleur preset » + « bloc capturé (stomp + ampli) + baffle ».
+      **Règle respectée** : le stomp et l'ampli d'une capture sont inséparables — jamais de
+      mélange entre deux tone models — et **seul le baffle se change**, choisi dans toute la
+      bibliothèque avec la mention « remplaçable par tout autre baffle ».
+- [x] Explication lisible de chaque conseil : « Catégorie HI-GAIN : saturation adaptée à « metal » »,
+      « Baffle « M-Tech Audio » : saturation adaptée à « metal » », « TS808 devant l'ampli… ».
+- [x] Onglet « Conseils » : formulaire artiste/chanson/style, 3 meilleurs presets et la
+      combinaison, chacun avec son score, ses raisons et un bouton « Ouvrir » qui sélectionne
+      la ligne dans la grille.
+- [x] Vérifié par automatisation UI (UIA) : saisie « metal » → 3 presets HI-GAIN (92/92/84 %) et
+      le bloc `Ibanez Tube Screamer TS808 -> Mesa Boogie Triple Rectifier` + baffle libre.
 ### Phase 4 — Conseil IA via OpenCode Go (priorité haute)
 - [x] Client HTTP : `https://opencode.ai/zen/go/v1/chat/completions` (OpenAI-compatible,
       `Authorization: Bearer`, `x-opencode-session`, `User-Agent: TonexAdvisor/1.0`).
@@ -78,7 +87,7 @@ Ce document liste ce qui reste à faire.
       l'orange du thème (priorité basse).
 - [ ] Mode sombre de la barre de tâches / icône d'application.
 - [ ] Installeur / publication (`dotnet publish -r win-x64 --self-contained`).
-- [ ] CI : build + 77 tests à chaque modification.
+- [ ] CI : build + 95 tests à chaque modification.
 
 ### Références externes (pour la suite)
 - Format V1/V2 : `https://git.codence.de/pub/tonex-library-sync` (open-source, lit le format V1).

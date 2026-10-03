@@ -175,6 +175,118 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
+
+                <TabItem Header="Conseils">
+                    <ScrollViewer>
+                        <StackPanel Spacing="12" Margin="4,10,4,4">
+
+                            <!-- ── Query ─────────────────────────────────── -->
+                            <Border Classes="card" Padding="12">
+                                <StackPanel Spacing="9">
+                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                                        <StackPanel Grid.Column="0" Spacing="3">
+                                            <TextBlock Text="ARTISTE" Classes="faint" />
+                                            <TextBox Text="{Binding Advice.Artist}"
+                                                     PlaceholderText="Guns N’ Roses…" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Spacing="3">
+                                            <TextBlock Text="CHANSON" Classes="faint" />
+                                            <TextBox Text="{Binding Advice.Song}"
+                                                     PlaceholderText="Back in Black…" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" Spacing="3">
+                                            <TextBlock Text="STYLE / AMBIANCE" Classes="faint" />
+                                            <TextBox Text="{Binding Advice.Style}"
+                                                     PlaceholderText="metal, blues, clean funk…" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                        <Button Grid.Column="0" Classes="accent"
+                                                Command="{Binding Advice.AdviseCommand}">Conseiller</Button>
+                                        <TextBlock Grid.Column="1" Text="{Binding Advice.Hint}"
+                                                   Classes="faint" FontSize="11"
+                                                   TextWrapping="Wrap" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <Border Classes="chip-static warn" HorizontalAlignment="Stretch"
+                                            IsVisible="{Binding Advice.HasError}">
+                                        <TextBlock Text="{Binding Advice.ErrorMessage}"
+                                                   TextWrapping="Wrap" FontSize="12" />
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- ── Ranked presets ────────────────────────── -->
+                            <StackPanel Spacing="6" IsVisible="{Binding Advice.HasPresets}">
+                                <TextBlock Text="MEILLEURS PRESETS" Classes="faint" />
+
+                                <ItemsControl ItemsSource="{Binding Advice.Presets}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:AdvicePresetRowViewModel">
+                                            <Border Classes="card" Padding="12" Margin="0,0,0,8">
+                                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                                    <Border Grid.Column="0" Classes="chip-static"
+                                                            VerticalAlignment="Top">
+                                                        <TextBlock Text="{Binding ScoreLabel}"
+                                                                   Classes="accent" />
+                                                    </Border>
+
+                                                    <StackPanel Grid.Column="1" Spacing="4">
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock Text="{Binding Name}" Classes="h2" />
+                                                            <TextBlock Text="{Binding Artist}" Classes="faint"
+                                                                       VerticalAlignment="Center" />
+                                                        </StackPanel>
+                                                        <TextBlock Text="{Binding Meta}" Classes="dim"
+                                                                   FontSize="12" TextWrapping="Wrap" />
+                                                        <TextBlock Text="{Binding ReasonsText}" Classes="faint"
+                                                                   FontSize="11" TextWrapping="Wrap" />
+                                                    </StackPanel>
+
+                                                    <Button Grid.Column="2" VerticalAlignment="Top"
+                                                            Command="{Binding OpenCommand}">Ouvrir</Button>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <!-- ── Best combination ──────────────────────── -->
+                            <StackPanel Spacing="6" IsVisible="{Binding Advice.HasCombination}">
+                                <TextBlock Text="MEILLEURE COMBINAISON — BLOC CAPTURÉ + BAFFLE"
+                                           Classes="faint" />
+                                <TextBlock Text="Le stomp et l’ampli viennent d’une même capture : ils sont inséparables. Seul le baffle se change."
+                                           Classes="dim" FontSize="11" TextWrapping="Wrap" />
+
+                                <Border Classes="card" Padding="12"
+                                        DataContext="{Binding Advice.Combination}">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <StackPanel Grid.Column="0" Spacing="5">
+                                            <TextBlock Text="{Binding Block}" Classes="h2"
+                                                       TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding CabLine}" Classes="accent"
+                                                       FontSize="12" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Usage}" Classes="faint"
+                                                       FontSize="11" />
+                                            <TextBlock Text="{Binding ReasonsText}" Classes="faint"
+                                                       FontSize="11" TextWrapping="Wrap" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="1" Spacing="8" HorizontalAlignment="Right">
+                                            <Border Classes="chip-static">
+                                                <TextBlock Text="{Binding ScoreLabel}" Classes="accent" />
+                                            </Border>
+                                            <Button Command="{Binding OpenCommand}">Ouvrir</Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
             </TabControl>
 
         </DockPanel>

@@ -58,7 +58,7 @@ vérifie la clé et le modèle choisi par une vraie requête.
 ## Données de test
 
 Les bases TONEX ne sont **pas versionnées** (bibliothèque personnelle, 89 Mo). Pour exécuter les
-77 tests, copie tes propres fichiers dans `db/` :
+95 tests, copie tes propres fichiers dans `db/` :
 
 ```
 db\Library.db     ← format V1 (réglages numériques complets)
@@ -71,11 +71,13 @@ db\Library2.db    ← format V2 (métadonnées)
 |---|---|
 | `src\TonexAdvisor.Core` | lecture des bases (read-only), DTOs, index, tokeniseur, ranges |
 | `src\TonexAdvisor.App` | UI Avalonia, thème `Themes\DarkRock.axaml`, ViewModels |
-| `tests\TonexAdvisor.Core.Tests` | 77 tests |
+| `tests\TonexAdvisor.Core.Tests` | 95 tests |
 | `TODO.md` | état d'avancement et travail restant |
 
 ## Avancement
 
 Voir [TODO.md](TODO.md) — v0.1 : lecture + navigateur + détail des presets, réglages IA
-(clé API + modèles gratuits + test de connexion). Reste : recommandation locale (Phase 3) puis
-conseil intégré à l'écran « Conseils » (Phase 4).
+(clé API + modèles gratuits + test de connexion). Voir [TODO.md](TODO.md) - v0.1 : lecture + navigateur + détail des presets, réglages IA
+(clé API + modèles gratuits + test de connexion), recommandation locale avec l'onglet
+« Conseils » (meilleurs presets + bloc capturé et baffle). Reste : conseil IA branché à cet
+écran (Phase 4 : streaming SSE, contexte envoyé au modèle, repli sur le classement local).

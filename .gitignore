@@ -15,6 +15,7 @@ db/*.db-wal
 # ── Secrets : jamais versionnés ───────────────────────────────────────────────
 # La clé API vit normalement dans %APPDATA%\TonexAdvisor\config.json (hors dépôt).
 # Ces motifs protègent contre une recopie accidentelle à l'intérieur du projet.
+opencode-key.txt
 config.json
 *.config.json
 *.secrets.json

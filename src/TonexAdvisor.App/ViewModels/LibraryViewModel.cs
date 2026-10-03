@@ -81,6 +81,14 @@ public partial class LibraryViewModel : ViewModelBase
         private set => SetProperty(ref _toneModels, value);
     }
 
+    public LibraryViewModel()
+    {
+        Advice = new AdviceViewModel(this);
+    }
+
+    /// <summary>The « Conseils » tab, which ranks this library against a song.</summary>
+    public AdviceViewModel Advice { get; }
+
     public bool HasDatabase => _index is not null;
 
     public bool HasPresets => Presets.Count > 0;
@@ -125,6 +133,7 @@ public partial class LibraryViewModel : ViewModelBase
         ToneModelDetail = null;
         DetailContent = null;
         SelectedTabIndex = 0;
+        Advice.Reset();
 
         OnPropertyChanged(nameof(HasDatabase));
         OnPropertyChanged(nameof(KnobSettingsAvailable));
@@ -197,7 +206,26 @@ public partial class LibraryViewModel : ViewModelBase
 
     /// <summary>Shows whichever detail matches the active grid tab.</summary>
     private void UpdateDetailContent()
-        => DetailContent = SelectedTabIndex == 0 ? (object?)PresetDetail : ToneModelDetail;
+        => DetailContent = SelectedTabIndex == 1 ? (object?)ToneModelDetail : PresetDetail;
+
+    /// <summary>
+    /// Leaves the « Conseils » tab and selects a preset the user just asked about. Filters are
+    /// reset first: a recommendation the grid is not showing would look broken.
+    /// </summary>
+    public void OpenPresetByKey(string key)
+    {
+        ClearFilters();
+        SelectedTabIndex = 0;
+        SelectedPreset = Presets.FirstOrDefault(row => string.Equals(row.Record.Key, key, StringComparison.Ordinal));
+    }
+
+    /// <summary>Same as <see cref="OpenPresetByKey"/>, for the recommended combination.</summary>
+    public void OpenToneModelByKey(string key)
+    {
+        ClearFilters();
+        SelectedTabIndex = 1;
+        SelectedToneModel = ToneModels.FirstOrDefault(row => string.Equals(row.Record.Key, key, StringComparison.Ordinal));
+    }
 
     private void Refresh()
     {
