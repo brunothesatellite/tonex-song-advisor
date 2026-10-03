@@ -123,34 +123,28 @@ confirmer : c'est le desaccord qui fait la valeur de ce mode.
 - [x] Tests : connecteurs factices (succes, erreur, timeout), selection des voix d'apres les
       cles renseignees, arbitrage a partir d'avis ecrits, catalogue des fournisseurs.
 ### Phase 7 - Réglages des potards en génération 2 (V2)
-Objectif : retrouver les valeurs numériques des potards pour une base V2, que TONEX stocke
-probablement ailleurs que dans les 20 colonnes visibles.
 
-Contexte :
-- V1 (`Library.db`) : 344 colonnes de réglages, déjà exploitées.
-- V2 (`Library2.db`) : 20 colonnes + un JSON `Chain` par preset, dont le lecteur n'extrait que
-  les blocs.
-- La base V2 fournie dans `db/` est un **upgrade de la V1** : les mêmes presets y existent (avec
-  quelques tone models en plus) — c'est la base d'une comparaison directe.
+**Analyse faite (lecture seule, bases + dossier TONEX) — résultats :**
 
-Pistes, dans l'ordre :
-1. **Comparer V1 ↔ V2 preset par preset** (même GUID) : prendre une valeur V1 connue (gain, EQ,
-   volume) et chercher ce nombre dans la ligne V2 et dans le JSON `Chain` (flottant, entier ou
-   chaîne) → ça localise où les réglages sont rangés.
-2. **Explorer tout le schéma V2** : tables, colonnes, BLOB et JSON non lus par le lecteur
-   (`CollectionData`, `DatabaseInfo`, …), sans a priori sur leur contenu.
-3. **Corréler les tone models** : le même modèle existe en V1 et V2 ; comparer pour voir si le
-   format V2 porte les réglages par bloc (dans `Chain` ou ailleurs).
-4. Si la base ne contient rien : **recherche strictement en lecture seule** dans
-   `D:\OneDriveBruno\OneDrive\Documents\IK Multimedia\TONEX` — accès exceptionnellement accordé
-   pour cette phase uniquement : fichiers de preset, dossiers de contenu, préférences de
-   l'éditeur. Rien écrire, rien déplacer, rien modifier.
-5. Si trouvé : étendre `V2Reader` pour peupler `PresetSettings` → l'IU affiche les potards en V2
-   comme en V1, et `HasKnobSettings` devient vrai.
-6. **Garantie inchangée** : empreintes SHA-256 des deux bases avant/après, et contrôle que rien
-   n'a été modifié dans le dossier TONEX ouvert en lecture seule.
-7. Tests : lecture V2 avec réglages retrouvés, comparaison V1/V2 sur un preset commun, non
-   régression de la lecture V2 actuelle.
+1. **Les valeurs ne sont pas dans `Library2.db`.** `Presets` V2 = 20 colonnes, dont `Chain` (TEXT)
+   qui ne contient qu'une liste de blocs : `[{"ID":0,"Bypass":false}, ...]` — aucun paramètre.
+   Confrontation sur un preset présent dans les deux bases : `ModelGain=2.3`, `EqTreble=5.9`,
+   `PwrAmpEqPresence=7.1` (V1) n'apparaissent nulle part dans le Chain V2.
+2. **Elles vivent dans les fichiers `.txp`** du dossier TONEX :
+   `\Library\Presets\*.txp` (2 513 fichiers = exactement le nombre de presets V2) et
+   `\Library\ToneModels\*.txm` (3 714 = les tone models V2). Ces fichiers sont **chiffrés**
+   (en-tête `29832.<base64>`, aucun mot lisible) — même signature que les champs `*Encrypt` de la
+   base. Les décrypter = reverse engineering du format propriétaire d'IK : hors sujet.
+3. **Ce qui est récupérable légitimement : la jointure V1 ↔ V2.** Ta base V2 est un upgrade de la
+   V1 : **2 489 presets V2 sur ~2 513 existent en V1**, où les valeurs sont en clair.
+
+**Reste à implémenter :**
+- [ ] Quand une base V2 est ouverte et qu'une base V1 est disponible, enrichir les presets V2 avec
+      les réglages V1 (jointure par nom de preset, secours par GUID du tone model).
+- [ ] Afficher les potentiomètres pour ces presets, avec la mention honnête « réglages issus de la
+      bibliothèque V1 — les valeurs V2 sont chiffrées dans les fichiers .txp ».
+- [ ] Les ~200 presets présents seulement en V2 restent sans réglage (valeur chiffrée, non lisible).
+- [ ] Tests : jointure sur les deux bases, non-régression V1 et V2, hash des bases inchangé.
 ### Références externes (pour la suite)
 - Format V1/V2 : `https://git.codence.de/pub/tonex-library-sync` (open-source, lit le format V1).
 - Les outils de référence `bcho/` (Bcho-Suite-Pro, seul outil connu lisant la V2) et
