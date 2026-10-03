@@ -69,6 +69,29 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private string _groqKey = "";
 
+    /// <summary>Modèle explicite ; vide = le modèle gratuit par défaut du catalogue.</summary>
+    [ObservableProperty]
+    private string _geminiModel = "";
+
+    [ObservableProperty]
+    private string _mistralModel = "";
+
+    [ObservableProperty]
+    private string _groqModel = "";
+
+    /// <summary>Les défauts viennent du catalogue : l'IU ne les duplique jamais.</summary>
+    public string GeminiDefaultModel => AiProviders.Find("gemini")!.DefaultModel;
+
+    public string MistralDefaultModel => AiProviders.Find("mistral")!.DefaultModel;
+
+    public string GroqDefaultModel => AiProviders.Find("groq")!.DefaultModel;
+
+    public string GeminiModelHint => $"modèle (défaut : {GeminiDefaultModel})";
+
+    public string MistralModelHint => $"modèle (défaut : {MistralDefaultModel})";
+
+    public string GroqModelHint => $"modèle (défaut : {GroqDefaultModel})";
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasProviderStatus))]
     private string _providerStatus = "";
@@ -91,6 +114,9 @@ public partial class SettingsViewModel : ViewModelBase
         _geminiKey = _config.CredentialFor("gemini").ApiKey;
         _mistralKey = _config.CredentialFor("mistral").ApiKey;
         _groqKey = _config.CredentialFor("groq").ApiKey;
+        _geminiModel = _config.CredentialFor("gemini").Model;
+        _mistralModel = _config.CredentialFor("mistral").Model;
+        _groqModel = _config.CredentialFor("groq").Model;
     }
 
     public string ReadOnlyNotice =>
@@ -133,21 +159,22 @@ public partial class SettingsViewModel : ViewModelBase
         _config.ApiKey = ApiKey.Trim();
         _config.Model = (SelectedModel ?? OpenCodeModels.Free[0]).Id;
         _config.Endpoint = OpenCodeModels.EndPoint;
-        PersistProvider("gemini", GeminiKey);
-        PersistProvider("mistral", MistralKey);
-        PersistProvider("groq", GroqKey);
+        PersistProvider("gemini", GeminiKey, GeminiModel);
+        PersistProvider("mistral", MistralKey, MistralModel);
+        PersistProvider("groq", GroqKey, GroqModel);
         _config.Save();
         return _config;
     }
 
     /// <summary>
-    /// Enregistre la clé d'une voix challenger sans perdre le modèle choisi à la main dans le
-    /// fichier de configuration.
+    /// Enregistre la clé et le modèle d'une voix challenger ; le modèle reste vide tant que
+    /// l'utilisateur n'a pas besoin de forcer le choix du catalogue.
     /// </summary>
-    private void PersistProvider(string providerId, string apiKey)
+    private void PersistProvider(string providerId, string apiKey, string model)
     {
         var credential = _config.CredentialFor(providerId);
         credential.ApiKey = apiKey.Trim();
+        credential.Model = model.Trim();
         _config.Providers[providerId] = credential;
     }
 
@@ -246,7 +273,15 @@ public partial class SettingsViewModel : ViewModelBase
                 }
                 catch (Exception exception)
                 {
-                    results.Add($"{provider.Label} : {Flatten(exception.Message, 90)}");
+                    var detail = $"{provider.Label} : {Flatten(exception.Message, 260)}";
+
+                    // Un modèle retiré est la panne la plus courante : on montre ceux qui sont
+                    // réellement ouverts à cette clé, sans que l'utilisateur ait à deviner.
+                    var available = await TryListModelsAsync(provider, credential).ConfigureAwait(true);
+                    if (available.Length > 0)
+                        detail += $"  ·  modèles : {available}";
+
+                    results.Add(detail);
                 }
             }
 
@@ -255,6 +290,27 @@ public partial class SettingsViewModel : ViewModelBase
         finally
         {
             IsTestingAi = false;
+        }
+    }
+
+    /// <summary>
+    /// Liste les modèles ouverts à une clé, pour dépanner un modèle retiré. Un échec ici ne
+    /// change rien au diagnostic principal.
+    /// </summary>
+    private static async Task<string> TryListModelsAsync(AiProvider provider, ProviderCredential credential)
+    {
+        try
+        {
+            var client = new OpenAiCompatClient(provider.Label, provider.EndPoint, credential.ApiKey);
+            var models = await client.ListModelsAsync().ConfigureAwait(true);
+
+            return models.Count == 0
+                ? ""
+                : string.Join(", ", models.Take(20));
+        }
+        catch (Exception)
+        {
+            return "";
         }
     }
 

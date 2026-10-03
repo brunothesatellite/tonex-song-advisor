@@ -121,7 +121,7 @@ public class AiConsultationTests
         Assert.Equal("longcat-2.5-preview-free", AiConsultation.ModelFor(config, "OpenCode Go"));
 
         // A challenger without an explicit model gets the free default of its catalogue.
-        Assert.Equal("gemini-2.5-flash", AiConsultation.ModelFor(config, "Gemini (Google)"));
+        Assert.Equal("gemini-flash-latest", AiConsultation.ModelFor(config, "Gemini (Google)"));
 
         // And one with an explicit model keeps it.
         Assert.Equal("llama-custom", AiConsultation.ModelFor(config, "Groq"));

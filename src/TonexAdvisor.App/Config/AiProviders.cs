@@ -42,7 +42,7 @@ public static class AiProviders
             "gemini",
             "Gemini (Google)",
             "https://generativelanguage.googleapis.com/v1beta/openai",
-            "gemini-2.5-flash",
+            "gemini-flash-latest",
             "https://aistudio.google.com/apikey"),
 
         new AiProvider(
@@ -56,7 +56,7 @@ public static class AiProviders
             "groq",
             "Groq",
             "https://api.groq.com/openai/v1",
-            "llama-3.3-70b-versatile",
+            "openai/gpt-oss-120b",
             "https://console.groq.com/keys"),
     ];
 

@@ -169,9 +169,9 @@ confronte les avis et classe les **3 meilleures propositions** avec leur niveau 
 | Voix | Où demander une clé API | Modèle gratuit par défaut |
 |---|---|---|
 | **OpenCode Go** (référence) | <https://opencode.ai/> (offre *Go*) | `longcat-2.5-preview-free` |
-| **Gemini** (Google) | <https://aistudio.google.com/apikey> | `gemini-2.5-flash` |
+| **Gemini** (Google) | <https://aistudio.google.com/apikey> | `gemini-flash-latest` |
 | **Mistral** | <https://console.mistral.ai/api-keys> | `mistral-small-latest` |
-| **Groq** | <https://console.groq.com/keys> | `llama-3.3-70b-versatile` |
+| **Groq** | <https://console.groq.com/keys> | `openai/gpt-oss-120b` |
 
 - Les clés se saisissent dans **Bases & réglages**, masquées, et sont stockées dans
   `%APPDATA%\TonexAdvisor\config.json` — **jamais dans le dépôt**.

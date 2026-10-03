@@ -100,6 +100,51 @@ public sealed class OpenAiCompatClient : IAiClient
         return parser.Content.Length > 0 ? parser.Content : parser.Reasoning;
     }
 
+    /// <summary>Les modèles réellement ouverts à cette clé (<c>GET /models</c>).</summary>
+    /// <remarks>
+    /// Les tarifs gratuits changent et un modèle finit par être retiré : plutôt que de deviner,
+    /// on interroge le fournisseur et on montre ce qui est utilisable.
+    /// </remarks>
+    public async Task<IReadOnlyList<string>> ListModelsAsync(CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, _endpoint + "/models");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+
+        using var response = await Http.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+            throw new InvalidOperationException(DescribeError(response.StatusCode, body));
+
+        var ids = new List<string>();
+
+        try
+        {
+            using var document = JsonDocument.Parse(body);
+            if (document.RootElement.ValueKind == JsonValueKind.Object
+                && document.RootElement.TryGetProperty("data", out var data)
+                && data.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var entry in data.EnumerateArray())
+                {
+                    if (entry.ValueKind == JsonValueKind.Object
+                        && entry.TryGetProperty("id", out var id)
+                        && id.ValueKind == JsonValueKind.String
+                        && !string.IsNullOrWhiteSpace(id.GetString()))
+                    {
+                        ids.Add(id.GetString() ?? "");
+                    }
+                }
+            }
+        }
+        catch (JsonException)
+        {
+            // Liste illisible : on renverra simplement une liste vide.
+        }
+
+        return ids;
+    }
+
     private static HttpClient CreateClient()
     {
         var client = new HttpClient { Timeout = TimeSpan.FromSeconds(90) };
@@ -112,6 +157,12 @@ public sealed class OpenAiCompatClient : IAiClient
         try
         {
             using var document = JsonDocument.Parse(body);
+
+            // Un corps qui n'est pas un objet JSON est légitime (message d'erreur brut) : il ne
+            // doit jamais faire échouer l'extraction.
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+                return body.Trim();
+
             if (!document.RootElement.TryGetProperty("choices", out var choices) || choices.ValueKind != JsonValueKind.Array)
                 return "";
 
@@ -144,7 +195,11 @@ public sealed class OpenAiCompatClient : IAiClient
         try
         {
             using var document = JsonDocument.Parse(body);
-            if (document.RootElement.TryGetProperty("error", out var error))
+
+            // Gemini renvoie parfois un corps qui n'est pas un objet : on lit alors le texte brut
+            // plutôt que de planter et de masquer la vraie erreur.
+            if (document.RootElement.ValueKind == JsonValueKind.Object
+                && document.RootElement.TryGetProperty("error", out var error))
             {
                 if (error.ValueKind == JsonValueKind.Object && error.TryGetProperty("message", out var message))
                     return $"Erreur IA ({(int)status}) : {message.GetString()}";

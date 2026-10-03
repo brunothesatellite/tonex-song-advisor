@@ -111,29 +111,53 @@
                 <StackPanel Spacing="9">
                     <TextBlock Text="CLÉS GEMINI / MISTRAL / GROQ (FACULTATIVES)" Classes="faint" />
 
-                    <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
-                        <TextBlock Grid.Column="0" Text="Gemini" VerticalAlignment="Center" />
-                        <TextBox Grid.Column="1" Text="{Binding GeminiKey}" PasswordChar="*"
-                                 PlaceholderText="AIza..." />
-                        <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
-                                   VerticalAlignment="Center" Text="aistudio.google.com/apikey" />
-                    </Grid>
+                    <StackPanel Spacing="3">
+                        <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
+                            <TextBlock Grid.Column="0" Text="Gemini" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1" Text="{Binding GeminiKey}" PasswordChar="*"
+                                     PlaceholderText="AIza..." />
+                            <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
+                                       VerticalAlignment="Center" Text="aistudio.google.com/apikey" />
+                        </Grid>
+                        <Grid ColumnDefinitions="110,*" ColumnSpacing="8">
+                            <TextBlock Grid.Column="0" Classes="faint" FontSize="11"
+                                       VerticalAlignment="Center" Text="{Binding GeminiModelHint}" />
+                            <TextBox Grid.Column="1" Text="{Binding GeminiModel}" FontSize="11"
+                                     PlaceholderText="{Binding GeminiDefaultModel}" />
+                        </Grid>
+                    </StackPanel>
 
-                    <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
-                        <TextBlock Grid.Column="0" Text="Mistral" VerticalAlignment="Center" />
-                        <TextBox Grid.Column="1" Text="{Binding MistralKey}" PasswordChar="*"
-                                 PlaceholderText="..." />
-                        <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
-                                   VerticalAlignment="Center" Text="console.mistral.ai/api-keys" />
-                    </Grid>
+                    <StackPanel Spacing="3">
+                        <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
+                            <TextBlock Grid.Column="0" Text="Mistral" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1" Text="{Binding MistralKey}" PasswordChar="*"
+                                     PlaceholderText="..." />
+                            <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
+                                       VerticalAlignment="Center" Text="console.mistral.ai/api-keys" />
+                        </Grid>
+                        <Grid ColumnDefinitions="110,*" ColumnSpacing="8">
+                            <TextBlock Grid.Column="0" Classes="faint" FontSize="11"
+                                       VerticalAlignment="Center" Text="{Binding MistralModelHint}" />
+                            <TextBox Grid.Column="1" Text="{Binding MistralModel}" FontSize="11"
+                                     PlaceholderText="{Binding MistralDefaultModel}" />
+                        </Grid>
+                    </StackPanel>
 
-                    <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
-                        <TextBlock Grid.Column="0" Text="Groq" VerticalAlignment="Center" />
-                        <TextBox Grid.Column="1" Text="{Binding GroqKey}" PasswordChar="*"
-                                 PlaceholderText="gsk_..." />
-                        <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
-                                   VerticalAlignment="Center" Text="console.groq.com/keys" />
-                    </Grid>
+                    <StackPanel Spacing="3">
+                        <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
+                            <TextBlock Grid.Column="0" Text="Groq" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1" Text="{Binding GroqKey}" PasswordChar="*"
+                                     PlaceholderText="gsk_..." />
+                            <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
+                                       VerticalAlignment="Center" Text="console.groq.com/keys" />
+                        </Grid>
+                        <Grid ColumnDefinitions="110,*" ColumnSpacing="8">
+                            <TextBlock Grid.Column="0" Classes="faint" FontSize="11"
+                                       VerticalAlignment="Center" Text="{Binding GroqModelHint}" />
+                            <TextBox Grid.Column="1" Text="{Binding GroqModel}" FontSize="11"
+                                     PlaceholderText="{Binding GroqDefaultModel}" />
+                        </Grid>
+                    </StackPanel>
 
                     <Button Classes="accent" HorizontalAlignment="Left"
                             Command="{Binding TestProvidersCommand}"
