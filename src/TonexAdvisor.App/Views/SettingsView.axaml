@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TonexAdvisor.App.ViewModels"
+             xmlns:config="using:TonexAdvisor.App.Config"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="1360" d:DesignHeight="740"
@@ -49,6 +50,53 @@
                         <TextBlock Text="Garantie technique" Classes="h2" VerticalAlignment="Center" />
                     </StackPanel>
                     <TextBlock Text="{Binding ReadOnlyNotice}" Classes="dim" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <!-- ── AI : OpenCode Go ─────────────────────────────────────── -->
+            <StackPanel Spacing="3">
+                <TextBlock Text="Conseil IA" Classes="h1" />
+                <TextBlock Text="Le conseil s'appuie sur l'API OpenCode Go, avec des modèles gratuits uniquement."
+                           Classes="dim" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Border Classes="card">
+                <StackPanel Spacing="9">
+                    <TextBlock Text="CLÉ API OPENCODE" Classes="faint" />
+                    <TextBox Text="{Binding ApiKey}"
+                             PasswordChar="*"
+                             PlaceholderText="oc_sk_…" />
+
+                    <TextBlock Text="MODÈLE GRATUIT" Classes="faint" />
+                    <ComboBox ItemsSource="{Binding FreeModels}"
+                              SelectedItem="{Binding SelectedModel}"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="config:FreeModel">
+                                <TextBlock Text="{Binding Label}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
+                        <Button Grid.Column="0" Classes="accent"
+                                Command="{Binding SaveAiCommand}">Enregistrer</Button>
+                        <Button Grid.Column="1"
+                                Command="{Binding TestAiCommand}"
+                                IsEnabled="{Binding !IsTestingAi}">Tester la connexion</Button>
+                    </Grid>
+
+                    <Border Classes="chip-static" Padding="10,7" HorizontalAlignment="Stretch"
+                            IsVisible="{Binding HasAiStatus}">
+                        <TextBlock Text="{Binding AiStatusMessage}" TextWrapping="Wrap" FontSize="12" />
+                    </Border>
+
+                    <StackPanel Spacing="3">
+                        <TextBlock Text="{Binding ConfigPath}" Classes="faint" FontSize="11"
+                                   TextWrapping="Wrap" />
+                        <TextBlock Classes="faint" FontSize="11" TextWrapping="Wrap"
+                                   Text="Seuls les modèles gratuits (tarifs « Free », illimité) sont proposés. Les modèles payants de Go sont exclus, et le free tier « Personnel » refuse toute clé API (403) : il ne fonctionne que depuis l'application OpenCode." />
+                    </StackPanel>
                 </StackPanel>
             </Border>
 

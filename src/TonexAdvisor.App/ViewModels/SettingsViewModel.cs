@@ -1,13 +1,16 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using TonexAdvisor.App.Config;
+using TonexAdvisor.App.Services;
 using TonexAdvisor.Core.Data;
 
 namespace TonexAdvisor.App.ViewModels;
 
-/// <summary>Database selection plus a read-only summary of what was opened.</summary>
+/// <summary>Database selection plus a read-only summary of what was opened, and the AI settings.</summary>
 public partial class SettingsViewModel : ViewModelBase
 {
     private readonly IDatabaseHost _host;
+    private readonly AppConfig _config;
 
     [ObservableProperty]
     private string _databasePath = "";
@@ -37,8 +40,37 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private string _tablesLabel = "—";
 
+    // ── IA (OpenCode Go) ────────────────────────────────────────────────────
+
+    [ObservableProperty]
+    private string _apiKey = "";
+
+    [ObservableProperty]
+    private FreeModel? _selectedModel;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAiStatus))]
+    private string _aiStatusMessage = "";
+
+    [ObservableProperty]
+    private bool _isTestingAi;
+
+    /// <summary>Modèles gratuits uniquement : les modèles payants de Go ne sont jamais exposés.</summary>
+    public IReadOnlyList<FreeModel> FreeModels => OpenCodeModels.Free;
+
+    /// <summary>Où se trouve le fichier de configuration (hors dépôt Git).</summary>
+    public string ConfigPath => AppConfig.DefaultPath;
+
+    /// <summary>True dès qu'un message de statut IA s'affiche.</summary>
+    public bool HasAiStatus => AiStatusMessage.Length > 0;
+
     public SettingsViewModel(IDatabaseHost host)
-        => _host = host ?? throw new ArgumentNullException(nameof(host));
+    {
+        _host = host ?? throw new ArgumentNullException(nameof(host));
+        _config = AppConfig.Load();
+        _apiKey = _config.ApiKey;
+        _selectedModel = OpenCodeModels.Resolve(_config.Model);
+    }
 
     public string ReadOnlyNotice =>
         "Ouverture strictement en lecture seule : Mode=ReadOnly, PRAGMA query_only=ON et contrôle " +
@@ -69,6 +101,66 @@ public partial class SettingsViewModel : ViewModelBase
         {
             ErrorMessage = exception.Message;
             ClearSummary();
+        }
+    }
+
+    // ── IA : enregistrement et test de la clé ──────────────────────────────
+
+    /// <summary>Copie les champs d'interface vers le fichier de configuration.</summary>
+    private AppConfig PersistAi()
+    {
+        _config.ApiKey = ApiKey.Trim();
+        _config.Model = (SelectedModel ?? OpenCodeModels.Free[0]).Id;
+        _config.Endpoint = OpenCodeModels.EndPoint;
+        _config.Save();
+        return _config;
+    }
+
+    [RelayCommand]
+    private void SaveAi()
+    {
+        PersistAi();
+        AiStatusMessage = $"Enregistré dans {AppConfig.DefaultPath}";
+    }
+
+    /// <summary>Réduit une réponse IA à une ligne courte, pour la barre de statut.</summary>
+    private static string Flatten(string value, int max)
+    {
+        var words = value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        var single = string.Join(' ', words);
+        return single.Length <= max ? single : single[..max].TrimEnd() + "…";
+    }
+
+    /// <summary>Envoie une requête réelle pour vérifier la clé et le modèle choisi.</summary>
+    [RelayCommand]
+    private async Task TestAiAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ApiKey))
+        {
+            AiStatusMessage = "Renseignez d'abord la clé API OpenCode.";
+            return;
+        }
+
+        var config = PersistAi();
+        var label = OpenCodeModels.Resolve(config.Model).Label;
+        IsTestingAi = true;
+        AiStatusMessage = $"Test avec {label}…";
+
+        try
+        {
+            var client = new OpenCodeClient(config);
+            var answer = await client.PingAsync(config.Model).ConfigureAwait(true);
+            AiStatusMessage = answer.Trim().Length == 0
+                ? $"Connecté avec {label}, mais la réponse est vide."
+                : $"Connexion OK avec {label} : « {Flatten(answer, 120)} »";
+        }
+        catch (Exception exception)
+        {
+            AiStatusMessage = exception.Message;
+        }
+        finally
+        {
+            IsTestingAi = false;
         }
     }
 

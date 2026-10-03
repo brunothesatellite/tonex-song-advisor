@@ -20,10 +20,45 @@ $dotnet = "$env:USERPROFILE\.dotnet\dotnet.exe"
 
 Prérequis : SDK .NET 9.
 
+## Clé API OpenCode (conseil IA)
+
+La clé API n'est **jamais versionnée** : elle est stockée dans un fichier hors dépôt,
+
+```
+%APPDATA%\TonexAdvisor\config.json
+```
+
+créé automatiquement au premier **Enregistrer** depuis *Réglages → Conseil IA*. Tu peux aussi le
+créer toi-même :
+
+```json
+{
+  "ApiKey": "oc_sk_…",
+  "Model": "longcat-2.5-preview-free",
+  "Endpoint": "https://opencode.ai/zen/go/v1"
+}
+```
+
+Où l'obtenir : <https://opencode.ai/settings/api>. Le `.gitignore` interdit également
+`config.json`, `*.config.json`, `*.secrets.json` et `.env*` à l'intérieur du dépôt, par sécurité.
+
+**Seuls les modèles gratuits (« Free », illimités) sont proposés** dans la liste déroulante :
+
+| Modèle | Offre | Disponible avec une clé API ? |
+|---|---|---|
+| `longcat-2.5-preview-free` (défaut) | OpenCode Go | ✅ oui |
+| `space-bunny-free` | OpenCode Go | ✅ oui |
+| `mimo-v2.6-flash-free`, `ling-3.1-flash-free`, `nemotron-3.5-lightning-free`, `fledge-alpha-free`, `muse-spark-1.3-contributor-free`… | Personnel (Zen) | ❌ `403 FreeTierError` |
+
+Le free tier **Personnel** n'accepte que les sessions OAuth de l'application OpenCode
+(`OpenCode's free tier can only be used from within OpenCode`) : ces modèles sont donc écartés
+d'une application tierce qui n'utilise qu'une clé `oc_sk_`. Le bouton **Tester la connexion**
+vérifie la clé et le modèle choisi par une vraie requête.
+
 ## Données de test
 
 Les bases TONEX ne sont **pas versionnées** (bibliothèque personnelle, 89 Mo). Pour exécuter les
-70 tests, copie tes propres fichiers dans `db/` :
+77 tests, copie tes propres fichiers dans `db/` :
 
 ```
 db\Library.db     ← format V1 (réglages numériques complets)
@@ -36,10 +71,11 @@ db\Library2.db    ← format V2 (métadonnées)
 |---|---|
 | `src\TonexAdvisor.Core` | lecture des bases (read-only), DTOs, index, tokeniseur, ranges |
 | `src\TonexAdvisor.App` | UI Avalonia, thème `Themes\DarkRock.axaml`, ViewModels |
-| `tests\TonexAdvisor.Core.Tests` | 70 tests |
+| `tests\TonexAdvisor.Core.Tests` | 77 tests |
 | `TODO.md` | état d'avancement et travail restant |
 
 ## Avancement
 
-Voir [TODO.md](TODO.md) — v0.1 : lecture + navigateur + détail des presets.
-Prochaines étapes : recommandation locale (Phase 3), conseil IA via l'API OpenCode Go (Phase 4).
+Voir [TODO.md](TODO.md) — v0.1 : lecture + navigateur + détail des presets, réglages IA
+(clé API + modèles gratuits + test de connexion). Reste : recommandation locale (Phase 3) puis
+conseil intégré à l'écran « Conseils » (Phase 4).

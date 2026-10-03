@@ -12,6 +12,15 @@ db/*.db
 db/*.db-shm
 db/*.db-wal
 
+# ── Secrets : jamais versionnés ───────────────────────────────────────────────
+# La clé API vit normalement dans %APPDATA%\TonexAdvisor\config.json (hors dépôt).
+# Ces motifs protègent contre une recopie accidentelle à l'intérieur du projet.
+config.json
+*.config.json
+*.secrets.json
+.env
+.env.*
+
 # ── Divers ────────────────────────────────────────────────────────────────────
 *.log
 Thumbs.db
