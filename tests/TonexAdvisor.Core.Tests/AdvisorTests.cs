@@ -11,14 +11,14 @@ public class AdvisorTests
 {
     private static LibraryAdvisor Advisor => new(SampleLibraries.Gen1);
 
-    [Fact]
+    [LibraryFact]
     public void BlankQuery_RanksNothing()
     {
         Assert.Empty(Advisor.RankPresets(new AdviceQuery()));
         Assert.Empty(Advisor.RankCombinations(new AdviceQuery()));
     }
 
-    [Fact]
+    [LibraryFact]
     public void ScoresAreBoundedAndEveryResultExplainsItself()
     {
         var results = Advisor.RankPresets(new AdviceQuery { Style = "metal" }, 5);
@@ -40,7 +40,7 @@ public class AdvisorTests
             Assert.True(results[i - 1].Score >= results[i].Score);
     }
 
-    [Fact]
+    [LibraryFact]
     public void MetalQuery_RecommendsHighGainPresets()
     {
         var results = Advisor.RankPresets(new AdviceQuery { Style = "metal" }, 3);
@@ -51,7 +51,7 @@ public class AdvisorTests
                 $"{result.Preset.Name} is {result.Preset.Category}, not saturated enough for « metal »"));
     }
 
-    [Fact]
+    [LibraryFact]
     public void BluesQuery_StaysInTheDriveFamily()
     {
         var results = Advisor.RankPresets(new AdviceQuery { Style = "blues" }, 3);
@@ -64,7 +64,7 @@ public class AdvisorTests
         });
     }
 
-    [Fact]
+    [LibraryFact]
     public void CleanQuery_NeverRecommendsASaturatedPreset()
     {
         var results = Advisor.RankPresets(new AdviceQuery { Style = "clean funk" }, 3);
@@ -75,7 +75,7 @@ public class AdvisorTests
                 $"{result.Preset.Name} is {result.Preset.Category}"));
     }
 
-    [Fact]
+    [LibraryFact]
     public void AnArtistThatIsInTheLibraryWins()
     {
         // The busiest artist of the sample library, so there are enough presets to fill the podium.
@@ -95,7 +95,7 @@ public class AdvisorTests
         Assert.Contains(results[0].Reasons, reason => reason.Text.StartsWith("Artiste identique", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [LibraryFact]
     public void ArtistAndSongTogetherPointAtOnePreset()
     {
         var preset = SampleLibraries.Gen1.Presets
@@ -110,7 +110,7 @@ public class AdvisorTests
         Assert.True(results[0].Score >= 85);
     }
 
-    [Fact]
+    [LibraryFact]
     public void AnUnknownArtistReturnsNothingInsteadOfAGuess()
     {
         // Regression: a single matching word ("zzz personne" landing inside "fuzzzzy") used to
@@ -118,7 +118,7 @@ public class AdvisorTests
         Assert.Empty(Advisor.RankPresets(new AdviceQuery { Artist = "zzz personne inconnue" }, 3));
     }
 
-    [Fact]
+    [LibraryFact]
     public void MetalCombination_KeepsTheCapturedBlockIntact_AndChoosesItsCabinet()
     {
         var combinations = Advisor.RankCombinations(new AdviceQuery { Style = "metal" }, 3);
@@ -156,7 +156,7 @@ public class AdvisorTests
         Assert.Contains(combinations, combination => StyleVocabulary.IsFrontBoost(combination.Stomp));
     }
 
-    [Fact]
+    [LibraryFact]
     public void WithoutARecognisedStyleTheCabinetStaysThatOfTheCapture()
     {
         // « dumble » names an amplifier, not a style: the vocabulary returns no profile, so the
@@ -173,7 +173,7 @@ public class AdvisorTests
         });
     }
 
-    [Fact]
+    [LibraryFact]
     public void Generation2LibraryAdvisesFromMetadataAlone()
     {
         var advisor = new LibraryAdvisor(SampleLibraries.Gen2);
@@ -184,7 +184,7 @@ public class AdvisorTests
         Assert.All(results, result => Assert.NotEmpty(result.Reasons));
     }
 
-    [Fact]
+    [LibraryFact]
     public void RankingIsFastEnoughToRunOnEveryKeystroke()
     {
         var advisor = Advisor;
@@ -202,7 +202,7 @@ public class AdvisorTests
             $"10 rankings took {stopwatch.ElapsedMilliseconds} ms");
     }
 
-    [Fact]
+    [LibraryFact]
     public void StyleVocabulary_FoldsWordingOntoTheSaturationLadder()
     {
         Assert.Equal("metal", StyleVocabulary.Detect("Metal moderne")!.Label);

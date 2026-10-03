@@ -65,8 +65,6 @@ public sealed class PresetRowViewModel
 
     public int ModelCount { get; }
 
-    /// <summary>Shown in the grid so a generation 2 library never looks broken.</summary>
-    public string SettingsBadge => HasSettings ? "✔" : "—";
 
     private static string JoinDistinct(
         IReadOnlyList<ToneModelRecord> models,

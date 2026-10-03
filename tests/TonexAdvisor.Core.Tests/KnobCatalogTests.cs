@@ -5,7 +5,7 @@ namespace TonexAdvisor.Core.Tests;
 
 public class KnobCatalogTests
 {
-    [Fact]
+    [LibraryFact]
     public void Sections_CoverEveryPresetParameterOfAV1Library()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V1));
@@ -25,7 +25,7 @@ public class KnobCatalogTests
         Assert.Empty(unknown.Distinct(StringComparer.OrdinalIgnoreCase));
     }
 
-    [Fact]
+    [LibraryFact]
     public void AllParameters_HasNoDuplicates()
     {
         var parameters = KnobCatalog.AllParameters;
@@ -33,7 +33,7 @@ public class KnobCatalogTests
         Assert.Equal(parameters.Count, parameters.Distinct(StringComparer.OrdinalIgnoreCase).Count());
     }
 
-    [Fact]
+    [LibraryFact]
     public void Sections_ExposeTheSwitchesADetailPanelNeeds()
     {
         foreach (var section in KnobCatalog.Sections)
@@ -49,7 +49,7 @@ public class KnobCatalogTests
         }
     }
 
-    [Fact]
+    [LibraryFact]
     public void HardwareSections_AreTheSoftwareOnesWithAPrefix()
     {
         var software = KnobCatalog.Sections.Single(section => section.Key == "eq");
@@ -61,7 +61,7 @@ public class KnobCatalogTests
         Assert.Equal("HWParamA_EqBass", hardware.Knobs[0].Param);
     }
 
-    [Fact]
+    [LibraryFact]
     public void Find_ResolvesAParameterByItsToneColumn()
     {
         var knob = KnobCatalog.Find("eqbass");
@@ -73,7 +73,7 @@ public class KnobCatalogTests
         Assert.Null(KnobCatalog.Find("NoSuchParam"));
     }
 
-    [Fact]
+    [LibraryFact]
     public void Find_KeepsSelectorsOnDiscreteParameters()
     {
         foreach (var param in new[] { "ModModel", "DelayModel", "ReverbModel", "VIRCabModel", "VIRCabMic1Model" })

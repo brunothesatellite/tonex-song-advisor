@@ -1,0 +1,30 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Build
+        run: dotnet build TonexAdvisor.sln -v minimal
+
+      - name: Tests
+        run: dotnet test tests/TonexAdvisor.Core.Tests/TonexAdvisor.Core.Tests.csproj -v minimal
+
+# Les deux bases TONEX sont personnelles et volontairement jamais versionnées : les tests qui
+# les nécessitent sont ignorés automatiquement ([LibraryFact]/[LibraryTheory], voir
+# tests/LibraryFactAttribute.cs). La CI vérifie donc le build, les avertissements (traités en
+# erreurs) et toute la partie du test suite indépendante des données ; sur une machine qui
+# possède les bases, la suite complète tourne.

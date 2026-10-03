@@ -1,3 +1,4 @@
+using TonexAdvisor.App.Services;
 using TonexAdvisor.App.ViewModels;
 using TonexAdvisor.Core.Data;
 
@@ -9,11 +10,11 @@ namespace TonexAdvisor.Core.Tests;
 /// </summary>
 public class LibraryBrowserTests
 {
-    [Fact]
+    [LibraryFact]
     public void Attach_ListsEveryPreset_AndLeavesTheDetailPanelOnRealData()
     {
         var index = SampleLibraries.Gen1;
-        var viewModel = new LibraryViewModel();
+        var viewModel = new LibraryViewModel(null, new InMemoryUserStateStore());
 
         viewModel.Attach(index);
 
@@ -30,11 +31,11 @@ public class LibraryBrowserTests
         Assert.Equal(viewModel.Presets[0].Name, ((PresetDetailViewModel)viewModel.DetailContent!).Name);
     }
 
-    [Fact]
+    [LibraryFact]
     public void SearchText_NarrowsBothGrids()
     {
         var index = SampleLibraries.Gen1;
-        var viewModel = new LibraryViewModel();
+        var viewModel = new LibraryViewModel(null, new InMemoryUserStateStore());
         viewModel.Attach(index);
 
         viewModel.SearchText = "hi-gain";
@@ -47,11 +48,11 @@ public class LibraryBrowserTests
         Assert.Contains("filtre actif", viewModel.Summary, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [LibraryFact]
     public void SearchText_UsesEveryToken_NotJustTheFirst()
     {
         var index = SampleLibraries.Gen1;
-        var viewModel = new LibraryViewModel();
+        var viewModel = new LibraryViewModel(null, new InMemoryUserStateStore());
         viewModel.Attach(index);
 
         viewModel.SearchText = "ik";
@@ -63,11 +64,11 @@ public class LibraryBrowserTests
         Assert.InRange(bothTokens, 1, singleToken);
     }
 
-    [Fact]
+    [LibraryFact]
     public void CategoryFilter_NarrowsTheGrid_AndClearFiltersRestoresIt()
     {
         var index = SampleLibraries.Gen1;
-        var viewModel = new LibraryViewModel();
+        var viewModel = new LibraryViewModel(null, new InMemoryUserStateStore());
         viewModel.Attach(index);
 
         var category = viewModel.Categories.First(value => value != LibraryViewModel.AnyFilter);
@@ -85,11 +86,11 @@ public class LibraryBrowserTests
         Assert.False(viewModel.OnlyFavorites);
     }
 
-    [Fact]
+    [LibraryFact]
     public void ChangingTab_SwapsTheDetailPanelToTheToneModel()
     {
         var index = SampleLibraries.Gen1;
-        var viewModel = new LibraryViewModel();
+        var viewModel = new LibraryViewModel(null, new InMemoryUserStateStore());
         viewModel.Attach(index);
 
         Assert.IsType<PresetDetailViewModel>(viewModel.DetailContent);
@@ -103,7 +104,7 @@ public class LibraryBrowserTests
         Assert.IsType<PresetDetailViewModel>(viewModel.DetailContent);
     }
 
-    [Fact]
+    [LibraryFact]
     public void LibraryIndex_SearchIsAccentAndCaseInsensitive()
     {
         var index = SampleLibraries.Gen1;
@@ -114,7 +115,7 @@ public class LibraryBrowserTests
         Assert.Empty(index.Search("ce-qui-nexiste-pas-vraiment"));
     }
 
-    [Fact]
+    [LibraryFact]
     public void LibraryIndex_ResolvesPresetToToneModelAndBack()
     {
         var index = SampleLibraries.Gen1;
@@ -127,7 +128,7 @@ public class LibraryBrowserTests
         Assert.Contains(preset, index.PresetsFor(models[0].Key));
     }
 
-    [Fact]
+    [LibraryFact]
     public void LibraryIndex_RangesCoverEveryNumericParameterUsedByAPreset()
     {
         var index = SampleLibraries.Gen1;

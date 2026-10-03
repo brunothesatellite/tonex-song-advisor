@@ -5,7 +5,7 @@ namespace TonexAdvisor.Core.Tests;
 
 public class V1ReaderTests
 {
-    [Fact]
+    [LibraryFact]
     public void Open_DetectsV1_AndExposesKnobSettings()
     {
         var path = TestPaths.Require(TestPaths.V1);
@@ -17,7 +17,7 @@ public class V1ReaderTests
         Assert.Contains("Presets", database.Tables, StringComparer.OrdinalIgnoreCase);
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadPresets_ReturnsEveryRow_WithToneModelLinkAndSettings()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V1));
@@ -35,7 +35,7 @@ public class V1ReaderTests
         });
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadPresets_KnownFactoryPreset_CarriesExpectedValues()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V1));
@@ -56,7 +56,7 @@ public class V1ReaderTests
         Assert.Equal(25.0, settings.Number("VIRCabModel"));
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadPresets_CollectsFolders()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V1));
@@ -66,7 +66,7 @@ public class V1ReaderTests
         Assert.NotEmpty(withFolder);
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadToneModels_ReturnsEveryRow_WithMetadataButNoPayload()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V1));
@@ -81,7 +81,7 @@ public class V1ReaderTests
         });
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadToneModels_ResolvesAuthorAndFolder()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V1));
@@ -93,7 +93,7 @@ public class V1ReaderTests
         Assert.Contains(models, model => model.Mic1.Length > 0);
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadToneModels_KnownModel_CarriesAmpAndCab()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V1));

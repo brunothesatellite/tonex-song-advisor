@@ -5,7 +5,7 @@ namespace TonexAdvisor.Core.Tests;
 
 public class V2ReaderTests
 {
-    [Fact]
+    [LibraryFact]
     public void Open_DetectsV2_AndReportsNoKnobSettings()
     {
         var path = TestPaths.Require(TestPaths.V2);
@@ -16,7 +16,7 @@ public class V2ReaderTests
         Assert.False(database.HasKnobSettings);
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadPresets_ReturnsEveryRow_WithoutSettingsButWithChain()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V2));
@@ -33,7 +33,7 @@ public class V2ReaderTests
         });
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadPresets_LinksEveryPresetToOneOrTwoToneModels()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V2));
@@ -47,7 +47,7 @@ public class V2ReaderTests
         });
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadPresets_KnownPreset_ParsesChainAsExpected()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V2));
@@ -65,7 +65,7 @@ public class V2ReaderTests
         Assert.Equal(6, preset.ActiveChain.Count());
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadPresets_PreservesEmptyPaddingSlots()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V2));
@@ -77,7 +77,7 @@ public class V2ReaderTests
         Assert.Equal(5, preset.ActiveChain.Count());
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadToneModels_ReturnsEveryRow_WithAmpAndCabMetadata()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V2));
@@ -90,7 +90,7 @@ public class V2ReaderTests
         Assert.Contains(models, model => model.Mic1.Length > 0);
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadToneModels_KeyedById_SoPresetLinksResolve()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V2));
@@ -102,7 +102,7 @@ public class V2ReaderTests
         Assert.All(presetKeys, key => Assert.Contains(key, keys));
     }
 
-    [Fact]
+    [LibraryFact]
     public void LoadToneModels_KnownModel_CarriesExpectedMetadata()
     {
         using var database = ToneXDatabase.Open(TestPaths.Require(TestPaths.V2));

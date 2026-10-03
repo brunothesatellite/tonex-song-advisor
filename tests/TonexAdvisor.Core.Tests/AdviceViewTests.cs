@@ -1,4 +1,5 @@
 using TonexAdvisor.App.Config;
+using TonexAdvisor.App.Services;
 using TonexAdvisor.App.ViewModels;
 
 namespace TonexAdvisor.Core.Tests;
@@ -9,10 +10,10 @@ namespace TonexAdvisor.Core.Tests;
 /// </summary>
 public class AdviceViewTests
 {
-    [Fact]
+    [LibraryFact]
     public void Advise_FillsTheTab_ThenOpensTheRecommendedPreset()
     {
-        var viewModel = new LibraryViewModel();
+        var viewModel = new LibraryViewModel(null, new InMemoryUserStateStore());
         viewModel.Attach(SampleLibraries.Gen1);
 
         viewModel.Advice.Style = "metal";
@@ -38,10 +39,10 @@ public class AdviceViewTests
         Assert.Equal(LibraryViewModel.AnyFilter, viewModel.SelectedCategory);
     }
 
-    [Fact]
+    [LibraryFact]
     public void Advise_OpensTheRecommendedToneModelOnItsTab()
     {
-        var viewModel = new LibraryViewModel();
+        var viewModel = new LibraryViewModel(null, new InMemoryUserStateStore());
         viewModel.Attach(SampleLibraries.Gen1);
 
         viewModel.Advice.Style = "metal";
@@ -59,10 +60,10 @@ public class AdviceViewTests
         Assert.IsType<ToneModelDetailViewModel>(viewModel.DetailContent);
     }
 
-    [Fact]
+    [LibraryFact]
     public void Advise_WithoutAQuery_ReportsInsteadOfGuessing()
     {
-        var viewModel = new LibraryViewModel();
+        var viewModel = new LibraryViewModel(null, new InMemoryUserStateStore());
         viewModel.Attach(SampleLibraries.Gen1);
 
         viewModel.Advice.AdviseCommand.Execute(null);
@@ -72,10 +73,10 @@ public class AdviceViewTests
         Assert.False(viewModel.Advice.HasCombination);
     }
 
-    [Fact]
+    [LibraryFact]
     public void Advise_WithoutALibrary_ReportsInsteadOfCrashing()
     {
-        var viewModel = new LibraryViewModel();
+        var viewModel = new LibraryViewModel(null, new InMemoryUserStateStore());
 
         viewModel.Advice.Style = "metal";
         viewModel.Advice.AdviseCommand.Execute(null);
@@ -84,10 +85,10 @@ public class AdviceViewTests
         Assert.Contains("bibliothèque", viewModel.Advice.ErrorMessage, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
+    [LibraryFact]
     public void Attach_ClearsTheAdviceOfThePreviousLibrary()
     {
-        var viewModel = new LibraryViewModel();
+        var viewModel = new LibraryViewModel(null, new InMemoryUserStateStore());
         viewModel.Attach(SampleLibraries.Gen1);
 
         viewModel.Advice.Style = "metal";
@@ -102,11 +103,11 @@ public class AdviceViewTests
         Assert.False(viewModel.Advice.HasError);
     }
 
-    [Fact]
+    [LibraryFact]
     public void AskAi_WithoutApiKey_KeepsTheLocalAdviceAndSaysSo()
     {
         // A config without a key: the test must never reach the network.
-        var viewModel = new LibraryViewModel(() => new AppConfig());
+        var viewModel = new LibraryViewModel(() => new AppConfig(), new InMemoryUserStateStore());
         viewModel.Attach(SampleLibraries.Gen1);
 
         viewModel.Advice.Style = "metal";
@@ -122,10 +123,10 @@ public class AdviceViewTests
         Assert.True(viewModel.Advice.HasCombination);
     }
 
-    [Fact]
+    [LibraryFact]
     public void AskAi_WithoutAQuery_OnlyAsksForOne()
     {
-        var viewModel = new LibraryViewModel(() => new AppConfig());
+        var viewModel = new LibraryViewModel(() => new AppConfig(), new InMemoryUserStateStore());
         viewModel.Attach(SampleLibraries.Gen1);
 
         viewModel.Advice.AskAiCommand.Execute(null);
@@ -134,10 +135,10 @@ public class AdviceViewTests
         Assert.Equal("", viewModel.Advice.AiText);
     }
 
-    [Fact]
+    [LibraryFact]
     public void Reset_ClearsTheAiAnswerToo()
     {
-        var viewModel = new LibraryViewModel(() => new AppConfig());
+        var viewModel = new LibraryViewModel(() => new AppConfig(), new InMemoryUserStateStore());
         viewModel.Attach(SampleLibraries.Gen1);
 
         viewModel.Advice.Style = "metal";

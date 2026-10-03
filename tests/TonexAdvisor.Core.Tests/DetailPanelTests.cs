@@ -10,7 +10,7 @@ namespace TonexAdvisor.Core.Tests;
 /// </summary>
 public class DetailPanelTests
 {
-    [Fact]
+    [LibraryFact]
     public void V1Preset_ExposesSignalPathSections_WithGaugesThatContainTheirValue()
     {
         var index = SampleLibraries.Gen1;
@@ -35,7 +35,7 @@ public class DetailPanelTests
         }
     }
 
-    [Fact]
+    [LibraryFact]
     public void V1Preset_KnownFactoryPreset_ShowsTheRealAmpGain()
     {
         var index = SampleLibraries.Gen1;
@@ -55,7 +55,7 @@ public class DetailPanelTests
         Assert.True(gain.Value < gain.Maximum);
     }
 
-    [Fact]
+    [LibraryFact]
     public void V1Preset_GiveEverySectionAName_AndNeverARepeatedTitle()
     {
         var index = SampleLibraries.Gen1;
@@ -74,7 +74,7 @@ public class DetailPanelTests
             detail.Sections.Select(section => section.Title).Distinct(StringComparer.Ordinal).Count());
     }
 
-    [Fact]
+    [LibraryFact]
     public void BypassedBlocks_AreDimmedButStillListed()
     {
         var index = SampleLibraries.Gen1;
@@ -96,7 +96,7 @@ public class DetailPanelTests
         Assert.True(found, "expected at least one bypassed block in the sample library");
     }
 
-    [Fact]
+    [LibraryFact]
     public void V1Preset_HardwareSlots_AreHiddenBehindTheToggle()
     {
         var index = SampleLibraries.Gen1;
@@ -113,7 +113,7 @@ public class DetailPanelTests
         Assert.Contains("Masquer", detail.HardwareSummary, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [LibraryFact]
     public void V2Preset_ExplainsMissingKnobsInsteadOfShowingAnEmptyPanel()
     {
         var index = SampleLibraries.Gen2;
@@ -133,7 +133,7 @@ public class DetailPanelTests
         Assert.NotEmpty(detail.ToneModels);
     }
 
-    [Fact]
+    [LibraryFact]
     public void ToneModelDetail_ListsThePresetsThatUseIt()
     {
         var index = SampleLibraries.Gen1;

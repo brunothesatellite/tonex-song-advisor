@@ -7,6 +7,22 @@ internal static class TestPaths
 
     public static string WorkspaceRoot => Root.Value;
 
+    /// <summary>True when both sample libraries sit where the tests expect them.</summary>
+    public static bool Exists
+    {
+        get
+        {
+            try
+            {
+                return File.Exists(V1) && File.Exists(V2);
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+        }
+    }
+
     /// <summary><c>Library.db</c> - generation 1.</summary>
     public static string V1 => Path.Combine(WorkspaceRoot, "db", "Library.db");
 
@@ -37,7 +53,8 @@ internal static class TestPaths
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException(
-            "Could not locate the workspace root containing db\\Library.db.");
+        // Absent: the tests relying on the libraries are skipped (see LibraryFactAttribute) and
+        // the paths below simply point somewhere that has no database.
+        return AppContext.BaseDirectory;
     }
 }

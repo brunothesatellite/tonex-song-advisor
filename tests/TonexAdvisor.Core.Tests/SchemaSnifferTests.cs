@@ -4,7 +4,7 @@ namespace TonexAdvisor.Core.Tests;
 
 public class SchemaSnifferTests
 {
-    [Fact]
+    [LibraryFact]
     public void Detect_ClassicLibrary_ReportsV1()
     {
         var path = TestPaths.Require(TestPaths.V1);
@@ -12,7 +12,7 @@ public class SchemaSnifferTests
         Assert.Equal(DatabaseFormat.V1, SchemaSniffer.Detect(path));
     }
 
-    [Fact]
+    [LibraryFact]
     public void Detect_Generation2Library_ReportsV2()
     {
         var path = TestPaths.Require(TestPaths.V2);
@@ -20,7 +20,7 @@ public class SchemaSnifferTests
         Assert.Equal(DatabaseFormat.V2, SchemaSniffer.Detect(path));
     }
 
-    [Fact]
+    [LibraryFact]
     public void Detect_MissingFile_Throws()
     {
         var missing = Path.Combine(TestPaths.WorkspaceRoot, "db", "does-not-exist.db");
@@ -28,7 +28,7 @@ public class SchemaSnifferTests
         Assert.Throws<FileNotFoundException>(() => SchemaSniffer.Detect(missing));
     }
 
-    [Fact]
+    [LibraryFact]
     public void ColumnsOf_V1PresetTable_ContainsToneModelGuid()
     {
         var path = TestPaths.Require(TestPaths.V1);
@@ -41,7 +41,7 @@ public class SchemaSnifferTests
         Assert.DoesNotContain("Chain", columns);
     }
 
-    [Fact]
+    [LibraryFact]
     public void ColumnsOf_V2PresetTable_ContainsChainAndNoParameters()
     {
         var path = TestPaths.Require(TestPaths.V2);
@@ -55,7 +55,7 @@ public class SchemaSnifferTests
         Assert.DoesNotContain("ModelGain", columns);
     }
 
-    [Fact]
+    [LibraryFact]
     public void ColumnsOf_UnknownTable_ReturnsEmptySet()
     {
         var path = TestPaths.Require(TestPaths.V1);
@@ -65,7 +65,7 @@ public class SchemaSnifferTests
         Assert.Empty(SchemaSniffer.ColumnsOf(connection, ""));
     }
 
-    [Fact]
+    [LibraryFact]
     public void TablesOf_BothLibraries_ExposeCoreTables()
     {
         foreach (var path in new[] { TestPaths.V1, TestPaths.V2 })

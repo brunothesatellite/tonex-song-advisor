@@ -8,7 +8,7 @@ namespace TonexAdvisor.Core.Tests;
 /// </summary>
 public class AdvicePromptTests
 {
-    [Fact]
+    [LibraryFact]
     public void Prompt_ContainsTheShortlistOnly_WithOneLinePerPreset()
     {
         var index = SampleLibraries.Gen1;
@@ -30,7 +30,7 @@ public class AdvicePromptTests
         Assert.True(prompt.Length < 4000, $"the prompt grew to {prompt.Length} characters");
     }
 
-    [Fact]
+    [LibraryFact]
     public void Prompt_StatesTheCapturedBlockRule()
     {
         var index = SampleLibraries.Gen1;
@@ -53,7 +53,7 @@ public class AdvicePromptTests
         Assert.Contains("style « metal »", prompt, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [LibraryFact]
     public void Prompt_QuotesTheKnobValues_WhenTheFormatCarriesThem()
     {
         var index = SampleLibraries.Gen1;
@@ -67,7 +67,7 @@ public class AdvicePromptTests
         Assert.Contains("EqBass=", prompt, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [LibraryFact]
     public void Prompt_NeverInventsSettingsForAGeneration2Library()
     {
         var index = SampleLibraries.Gen2;

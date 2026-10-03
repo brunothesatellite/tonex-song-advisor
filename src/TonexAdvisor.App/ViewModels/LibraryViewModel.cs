@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TonexAdvisor.App.Config;
+using TonexAdvisor.App.Services;
 using TonexAdvisor.Core.Data;
 
 namespace TonexAdvisor.App.ViewModels;
@@ -82,10 +83,14 @@ public partial class LibraryViewModel : ViewModelBase
         private set => SetProperty(ref _toneModels, value);
     }
 
-    public LibraryViewModel(Func<AppConfig>? aiConfig = null)
+    public LibraryViewModel(Func<AppConfig>? aiConfig = null, IUserStateStore? stateStore = null)
     {
+        _stateStore = stateStore ?? new UserStateStore();
         Advice = new AdviceViewModel(this, aiConfig);
     }
+
+    /// <summary>Where filters are remembered between two runs.</summary>
+    private readonly IUserStateStore _stateStore;
 
     /// <summary>The « Conseils » tab, which ranks this library against a song.</summary>
     public AdviceViewModel Advice { get; }
@@ -139,6 +144,7 @@ public partial class LibraryViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasDatabase));
         OnPropertyChanged(nameof(KnobSettingsAvailable));
 
+        ApplyState();
         Refresh();
 
         // Start on real data instead of an empty detail panel.
@@ -165,15 +171,22 @@ public partial class LibraryViewModel : ViewModelBase
         OnlyFavorites = false;
     }
 
-    partial void OnSearchTextChanged(string value) => Refresh();
+    partial void OnSearchTextChanged(string value) => FilterChanged();
 
-    partial void OnSelectedCategoryChanged(string value) => Refresh();
+    partial void OnSelectedCategoryChanged(string value) => FilterChanged();
 
-    partial void OnSelectedGenreChanged(string value) => Refresh();
+    partial void OnSelectedGenreChanged(string value) => FilterChanged();
 
-    partial void OnSelectedFolderChanged(string value) => Refresh();
+    partial void OnSelectedFolderChanged(string value) => FilterChanged();
 
-    partial void OnOnlyFavoritesChanged(bool value) => Refresh();
+    partial void OnOnlyFavoritesChanged(bool value) => FilterChanged();
+
+    /// <summary>Re-filters the grids and remembers the new filters for the next run.</summary>
+    private void FilterChanged()
+    {
+        Refresh();
+        SaveState();
+    }
 
     partial void OnSelectedPresetChanged(PresetRowViewModel? value)
     {
@@ -203,7 +216,11 @@ public partial class LibraryViewModel : ViewModelBase
         UpdateDetailContent();
     }
 
-    partial void OnSelectedTabIndexChanged(int value) => UpdateDetailContent();
+    partial void OnSelectedTabIndexChanged(int value)
+    {
+        UpdateDetailContent();
+        SaveState();
+    }
 
     /// <summary>Shows whichever detail matches the active grid tab.</summary>
     private void UpdateDetailContent()
@@ -226,6 +243,39 @@ public partial class LibraryViewModel : ViewModelBase
         ClearFilters();
         SelectedTabIndex = 1;
         SelectedToneModel = ToneModels.FirstOrDefault(row => string.Equals(row.Record.Key, key, StringComparison.Ordinal));
+    }
+
+    /// <summary>Restores the filters of the previous session, when they still make sense.</summary>
+    private void ApplyState()
+    {
+        var state = _stateStore.Load();
+
+        SearchText = state.SearchText;
+        SelectedCategory = Categories.Contains(state.Category) ? state.Category : AnyFilter;
+        SelectedGenre = Genres.Contains(state.Genre) ? state.Genre : AnyFilter;
+        SelectedFolder = Folders.Contains(state.Folder) ? state.Folder : AnyFilter;
+        OnlyFavorites = state.OnlyFavorites;
+        SelectedTabIndex = state.SelectedTabIndex is >= 0 and <= 2 ? state.SelectedTabIndex : 0;
+    }
+
+    /// <summary>
+    /// Puts the filters aside for the next run. Written outside the repository, and never
+    /// anywhere near the TONEX libraries.
+    /// </summary>
+    private void SaveState()
+    {
+        if (_index is null)
+            return;
+
+        _stateStore.Save(new UserState
+        {
+            SearchText = SearchText,
+            Category = SelectedCategory == AnyFilter ? "" : SelectedCategory,
+            Genre = SelectedGenre == AnyFilter ? "" : SelectedGenre,
+            Folder = SelectedFolder == AnyFilter ? "" : SelectedFolder,
+            OnlyFavorites = OnlyFavorites,
+            SelectedTabIndex = SelectedTabIndex,
+        });
     }
 
     private void Refresh()

@@ -9,6 +9,80 @@ preset / la meilleure combinaison **ampli + stomp + cab** pour une chanson ou un
 > (`SELECT`/`WITH`/`EXPLAIN` uniquement), et empreintes SHA-256 capturées à l'ouverture puis
 > revérifiées à la fermeture.
 
+## Manuel utilisateur
+
+Les captures viennent d'une bibliothèque d'exemple : les noms de presets changent selon la vôtre.
+
+### 1. L'écran Bibliothèque (onglet Presets)
+
+<img src="docs/images/01-presets.png" alt="Onglet Presets : recherche, filtres, grille et panneau de détail" width="780">
+
+- **Recherche** : un seul champ couvre tout (nom, artiste, chanson, ampli, dossier, auteur).
+  Plusieurs mots = tous doivent être présents.
+- **Filtres** : catégorie, genre, dossier, et le bouton **Favoris** qui garde les presets marqués
+  étoile dans TONEX.
+- **Réinitialiser** efface recherche et filtres.
+- Les colonnes se **trient** : un clic sur l'en-tête trie en croissant, un second en décroissant.
+- Le **panneau de droite** détaille la ligne sélectionnée : métadonnées, tone model lié,
+  potentiomètres en lecture seule, sections matériel masquables.
+- La colonne **Réglages** indique (coche orange ou tiret) si le preset embarque des réglages
+  numériques exploitables : c'est le cas en génération 1, jamais en génération 2.
+- Vos filtres et l'onglet actif sont **retrouvés au lancement suivant**
+  (`%APPDATA%\TonexAdvisor\state.json`).
+
+### 2. L'onglet Tone models
+
+<img src="docs/images/02-tone-models.png" alt="Onglet Tone models : captures d'ampli, baffles, micros" width="780">
+
+Les captures (stomp, ampli, baffle, micros) et le nombre de presets qui les utilisent. La
+sélection alimente le même panneau de détail.
+
+### 3. L'onglet Conseils : le classement local
+
+<img src="docs/images/03-conseils-local.png" alt="Conseils : meilleurs presets et bloc capturé avec baffle" width="780">
+
+1. Décrivez la chanson : **artiste**, **chanson**, **style/ambiance** (« metal », « blues saturé »,
+   « clean funk ») — un seul champ suffit.
+2. Cliquez **Conseiller** : la bibliothèque est classée en quelques millisecondes, hors ligne, et
+   l'écran affiche :
+   - les **3 meilleurs presets**, avec score et raisons (« Catégorie HI-GAIN : saturation adaptée
+     à « metal » », « Genre « Metal » », « Favori de la bibliothèque »…) ;
+   - le **meilleur bloc capturé**, `stomp → ampli` : les deux viennent de la **même capture** et
+     sont inséparables ;
+   - le **baffle** conseillé, toujours signalé comme **remplaçable par tout autre baffle** — c'est
+     la seule pièce interchangeable dans TONEX.
+3. **Ouvrir** sélectionne la ligne correspondante dans la grille, filtres réinitialisés.
+
+### 4. Le conseil IA
+
+<img src="docs/images/04-conseils-ia.png" alt="Conseil IA en streaming à partir de la sélection locale" width="780">
+
+- **Demander à l'IA** n'envoie au modèle que la demande + les 3 presets + le bloc capturé,
+  **jamais toute la bibliothèque** ; le modèle doit rester dans cette liste et respecter la règle
+  « stomp + ampli inséparables ».
+- La réponse s'écrit **au fil de l'eau** ; la chaîne de pensée s'affiche pendant la génération
+  puis disparaît quand la réponse arrive.
+- Clé absente, réseau en panne, quota dépassé : message explicite et **le classement local reste
+  affiché** — l'IA est un plus, jamais la seule source de conseil.
+- **Annuler** interrompt la génération.
+
+### 5. Bases & réglages : la clé API
+
+<img src="docs/images/05-reglages.png" alt="Écran Bases et réglages : clé API, modèle, garantie de lecture seule" width="780">
+
+- La clé OpenCode se saisit ici (masquée à l'écran) et est stockée dans
+  `%APPDATA%\TonexAdvisor\config.json`, **hors dépôt**.
+- Choix du **modèle gratuit** (LongCat 2.5 Preview Free par défaut, Space Bunny Free) et bouton
+  **Tester la connexion**.
+- L'écran affiche aussi le format détecté (V1 ou V2) et rappelle la garantie de lecture seule.
+
+### Ce que l'application ne fait jamais
+
+- elle **n'écrit jamais** dans les bases TONEX : empreintes SHA-256 vérifiées avant/après par les
+  tests, connexion `Mode=ReadOnly`, `PRAGMA query_only` et filtrage des verbes SQL ;
+- elle n'ouvre **jamais** le dossier `Documents\IK Multimedia\TONEX` : seules les copies
+  `db\Library.db` et `db\Library2.db` du projet sont lues ;
+- elle ne versionne **aucune clé** ni aucune base (voir `.gitignore`).
 ## Compiler et tester
 
 ```powershell
@@ -19,6 +93,16 @@ $dotnet = "$env:USERPROFILE\.dotnet\dotnet.exe"
 ```
 
 Prérequis : SDK .NET 9.
+
+### Publier une version autonome
+
+```powershell
+& $dotnet publish src\TonexAdvisor.App\TonexAdvisor.App.csproj -c Release -r win-x64 `
+    --self-contained -o .\publish
+```
+
+Le dossier `publish\` contient l'exécutable (icône comprise) et tout le nécessaire pour tourner
+sans .NET installé (~200 Mo). Il est hors dépôt.
 
 ## Clé API OpenCode (conseil IA)
 

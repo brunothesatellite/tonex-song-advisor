@@ -296,7 +296,9 @@
     </Style>
 
     <Style Selector="DataGridRow:selected /template/ ContentPresenter">
-        <Setter Property="Background" Value="#2EFF6A00" />
+        <Setter Property="Background" Value="#33FF6A00" />
+        <Setter Property="BorderBrush" Value="{StaticResource B.Accent}" />
+        <Setter Property="BorderThickness" Value="2,0,0,0" />
     </Style>
 
     <Style Selector="DataGridRow:pointerover /template/ ContentPresenter">
@@ -326,6 +328,25 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Fill" Value="{StaticResource B.Accent}" />
+    </Style>
+
+    <!--  Settings badge. A vector, for the same reason as the star: Inter has no U+2714
+         (check mark) glyph and a missing glyph renders as an empty box. ────────── -->
+    <Style Selector="Path.checkGlyph">
+        <Setter Property="Data" Value="M1,5.7 L4.2,8.9 L10.6,1.5 L12,2.9 L4.8,11 L0,6.3 Z" />
+        <Setter Property="Stretch" Value="Fill" />
+        <Setter Property="Width" Value="13" />
+        <Setter Property="Height" Value="13" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Fill" Value="{StaticResource B.Accent}" />
+    </Style>
+
+    <!--  No numeric settings stored (generation 2): the same dash as before. ──── -->
+    <Style Selector="Path.checkGlyph.checkOff">
+        <Setter Property="Data" Value="M0,5.6 L12,5.6 L12,7.2 L0,7.2 Z" />
+        <Setter Property="Fill" Value="#3A3A46" />
+        <Setter Property="Opacity" Value="0.9" />
     </Style>
 
     <Style Selector="Path.favStar.favOff">

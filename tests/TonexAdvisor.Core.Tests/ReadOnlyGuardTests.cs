@@ -8,7 +8,7 @@ namespace TonexAdvisor.Core.Tests;
 /// </summary>
 public class ReadOnlyGuardTests
 {
-    [Theory]
+    [LibraryTheory]
     [InlineData(true)]
     [InlineData(false)]
     public async Task ReadingALibrary_LeavesTheFileByteIdentical(bool v1)
@@ -54,7 +54,7 @@ public class ReadOnlyGuardTests
         ReadOnlyConnection.EnsureReadOnly(sql);
     }
 
-    [Fact]
+    [LibraryFact]
     public void Connection_RejectsAWriteAtTheSqliteLevel()
     {
         var path = TestPaths.Require(TestPaths.V1);
