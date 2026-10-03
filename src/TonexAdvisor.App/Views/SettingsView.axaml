@@ -20,9 +20,26 @@
             <!-- ── Path + actions ──────────────────────────────────────── -->
             <Border Classes="card">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="FICHIER DE BIBLIOTHÈQUE" Classes="faint" />
+                    <TextBlock Text="BIBLIOTHÈQUE TONEX" Classes="faint" />
 
-                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                    <!-- Choix 2 : les bases du dossier officiel. -->
+                    <StackPanel Spacing="6">
+                        <CheckBox IsChecked="{Binding UseTonexLibrary}"
+                                  IsEnabled="{Binding CanUseTonex}"
+                                  Content="Utiliser une base du dossier TONEX" />
+                        <ComboBox ItemsSource="{Binding TonexLibraries}"
+                                  SelectedItem="{Binding SelectedTonexLibrary}"
+                                  IsEnabled="{Binding IsTonexEnabled}"
+                                  HorizontalAlignment="Stretch"
+                                  PlaceholderText="Choisir une base du dossier TONEX" />
+                        <TextBlock Text="{Binding TonexFolderHint}" Classes="faint"
+                                   FontSize="11" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <!-- Choix 1 : le chemin, inactif quand la liste est utilisée. -->
+
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8"
+                          IsEnabled="{Binding IsManualEnabled}">
                         <TextBox Grid.Column="0"
                                  Text="{Binding DatabasePath}"
                                  PlaceholderText="C:\…\TONEX\Library.db ou Library2.db" />

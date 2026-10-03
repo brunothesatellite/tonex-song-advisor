@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TonexAdvisor.App.Config;
@@ -10,10 +11,52 @@ namespace TonexAdvisor.App.ViewModels;
 public partial class SettingsViewModel : ViewModelBase
 {
     private readonly IDatabaseHost _host;
+    private readonly IUserStateStore _stateStore;
     private readonly AppConfig _config;
+
+    /// <summary>La base choisie dans la liste TONEX, mémorisée par son chemin.</summary>
+    private string _selectedTonexPath = "";
+
+    /// <summary>Faux pendant la construction : rien ne doit se charger tout seul à ce moment-là.</summary>
+    private bool _ready;
+
+    /// <summary>Le dossier TONEX à explorer ; le dossier officiel par défaut.</summary>
+    private readonly string? _tonexFolder;
 
     [ObservableProperty]
     private string _databasePath = "";
+
+    // ── Choix de la base : chemin manuel, ou dossier TONEX ─────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsManualEnabled), nameof(IsTonexEnabled))]
+    private bool _useTonexLibrary;
+
+    [ObservableProperty]
+    private LibraryFile? _selectedTonexLibrary;
+
+    /// <summary>Les bases trouvées à la racine du dossier TONEX.</summary>
+    public ObservableCollection<LibraryFile> TonexLibraries { get; } = new();
+
+    /// <summary>Le dossier officiel, trouvé par le « Documents » connu de Windows.</summary>
+    public string TonexFolder => _tonexFolder ?? TonexLibraryFolder.DefaultPath;
+
+    /// <summary>La case n'est proposée que s'il y a quelque chose à choisir.</summary>
+    public bool CanUseTonex => TonexLibraries.Count > 0;
+
+    public bool IsManualEnabled => !UseTonexLibrary;
+
+    public bool IsTonexEnabled => UseTonexLibrary;
+
+    public string TonexFolderHint => TonexLibraries.Count == 0
+        ? $"Aucune base trouvée dans {TonexFolder}."
+        : $"{TonexLibraries.Count} base(s) trouvée(s) dans {TonexFolder} — si la base est en génération 2 et qu'une V1 est à côté, ses réglages sont joints automatiquement.";
+
+    /// <summary>La base à ouvrir au démarrage : le choix mémorisé, s'il y en a un.</summary>
+    public string? EffectiveDatabasePath =>
+        UseTonexLibrary
+            ? SelectedTonexLibrary?.Path
+            : string.IsNullOrWhiteSpace(DatabasePath) ? null : DatabasePath.Trim();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasError))]
@@ -105,10 +148,18 @@ public partial class SettingsViewModel : ViewModelBase
     /// <summary>True dès qu'un message de statut IA s'affiche.</summary>
     public bool HasAiStatus => AiStatusMessage.Length > 0;
 
-    public SettingsViewModel(IDatabaseHost host)
+    public SettingsViewModel(IDatabaseHost host, IUserStateStore? stateStore = null, string? tonexFolder = null)
     {
         _host = host ?? throw new ArgumentNullException(nameof(host));
+        _stateStore = stateStore ?? new UserStateStore();
+        _tonexFolder = tonexFolder;
         _config = AppConfig.Load();
+
+        var state = _stateStore.Load();
+        _databasePath = state.DatabasePath;
+        _useTonexLibrary = state.UseTonexLibrary;
+        _selectedTonexPath = state.TonexDatabasePath;
+
         _apiKey = _config.ApiKey;
         _selectedModel = OpenCodeModels.Resolve(_config.Model);
         _geminiKey = _config.CredentialFor("gemini").ApiKey;
@@ -117,6 +168,9 @@ public partial class SettingsViewModel : ViewModelBase
         _geminiModel = _config.CredentialFor("gemini").Model;
         _mistralModel = _config.CredentialFor("mistral").Model;
         _groqModel = _config.CredentialFor("groq").Model;
+
+        RefreshTonexLibraries();
+        _ready = true;
     }
 
     public string ReadOnlyNotice =>
@@ -360,5 +414,87 @@ public partial class SettingsViewModel : ViewModelBase
         {
             ErrorMessage = "";
         }
+
+        SaveState();
+    }
+
+    // ── Choix de la base ───────────────────────────────────────────────────
+
+    partial void OnUseTonexLibraryChanged(bool value)
+    {
+        SaveState();
+
+        if (!_ready)
+            return;
+
+        if (value)
+        {
+            RefreshTonexLibraries();
+            if (SelectedTonexLibrary is not null)
+                _ = LoadFromAsync(SelectedTonexLibrary.Path);
+            return;
+        }
+
+        // Retour au choix 1 : la base du champ de chemin est rechargée, sans clic supplémentaire.
+        if (!string.IsNullOrWhiteSpace(DatabasePath))
+            _ = LoadFromAsync(DatabasePath.Trim());
+    }
+
+    partial void OnSelectedTonexLibraryChanged(LibraryFile? value)
+    {
+        SaveState();
+
+        if (_ready && value is not null && UseTonexLibrary)
+            _ = LoadFromAsync(value.Path);
+    }
+
+    /// <summary>Les bases de la racine du dossier TONEX, la plus récente d'abord.</summary>
+    private void RefreshTonexLibraries()
+    {
+        TonexLibraries.Clear();
+
+        foreach (var library in TonexLibraryFolder.FindDatabases(TonexFolder))
+            TonexLibraries.Add(library);
+
+        SelectedTonexLibrary = TonexLibraries.FirstOrDefault(library =>
+                                 string.Equals(library.Path, _selectedTonexPath, StringComparison.OrdinalIgnoreCase))
+                               ?? TonexLibraries.FirstOrDefault();
+
+        OnPropertyChanged(nameof(CanUseTonex));
+        OnPropertyChanged(nameof(TonexFolderHint));
+
+        // Rien à choisir : la case n'a pas de sens, on reste sur le chemin manuel.
+        if (TonexLibraries.Count == 0 && UseTonexLibrary)
+            UseTonexLibrary = false;
+    }
+
+    /// <summary>Charge une base choisie ailleurs que par le champ de chemin.</summary>
+    private async Task LoadFromAsync(string path)
+    {
+        ErrorMessage = "";
+
+        try
+        {
+            await _host.LoadDatabaseAsync(path).ConfigureAwait(true);
+            Refresh();
+        }
+        catch (Exception exception)
+        {
+            ErrorMessage = exception.Message;
+            ClearSummary();
+        }
+    }
+
+    /// <summary>
+    /// Mémorise le choix de base. Lecture-modification-écriture : l'écran de la bibliothèque
+    /// écrit le même fichier, et aucun des deux ne doit effacer les champs de l'autre.
+    /// </summary>
+    private void SaveState()
+    {
+        var state = _stateStore.Load();
+        state.DatabasePath = DatabasePath;
+        state.UseTonexLibrary = UseTonexLibrary;
+        state.TonexDatabasePath = SelectedTonexLibrary?.Path ?? _selectedTonexPath;
+        _stateStore.Save(state);
     }
 }

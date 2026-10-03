@@ -20,6 +20,17 @@ public sealed class UserState
 
     public string SearchText { get; set; } = "";
 
+    // ── Base de données ────────────────────────────────────────────────────
+
+    /// <summary>True when the library comes from the TONEX folder rather than from a path.</summary>
+    public bool UseTonexLibrary { get; set; }
+
+    /// <summary>The path of choice 1.</summary>
+    public string DatabasePath { get; set; } = "";
+
+    /// <summary>The library selected in the TONEX folder list, choice 2.</summary>
+    public string TonexDatabasePath { get; set; } = "";
+
     /// <summary>Empty means « every category ».</summary>
     public string Category { get; set; } = "";
 
@@ -55,6 +66,12 @@ public sealed class UserState
             return new UserState();
         }
     }
+
+    /// <summary>
+    /// Copies this state. Screens modify their own read, never the stored one: the file store
+    /// hands out a fresh object on every read, and the in-memory one must behave the same way.
+    /// </summary>
+    public UserState Clone() => (UserState)MemberwiseClone();
 
     /// <summary>Writes the state in place, creating the folder when needed.</summary>
     public void Save(string? path = null)

@@ -260,22 +260,22 @@ public partial class LibraryViewModel : ViewModelBase
 
     /// <summary>
     /// Puts the filters aside for the next run. Written outside the repository, and never
-    /// anywhere near the TONEX libraries.
+    /// anywhere near the TONEX libraries. Read-modify-write: the settings screen writes the same
+    /// file, and neither may erase the fields of the other.
     /// </summary>
     private void SaveState()
     {
         if (_index is null)
             return;
 
-        _stateStore.Save(new UserState
-        {
-            SearchText = SearchText,
-            Category = SelectedCategory == AnyFilter ? "" : SelectedCategory,
-            Genre = SelectedGenre == AnyFilter ? "" : SelectedGenre,
-            Folder = SelectedFolder == AnyFilter ? "" : SelectedFolder,
-            OnlyFavorites = OnlyFavorites,
-            SelectedTabIndex = SelectedTabIndex,
-        });
+        var state = _stateStore.Load();
+        state.SearchText = SearchText;
+        state.Category = SelectedCategory == AnyFilter ? "" : SelectedCategory;
+        state.Genre = SelectedGenre == AnyFilter ? "" : SelectedGenre;
+        state.Folder = SelectedFolder == AnyFilter ? "" : SelectedFolder;
+        state.OnlyFavorites = OnlyFavorites;
+        state.SelectedTabIndex = SelectedTabIndex;
+        _stateStore.Save(state);
     }
 
     private void Refresh()

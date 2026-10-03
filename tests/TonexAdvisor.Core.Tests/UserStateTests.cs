@@ -22,6 +22,9 @@ public class UserStateTests
                 Folder = "GalTone",
                 OnlyFavorites = true,
                 SelectedTabIndex = 2,
+                UseTonexLibrary = true,
+                DatabasePath = @"D:\bibliotheques\Library.db",
+                TonexDatabasePath = @"C:\TONEX\Library2.db",
             }.Save(file);
 
             var loaded = UserState.Load(file);
@@ -32,6 +35,9 @@ public class UserStateTests
             Assert.Equal("GalTone", loaded.Folder);
             Assert.True(loaded.OnlyFavorites);
             Assert.Equal(2, loaded.SelectedTabIndex);
+            Assert.True(loaded.UseTonexLibrary);
+            Assert.Equal(@"D:\bibliotheques\Library.db", loaded.DatabasePath);
+            Assert.Equal(@"C:\TONEX\Library2.db", loaded.TonexDatabasePath);
         }
         finally
         {

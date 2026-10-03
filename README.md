@@ -169,6 +169,20 @@ Le free tier **Personnel** n'accepte que les sessions OAuth de l'application Ope
 d'une application tierce qui n'utilise qu'une clé `oc_sk_`. Le bouton **Tester la connexion**
 vérifie la clé et le modèle choisi par une vraie requête.
 
+### Choisir sa bibliothèque (écran « Bases & réglages »)
+
+Deux façons, au choix :
+
+1. **Chemin manuel** : saisir ou « Parcourir » jusqu'à un fichier `Library.db` / `Library2.db`,
+   puis « Ouvrir ».
+2. **Dossier TONEX** : cocher « Utiliser une base du dossier TONEX » et choisir dans la liste —
+   le dossier est trouvé par le *Known Folder* « Documents » de Windows, donc correct même quand
+   Documents est redirigé vers OneDrive. Chaque ligne indique le nom, la génération (V1/V2), la
+   taille et la date.
+
+La case cochée grise le chemin ; décochée, on revient au choix 1 et la base du chemin est
+rechargée. Le choix est **mémorisé** au redémarrage. Dans les deux cas, si la base est en
+génération 2 et qu'une V1 est à côté, ses réglages sont joints automatiquement.
 ## Clés IA (avis croisés)
 
 Le conseil peut croiser plusieurs avis : **OpenCode** (la référence) et, **si vous renseignez leur
@@ -209,7 +223,7 @@ db\Library2.db    ← format V2 (métadonnées)
 |---|---|
 | `src\TonexAdvisor.Core` | lecture des bases (read-only), DTOs, index, tokeniseur, ranges |
 | `src\TonexAdvisor.App` | UI Avalonia, thème `Themes\DarkRock.axaml`, ViewModels |
-| `tests\TonexAdvisor.Core.Tests` | 151 tests |
+| `tests\TonexAdvisor.Core.Tests` | 168 tests |
 | `TODO.md` | état d'avancement et travail restant |
 
 ## Avancement
@@ -226,7 +240,7 @@ db\Library2.db    ← format V2 (métadonnées)
 - **Réglages en génération 2** : les valeurs ne sont pas dans Library2.db (chiffrées dans les
   .txp d'IK) — quand une bibliothèque V1 est à côté, elles sont jointes automatiquement
   (2 313 presets sur la bibliothèque d'exemple), avec la mention de leur origine.
-- **Installateur** et **version portable**, CI GitHub Actions, 151 tests, garantie de lecture
+- **Installateur** et **version portable**, CI GitHub Actions, 168 tests, garantie de lecture
   seule vérifiée par empreinte SHA-256.
 
 Reste (Phase 7) : retrouver les réglages des potards en génération 2.

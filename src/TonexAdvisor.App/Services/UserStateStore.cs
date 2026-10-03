@@ -24,14 +24,15 @@ public sealed class UserStateStore : IUserStateStore
 }
 
 /// <summary>
-/// A store that reads and writes nothing: tests must not see the preferences of the person
-/// running them, nor overwrite them.
+/// A store that reads and writes nothing real: tests must not see the preferences of the person
+/// running them, nor overwrite them. Like the file store, every read hands out a copy — a screen
+/// that reads-modifies-writes must not corrupt what another screen restored from it.
 /// </summary>
 public sealed class InMemoryUserStateStore : IUserStateStore
 {
     private UserState _state = new();
 
-    public UserState Load() => _state;
+    public UserState Load() => _state.Clone();
 
-    public void Save(UserState state) => _state = state;
+    public void Save(UserState state) => _state = state.Clone();
 }

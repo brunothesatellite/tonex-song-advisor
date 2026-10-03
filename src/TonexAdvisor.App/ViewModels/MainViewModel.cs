@@ -77,7 +77,9 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
     /// </summary>
     public async Task InitializeAsync()
     {
-        var candidate = AppPaths.FindDefaultDatabase() ?? Settings.DatabasePath;
+        // Le choix mémorisé passe avant le défaut de développement : si une base a été choisie,
+        // c'est elle qui s'ouvre, pas celle du dossier d'exemple.
+        var candidate = Settings.EffectiveDatabasePath ?? AppPaths.FindDefaultDatabase();
         if (string.IsNullOrWhiteSpace(candidate))
         {
             StatusMessage = "Choisissez un fichier Library.db ou Library2.db.";
