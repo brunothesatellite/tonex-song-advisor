@@ -145,6 +145,46 @@ confirmer : c'est le desaccord qui fait la valeur de ce mode.
       bibliothèque V1 — les valeurs V2 sont chiffrées dans les fichiers .txp ».
 - [x] Les ~200 presets présents seulement en V2 restent sans réglage (valeur chiffrée, non lisible).
 - [x] Tests : jointure sur les deux bases (2 313 presets enrichis), non-régression V1 et V2, hash des bases inchangé. Règle : la jointe ne remplit que ce qui manque, une base V1 garde ses propres valeurs.
+### Phase 8 - Internationalisation (français / anglais)
+
+Objectif : l'application en français **ou** en anglais, la bonne langue détectée au premier
+démarrage, le choix dans les réglages, et une architecture qui accepte une troisième langue sans
+retravailler les écrans.
+
+**État de départ :** toutes les chaînes sont en dur en français — XAML (libellés, colonnes,
+infobulles, boutons) et ViewModels (messages d'état, erreurs, notes, formats de réponse IA).
+Quelques tests assertent sur des textes français.
+
+1. **Mécanisme de ressources** (le socle, en premier) :
+   - un fichier de ressources par langue (`Strings.fr`, `Strings.en`), clé → texte ;
+   - un petit service `Localizer` exposé en ressource d'application, avec un indexeur
+     (`{Binding [Cle]}`) et une propriété `Culture` : changer de langue lève `PropertyChanged` et
+     **toute l'IU se met à jour sans redémarrage** ;
+   - aucune chaîne littérale ne reste dans un écran : tout passe par une clé.
+2. **Inventaire** (le gros du travail, ~150 à 250 chaînes) : XAML, ViewModels, messages d'erreur,
+   infobulles, colonnes de grille, notes du panneau de détail, titres de cartes, texte des
+   invites IA. Une seule source de vérité par phrase.
+3. **Détection au premier démarrage** : `CultureInfo.CurrentUICulture` — français si la langue du
+   système est le français, sinon anglais. Le résultat est écrit dans `state.json` à la première
+   exécution ; ensuite **le choix de l'utilisateur gagne**.
+4. **Choix dans les réglages** : liste « Langue » (Français / English) à côté de la base de
+   données, mémorisée comme les autres préférences, effet immédiat.
+5. **Évolutivité** : la liste des langues vient des **fichiers de ressources présents**, pas d'une
+   liste en dur — ajouter une langue = ajouter un fichier ; le sélecteur et la détection suivent
+   seuls.
+6. **Points spécifiques à trancher pendant l'implémentation** :
+   - la **langue des réponses IA** suit celle de l'interface (le prompt dit aujourd'hui « réponds
+     en français ») ;
+   - les **marqueurs de format** (`BLOC`, `BAFFLE`, `RÉGLAGES`, `ALTERNATIVE`, `CONSEIL LIBRE`,
+     `VERDICT`) servent d'ancres au nettoyage des réponses (`AnswerCleaner`) : soit on les garde
+     fixes quelle que soit la langue, soit on les traduit **et** on utilise le marqueur localisé
+     dans le nettoyage — à décider une fois pour toutes ;
+   - formatage des nombres et dates selon la culture (séparateur décimal, `1,5 s` / `1.5 s`).
+7. **Tests** : complétude des ressources (toutes les clés dans toutes les langues, ni plus ni
+   moins), détection (système fr → français, sinon anglais), changement de langue pris en compte
+   sans redémarrage, marqueurs de format intacts, non-régression des écrans.
+8. **Hors périmètre pour l'instant** : traduire le README / le manuel, langues RTL (arabe,
+   hébreu) — à réexaminer si une telle langue est ajoutée.
 ### Références externes (pour la suite)
 - Format V1/V2 : `https://git.codence.de/pub/tonex-library-sync` (open-source, lit le format V1).
 - Les outils de référence `bcho/` (Bcho-Suite-Pro, seul outil connu lisant la V2) et
