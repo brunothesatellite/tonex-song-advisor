@@ -28,6 +28,18 @@ public sealed class AppConfig
     /// <summary>Base URL de l'API, sans le suffixe <c>/chat/completions</c>.</summary>
     public string Endpoint { get; set; } = OpenCodeModels.EndPoint;
 
+    /// <summary>
+    /// Clés des voix challengeres (Gemini, Mistral, Groq), par identifiant de fournisseur.
+    /// L'utilisateur renseigne celles qu'il souhaite : une clé absente = une voix absente.
+    /// </summary>
+    public Dictionary<string, ProviderCredential> Providers { get; set; } = new();
+
+    /// <summary>La clé (et le modèle) d'un fournisseur challenger, vide s'il n'est pas renseigné.</summary>
+    public ProviderCredential CredentialFor(string providerId)
+        => Providers.TryGetValue(providerId, out var credential) && credential is not null
+            ? credential
+            : new ProviderCredential();
+
     /// <summary>True quand une clé a été enregistrée.</summary>
     [JsonIgnore]
     public bool HasApiKey => !string.IsNullOrWhiteSpace(ApiKey);

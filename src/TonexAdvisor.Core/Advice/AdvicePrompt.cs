@@ -6,20 +6,20 @@ using TonexAdvisor.Core.Data.Records;
 namespace TonexAdvisor.Core.Advice;
 
 /// <summary>
-/// Builds the prompt sent to the AI from the local shortlist — never the whole library.
+/// Builds the prompts sent to the AIs from the local shortlist — never the whole library.
 /// </summary>
 /// <remarks>
-/// The model receives three presets and one captured block, not 2 310 rows: that keeps the
-/// request inside a small token budget and stops the answer from inventing presets the user
-/// cannot find. The stomp/amp rule is repeated verbatim because it is exactly the kind of
-/// constraint a model happily ignores.
+/// Every voice receives the same shortlist of three presets and one captured block, not 2 310
+/// rows: that keeps the request inside a small token budget and stops an answer from inventing
+/// presets the user cannot find. The stomp/amp rule is repeated verbatim because it is exactly
+/// the kind of constraint a model happily ignores.
 /// </remarks>
 public static class AdvicePrompt
 {
     /// <summary>
     /// Answer budget. Deliberately generous: a reasoning model spends most of it on its chain of
     /// thought before writing the first word of the answer, and cutting it off there returns the
-    /// thinking instead of the advice.
+    /// thinking instead of the advice — measured on LongCat, 1 800 tokens were not enough.
     /// </summary>
     public const int MaxTokens = 4000;
 
@@ -29,11 +29,31 @@ public static class AdvicePrompt
         "ModelGain", "ModelVolume", "EqBass", "EqMiddle", "EqTreble",
     ];
 
-    /// <summary>
-    /// French prompt for the given query and shortlist. <paramref name="index"/> is optional and
-    /// only used to name the amplifier and the cabinet behind each preset.
-    /// </summary>
+    /// <summary>French prompt for one voice, on its own.</summary>
     public static string Build(
+        AdviceQuery query,
+        IReadOnlyList<ScoredPreset> presets,
+        ScoredCombination? combination,
+        LibraryIndex? index = null)
+    {
+        var builder = new StringBuilder(1600);
+
+        builder.AppendLine("Tu es un conseiller guitare (rock/metal) pour un lecteur de bibliothèques TONEX.");
+        builder.AppendLine("Réponds en français, en 6 à 10 phrases, ton direct et concret.");
+        builder.AppendLine("Va droit au but : ni préambule, ni analyse de la demande, ni recapitulatif final.");
+        builder.AppendLine();
+
+        builder.Append(DescribeShortlist(query, presets, combination, index));
+
+        AppendRules(builder);
+        return builder.ToString();
+    }
+
+    /// <summary>
+    /// The request plus the shortlist the answers must stick to. Shared by the single-voice
+    /// prompt and by the arbitration, so every voice is judged on the same material.
+    /// </summary>
+    public static string DescribeShortlist(
         AdviceQuery query,
         IReadOnlyList<ScoredPreset> presets,
         ScoredCombination? combination,
@@ -42,12 +62,7 @@ public static class AdvicePrompt
         ArgumentNullException.ThrowIfNull(query);
         ArgumentNullException.ThrowIfNull(presets);
 
-        var builder = new StringBuilder(1600);
-
-        builder.AppendLine("Tu es un conseiller guitare (rock/metal) pour un lecteur de bibliothèques TONEX.");
-        builder.AppendLine("Réponds en français, en 6 à 10 phrases, ton direct et concret.");
-        builder.AppendLine("Va droit au but : ni préambule, ni analyse de la demande, ni recapitulatif final.");
-        builder.AppendLine();
+        var builder = new StringBuilder(1400);
 
         builder.Append("La demande :");
         AppendField(builder, "artiste", query.Artist);
@@ -103,6 +118,14 @@ public static class AdvicePrompt
             builder.AppendLine($"   baffle suggéré : {Label(combination.Cab)} ({combination.CabNote})");
         }
 
+        return builder.ToString();
+    }
+
+    /// <summary>The constraint every answer has to respect, and the shape of a good answer.</summary>
+    public static void AppendRules(StringBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+
         builder.AppendLine();
         builder.AppendLine(
             "Règles : le stomp et l'ampli d'une capture sont inséparables, ne propose jamais de " +
@@ -112,8 +135,6 @@ public static class AdvicePrompt
             "ampli + baffle, donne 2 à 3 réglages concrets en t'appuyant sur les valeurs ci-dessus, " +
             "puis propose une alternative parmi la liste.");
         builder.AppendLine("N'invente aucun preset, ampli ou baffle qui ne figurent pas ci-dessus.");
-
-        return builder.ToString();
     }
 
     private static void AppendField(StringBuilder builder, string label, string value)

@@ -13,7 +13,7 @@ namespace TonexAdvisor.App.Services;
 /// <c>MissingSessionID</c>. Un identifiant est donc généré par instance et réutilisé pour toutes
 /// les requêtes de la session de discussion.
 /// </remarks>
-public sealed class OpenCodeClient
+public sealed class OpenCodeClient : IAiClient
 {
     private static readonly HttpClient Http = CreateClient();
 
@@ -30,6 +30,9 @@ public sealed class OpenCodeClient
 
     /// <summary>Identifiant de session envoyé à chaque requête.</summary>
     public string SessionId => _sessionId;
+
+    /// <summary>Le fournisseur de référence du panneau d'avis croisés.</summary>
+    public string Provider => "OpenCode Go";
 
     /// <summary>Ping de connectivité : vérifie la clé et le modèle en une seule requête.</summary>
     public Task<string> PingAsync(string model, CancellationToken cancellationToken = default)

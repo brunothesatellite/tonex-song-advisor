@@ -100,6 +100,55 @@
                 </StackPanel>
             </Border>
 
+            <!-- Avis croises : voix challengeres (facultatif) -->
+            <StackPanel Spacing="3">
+                <TextBlock Text="Avis croisés" Classes="h1" />
+                <TextBlock Text="Renseignez les clés que vous souhaitez : chaque voix donne son avis et peut contredire la référence, puis un arbitre classe les 3 meilleures propositions."
+                           Classes="dim" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Border Classes="card">
+                <StackPanel Spacing="9">
+                    <TextBlock Text="CLÉS GEMINI / MISTRAL / GROQ (FACULTATIVES)" Classes="faint" />
+
+                    <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
+                        <TextBlock Grid.Column="0" Text="Gemini" VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1" Text="{Binding GeminiKey}" PasswordChar="*"
+                                 PlaceholderText="AIza..." />
+                        <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
+                                   VerticalAlignment="Center" Text="aistudio.google.com/apikey" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
+                        <TextBlock Grid.Column="0" Text="Mistral" VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1" Text="{Binding MistralKey}" PasswordChar="*"
+                                 PlaceholderText="..." />
+                        <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
+                                   VerticalAlignment="Center" Text="console.mistral.ai/api-keys" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
+                        <TextBlock Grid.Column="0" Text="Groq" VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1" Text="{Binding GroqKey}" PasswordChar="*"
+                                 PlaceholderText="gsk_..." />
+                        <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
+                                   VerticalAlignment="Center" Text="console.groq.com/keys" />
+                    </Grid>
+
+                    <Button Classes="accent" HorizontalAlignment="Left"
+                            Command="{Binding TestProvidersCommand}"
+                            IsEnabled="{Binding !IsTestingAi}">Tester les voix</Button>
+
+                    <Border Classes="chip-static" Padding="10,7" HorizontalAlignment="Stretch"
+                            IsVisible="{Binding HasProviderStatus}">
+                        <TextBlock Text="{Binding ProviderStatus}" TextWrapping="Wrap" FontSize="12" />
+                    </Border>
+
+                    <TextBlock Classes="faint" FontSize="11" TextWrapping="Wrap"
+                               Text="Aucune clé n'est versionnée : elles sont stockées dans le même fichier hors dépôt. Une clé absente = une voix silencieuse, et le conseil reste valable sans elle." />
+                </StackPanel>
+            </Border>
+
             <!-- ── What was opened ─────────────────────────────────────── -->
             <Border Classes="card">
                 <StackPanel Spacing="10">

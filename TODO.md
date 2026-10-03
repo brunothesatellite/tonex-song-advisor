@@ -82,14 +82,14 @@ Ce document liste ce qui reste à faire.
 ### Phase 5 — Fiabilité et finitions
 - [x] Test d'intégrité **automatisé** : hash des 2 bases avant/après une session complète
       (lecture, conseil, clics dans l'IU) + aucun journal SQLite ni pages en attente.
-- [ ] Persistance des favoris et des filtres (fichier JSON local) — actuellement éphémères.
-- [x] Tri par colonne vérifié : clic sur « Nom » → ordre croissant, second clic → décroissant
+- [x] Persistance des filtres et de l'onglet actif (`%APPDATA%\TonexAdvisor\state.json`, hors dépôt).
+      Les favoris viennent de TONEX lui-même : rien à persister, et les bases ne sont jamais écrites.
       (vérifié par automatisation UI, colonne lue avant/après).
-- [ ] Kolonne « Réglages » : valeur `✔`/`—` — vérifier que le `✔` (U+2714) est rendu par la police,
-      sinon remplacer par un `Path` vectoriel comme pour l'étoile.
+- [x] Colonne « Réglages » : la coche (U+2714) n'existe pas dans Inter, comme l'étoile (U+2605)
+      avant elle : remplacée par un `Path` vectoriel (`Path.checkGlyph`), affichée dans les deux sens.
 - [x] Sélection de ligne aux couleurs du thème : fond orange translucide + liseré accent.
-- [ ] Mode sombre de la barre de tâches / icône d'application.
-- [x] Publication autonome vérifiée (`dotnet publish -c Release -r win-x64 --self-contained`,
+- [x] Icône d'application (`Assets/app.ico`) + `ApplicationIcon`, barre de titre en mode sombre.
+      Reste : le thème de la barre des tâches est un réglage Windows, hors application.
       230 fichiers / 206 Mo, commande documentée dans le README). Reste : un vrai installeur.
 - [x] CI GitHub Actions (`.github/workflows/ci.yml`) : build + tests à chaque modification.
       Les tests dépendants des bases (jamais versionnées) sont ignorés automatiquement
@@ -102,31 +102,26 @@ garder que les **3 meilleures propositions**. Gemini et Copilot sont expliciteme
 **contester** la recommandation de reference (preset, bloc capture, reglages), pas a la
 confirmer : c'est le desaccord qui fait la valeur de ce mode.
 
-- [ ] Interface commune `AiProvider` (`AskStreamAsync` + nom + modele), reimplementee par
-      `OpenCodeClient` existant. Un fournisseur = un connecteur, jamais de code specialise dans
-      l'IU.
-- [ ] Connecteur **Gemini gratuit** : endpoint OpenAI-compatible
-      `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`, cle AI Studio
-      (quota gratuit), cle stockee comme celle d'OpenCode (`%APPDATA%\TonexAdvisor\config.json`,
-      hors repo).
-- [ ] Connecteur **Copilot gratuit** : **point a valider avant tout developpement** - Microsoft
-      Copilot n'expose pas d'API publique gratuite a ce jour ; a confirmer (API GitHub Copilot,
-      Copilot Studio ?). Si aucun acces n'existe, documenter le refus et fonctionner a deux voix
-      sans casser la fonctionnalite.
-- [ ] Consultation **en parallele** (3 requetes, meme contexte `AdvicePrompt` et meme regle
-      « stomp + ampli inseparables, seul le baffle se change »), avec delai maximal (ex. 20 s)
-      et collecte des erreurs par fournisseur.
-- [ ] Prompt de **confrontation** : demander a Gemini/Copilot de relever ce qui cloche dans la
-      proposition de reference et de proposer une alternative issue de la meme liste locale,
-      jamais un preset hors liste.
-- [ ] **Arbitrage** : tour de synthese qui classe les 3 meilleures propositions, chacune avec
-      l'avis des 3 IA, les points de desaccord et un niveau de consensus (3/3, 2/3).
-- [ ] IU : carte « Avis croises » sur l'onglet Conseils - colonnes OpenCode / Gemini / Copilot,
-      badge de desaccord, bouton « Synthese » et resultat de l'arbitrage.
-- [ ] Repli : un fournisseur en echec ou en timeout est signale et le verdict est rendu a 2
-      voix ; si un seul repond, on retombe sur le mode mono-IA actuel.
-- [ ] Tests : connecteurs factices (succes, erreur, timeout), arbitrage deterministe a partir de
-      trois avis ecrits, et absence de fuite de cles.
+- [x] Interface commune `IAiClient` (`AskStreamAsync`), implementee par `OpenCodeClient` (reference)
+      et par `OpenAiCompatClient`, un seul connecteur pour tous les fournisseurs compatibles OpenAI.
+- [x] Connecteurs **Gemini**, **Mistral** et **Groq** (`Config/AiProviders.cs`) : endpoints
+      compatibles OpenAI, modeles gratuits par defaut, liens des pages de demande de cle dans le
+      README et dans les reglages.
+- [x] **Copilot ecarte** : pas d'API publique gratuite. Remplace par **Mistral** et **Groq**,
+      qui ont de vrais quotas gratuits avec une cle utilisable depuis une application tierce.
+- [x] Consultation **en parallele** (`AiConsultation`) : meme contexte `AdvicePrompt`, delai de
+      60 s par voix, chaque echec/depassement devient l'avis de cette voix et n'arrete rien.
+- [x] **Confrontation sans ancrag** : les voix repondent independamment (pas de reponse de
+      reference a commenter, cela evite de les aligner dessus), puis `ArbitrationPrompt` demande
+      a l'arbitre de relever ce qui cloche chez chacun.
+- [x] **Arbitrage** : tour de synthese qui classe les 3 meilleures propositions, les points de
+      desaccord et le niveau de consensus (3/3, 2/3, 1/3), jamais hors de la selection locale.
+- [x] IU : carte « Avis croises » sur l'onglet Conseils (un bloc par voix, avec son delai ou son
+      erreur) + la synthese arbitree, et saisie des cles Gemini/Mistral/Groq dans les reglages.
+- [x] Repli : un fournisseur en echec ou en timeout est signale ; a 2 voix ou plus l'arbitrage
+      tourne, a une seule voix on affiche son avis, a zéro on garde le classement local.
+- [x] Tests : connecteurs factices (succes, erreur, timeout), selection des voix d'apres les
+      cles renseignees, arbitrage a partir d'avis ecrits, catalogue des fournisseurs.
 ### Références externes (pour la suite)
 - Format V1/V2 : `https://git.codence.de/pub/tonex-library-sync` (open-source, lit le format V1).
 - Les outils de référence `bcho/` (Bcho-Suite-Pro, seul outil connu lisant la V2) et

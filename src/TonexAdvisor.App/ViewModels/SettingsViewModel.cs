@@ -58,6 +58,24 @@ public partial class SettingsViewModel : ViewModelBase
     /// <summary>Modèles gratuits uniquement : les modèles payants de Go ne sont jamais exposés.</summary>
     public IReadOnlyList<FreeModel> FreeModels => OpenCodeModels.Free;
 
+    // ── Avis croisés : voix challengeres (Gemini, Mistral, Groq) ───────────
+
+    [ObservableProperty]
+    private string _geminiKey = "";
+
+    [ObservableProperty]
+    private string _mistralKey = "";
+
+    [ObservableProperty]
+    private string _groqKey = "";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasProviderStatus))]
+    private string _providerStatus = "";
+
+    /// <summary>True dès qu'un message de statut s'affiche pour les voix challengeres.</summary>
+    public bool HasProviderStatus => ProviderStatus.Length > 0;
+
     /// <summary>Où se trouve le fichier de configuration (hors dépôt Git).</summary>
     public string ConfigPath => AppConfig.DefaultPath;
 
@@ -70,6 +88,9 @@ public partial class SettingsViewModel : ViewModelBase
         _config = AppConfig.Load();
         _apiKey = _config.ApiKey;
         _selectedModel = OpenCodeModels.Resolve(_config.Model);
+        _geminiKey = _config.CredentialFor("gemini").ApiKey;
+        _mistralKey = _config.CredentialFor("mistral").ApiKey;
+        _groqKey = _config.CredentialFor("groq").ApiKey;
     }
 
     public string ReadOnlyNotice =>
@@ -112,8 +133,22 @@ public partial class SettingsViewModel : ViewModelBase
         _config.ApiKey = ApiKey.Trim();
         _config.Model = (SelectedModel ?? OpenCodeModels.Free[0]).Id;
         _config.Endpoint = OpenCodeModels.EndPoint;
+        PersistProvider("gemini", GeminiKey);
+        PersistProvider("mistral", MistralKey);
+        PersistProvider("groq", GroqKey);
         _config.Save();
         return _config;
+    }
+
+    /// <summary>
+    /// Enregistre la clé d'une voix challenger sans perdre le modèle choisi à la main dans le
+    /// fichier de configuration.
+    /// </summary>
+    private void PersistProvider(string providerId, string apiKey)
+    {
+        var credential = _config.CredentialFor(providerId);
+        credential.ApiKey = apiKey.Trim();
+        _config.Providers[providerId] = credential;
     }
 
     [RelayCommand]
@@ -157,6 +192,65 @@ public partial class SettingsViewModel : ViewModelBase
         catch (Exception exception)
         {
             AiStatusMessage = exception.Message;
+        }
+        finally
+        {
+            IsTestingAi = false;
+        }
+    }
+
+    /// <summary>
+    /// Teste une par une les voix challengeres renseignées : une clé invalide est signalée sans
+    /// empêcher de tester les autres.
+    /// </summary>
+    [RelayCommand]
+    private async Task TestProvidersAsync()
+    {
+        var config = PersistAi();
+
+        if (AiProviders.Challengers.All(provider =>
+                string.IsNullOrWhiteSpace(config.CredentialFor(provider.Id).ApiKey)))
+        {
+            ProviderStatus = "Renseigne au moins une clé challenger (Gemini, Mistral ou Groq).";
+            return;
+        }
+
+        IsTestingAi = true;
+        try
+        {
+            var results = new List<string>();
+
+            foreach (var provider in AiProviders.Challengers)
+            {
+                var credential = config.CredentialFor(provider.Id);
+                if (string.IsNullOrWhiteSpace(credential.ApiKey))
+                {
+                    results.Add($"{provider.Label} : non renseigné");
+                    continue;
+                }
+
+                var model = string.IsNullOrWhiteSpace(credential.Model)
+                    ? provider.DefaultModel
+                    : credential.Model;
+
+                try
+                {
+                    var client = new OpenAiCompatClient(provider.Label, provider.EndPoint, credential.ApiKey);
+                    var answer = await client
+                        .AskStreamAsync(model, "Réponds uniquement par le mot OK.", 800, _ => { })
+                        .ConfigureAwait(true);
+
+                    results.Add(answer.Trim().Length == 0
+                        ? $"{provider.Label} : connecté, réponse vide"
+                        : $"{provider.Label} : OK « {Flatten(answer, 60)} »");
+                }
+                catch (Exception exception)
+                {
+                    results.Add($"{provider.Label} : {Flatten(exception.Message, 90)}");
+                }
+            }
+
+            ProviderStatus = string.Join("  ·  ", results);
         }
         finally
         {

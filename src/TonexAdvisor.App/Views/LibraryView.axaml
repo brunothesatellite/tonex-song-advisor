@@ -302,8 +302,8 @@
                                 <StackPanel Spacing="8">
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                         <StackPanel Grid.Column="0" Spacing="3">
-                                            <TextBlock Text="CONSEIL IA — OPENCODE GO" Classes="faint" />
-                                            <TextBlock Text="Le modèle ne reçoit que les presets et le bloc ci-dessus, jamais toute la bibliothèque."
+                                            <TextBlock Text="AVIS CROISÉS — OPENCODE, GEMINI, MISTRAL, GROQ" Classes="faint" />
+                                            <TextBlock Text="Chaque voix ne reçoit que les presets et le bloc ci-dessus, jamais toute la bibliothèque. Les voix challengent la référence, puis un arbitre classe les 3 meilleures propositions."
                                                        Classes="dim" FontSize="11" TextWrapping="Wrap" />
                                         </StackPanel>
 
@@ -319,6 +319,27 @@
                                     <TextBlock Text="{Binding Advice.AiStatus}" Classes="chip-static warn"
                                                FontSize="12" TextWrapping="Wrap"
                                                IsVisible="{Binding Advice.HasAiStatus}" />
+
+                                    <ItemsControl ItemsSource="{Binding Advice.Opinions}"
+                                                  IsVisible="{Binding Advice.HasOpinions}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:AiOpinionRowViewModel">
+                                                <Border Classes="card" Padding="10" Margin="0,0,0,6">
+                                                    <StackPanel Spacing="4">
+                                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                                            <TextBlock Grid.Column="0" Text="{Binding Provider}"
+                                                                       FontWeight="SemiBold" FontSize="12" />
+                                                            <TextBlock Grid.Column="1" Text="{Binding Status}"
+                                                                       Classes="faint" FontSize="11" />
+                                                        </Grid>
+                                                        <TextBlock Text="{Binding Text}" Classes="dim"
+                                                                   FontSize="11" TextWrapping="Wrap"
+                                                                   IsVisible="{Binding HasText}" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
 
                                     <TextBlock Text="{Binding Advice.AiThinking}" Classes="faint"
                                                FontStyle="Italic" FontSize="11" TextWrapping="Wrap"

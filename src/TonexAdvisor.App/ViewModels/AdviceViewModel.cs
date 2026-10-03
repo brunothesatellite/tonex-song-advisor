@@ -9,17 +9,27 @@ using TonexAdvisor.Core.Advice;
 namespace TonexAdvisor.App.ViewModels;
 
 /// <summary>
-/// The « Conseils » tab: asks for a song, an artist or a style and ranks the library locally.
+/// The « Conseils » tab: a local ranking first, then the opinion of every AI voice the user
+/// configured, then an arbitration between them.
 /// </summary>
 /// <remarks>
 /// Scoring happens in <see cref="LibraryAdvisor"/>, in milliseconds and without any network
-/// call, so this tab is always usable — even with no API key configured. The AI of phase 4 will
-/// be fed this shortlist rather than the whole library.
+/// call, so this tab is always usable — even with no key at all. The AIs only ever see this
+/// shortlist, they are asked to contradict each other, and the local ranking stays on screen
+/// whenever they fail.
 /// </remarks>
 public partial class AdviceViewModel : ViewModelBase
 {
     private const int PresetCount = 3;
     private const int CombinationCount = 1;
+
+    /// <summary>Shown before the tab has been asked anything.</summary>
+    private const string DefaultHint =
+        "Décrivez la chanson : un artiste, un titre, ou simplement l'ambiance recherchée " +
+        "(« metal », « blues », « clean funk »).";
+
+    /// <summary>Deadline for one voice: a slow provider never holds up the others.</summary>
+    private static readonly TimeSpan VoiceTimeout = TimeSpan.FromSeconds(60);
 
     private readonly LibraryViewModel _owner;
 
@@ -39,11 +49,6 @@ public partial class AdviceViewModel : ViewModelBase
     [ObservableProperty]
     private string _hint = DefaultHint;
 
-    /// <summary>Shown before the tab has been asked anything.</summary>
-    private const string DefaultHint =
-        "Décrivez la chanson : un artiste, un titre, ou simplement l'ambiance recherchée " +
-        "(« metal », « blues », « clean funk »).";
-
     [ObservableProperty]
     private bool _hasRun;
 
@@ -51,7 +56,7 @@ public partial class AdviceViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(HasCombination))]
     private AdviceCombinationRowViewModel? _combination;
 
-    // ── Conseil IA (Phase 4) ───────────────────────────────────────────────
+    // ── Avis croisés ──────────────────────────────────────────────────────
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasAiText), nameof(HasAiThinking))]
@@ -80,26 +85,31 @@ public partial class AdviceViewModel : ViewModelBase
 
     public ObservableCollection<AdvicePresetRowViewModel> Presets { get; } = new();
 
+    /// <summary>One entry per voice consulted, in the order the answers arrived.</summary>
+    public ObservableCollection<AiOpinionRowViewModel> Opinions { get; } = new();
+
     public bool HasError => ErrorMessage.Length > 0;
 
     public bool HasPresets => Presets.Count > 0;
 
     public bool HasCombination => Combination is not null;
 
-    // ── Conseil IA ────────────────────────────────────────────────────────
+    // ── Avis croisés ──────────────────────────────────────────────────────
 
-    /// <summary>La réponse de l'IA, remplie au fil du flux.</summary>
+    /// <summary>The answer: the arbitration when several voices spoke, their opinion otherwise.</summary>
     public bool HasAiText => AiText.Length > 0;
 
     /// <summary>
-    /// La chaîne de pensée n'est montrée que pendant la génération : une fois la réponse là, ce
-    /// n'est plus que du bruit pour l'utilisateur.
+    /// The chain of thought is shown while generating only: once the answer is there, it is
+    /// noise for the user.
     /// </summary>
     public bool HasAiThinking => AiThinking.Length > 0 && (IsAiBusy || AiText.Length == 0);
 
     public bool HasAiStatus => AiStatus.Length > 0;
 
-    /// <summary>Le bouton « Demander à l'IA » est actif hors requête.</summary>
+    public bool HasOpinions => Opinions.Count > 0;
+
+    /// <summary>The « Demander à l'IA » button is active outside a request.</summary>
     public bool IsAiEnabled => !IsAiBusy;
 
     /// <summary>Empties the previous answer, called whenever a new library is opened.</summary>
@@ -113,7 +123,9 @@ public partial class AdviceViewModel : ViewModelBase
         AiText = "";
         AiThinking = "";
         AiStatus = "";
+        Opinions.Clear();
         OnPropertyChanged(nameof(HasPresets));
+        OnPropertyChanged(nameof(HasOpinions));
     }
 
     [RelayCommand]
@@ -160,9 +172,9 @@ public partial class AdviceViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Demande un conseil IA à propos de la sélection locale. En cas d'échec — hors-ligne, clé
-    /// invalide, quota dépassé — le classement local reste affiché : l'IA est un plus, jamais la
-    /// seule source de conseil.
+    /// Asks every configured voice, then has them contradicted and arbitrated. On any failure —
+    /// missing key, offline, quota, timeout — a message explains it and the local ranking stays
+    /// on screen: the AI is a bonus, never the only source of advice.
     /// </summary>
     [RelayCommand]
     private async Task AskAiAsync()
@@ -173,6 +185,8 @@ public partial class AdviceViewModel : ViewModelBase
         AiText = "";
         AiThinking = "";
         AiStatus = "";
+        Opinions.Clear();
+        OnPropertyChanged(nameof(HasOpinions));
 
         var query = AdviceQuery.Create(Artist, Song, Style);
         if (query.IsBlank)
@@ -181,7 +195,7 @@ public partial class AdviceViewModel : ViewModelBase
             return;
         }
 
-        // Le classement local d'abord : c'est lui qui alimente le contexte envoyé au modèle.
+        // The local ranking first: it is what the voices are given to work with.
         if (!HasPresets && Combination is null)
             Advise();
 
@@ -192,18 +206,16 @@ public partial class AdviceViewModel : ViewModelBase
         }
 
         var config = _configLoader();
-        if (!config.HasApiKey)
+        var clients = AiConsultation.BuildClients(config);
+        if (clients.Count == 0)
         {
-            AiStatus = "Clé API absente : ouvre Réglages → Conseil IA pour l'enregistrer. " +
-                       "Le classement local reste valable.";
+            AiStatus = "Clé API absente : renseigne au moins une voix (OpenCode, Gemini, Mistral " +
+                       "ou Groq) dans Réglages → Bases & réglages. Le classement local reste valable.";
             return;
         }
 
-        var prompt = AdvicePrompt.Build(
-            query,
-            Presets.Select(row => row.Scored).ToList(),
-            Combination?.Scored,
-            _owner.Index);
+        var shortlist = Presets.Select(row => row.Scored).ToList();
+        var prompt = AdvicePrompt.Build(query, shortlist, Combination?.Scored, _owner.Index);
 
         _aiCts?.Cancel();
         _aiCts = new CancellationTokenSource();
@@ -211,12 +223,48 @@ public partial class AdviceViewModel : ViewModelBase
         IsAiBusy = true;
         try
         {
-            var client = new OpenCodeClient(config);
-
-            var text = await client.AskStreamAsync(
-                config.Model,
+            // 1. Every voice at once, each opinion appearing as it lands.
+            var opinions = await AiConsultation.ConsultAsync(
+                clients,
+                client => AiConsultation.ModelFor(config, client.Provider),
                 prompt,
                 AdvicePrompt.MaxTokens,
+                VoiceTimeout,
+                onOpinion: opinion => Dispatch(() => AppendOpinion(opinion)),
+                cancellationToken: _aiCts.Token);
+
+            var usable = opinions.Where(opinion => opinion.Ok).ToList();
+
+            if (usable.Count == 0)
+            {
+                var failure = opinions.FirstOrDefault();
+                AiStatus = failure is null
+                    ? "Aucune voix disponible."
+                    : $"{failure.Provider} : {failure.Error} — le classement local reste affiché.";
+                return;
+            }
+
+            // 2. A single voice has nothing to contradict: its opinion is the answer.
+            if (usable.Count == 1)
+            {
+                AiText = usable[0].Text;
+                AiStatus = $"Conseil IA — {usable[0].Provider}";
+                return;
+            }
+
+            // 3. Several voices: a referee confronts them and ranks the three best proposals.
+            var arbitration = ArbitrationPrompt.Build(
+                query,
+                shortlist,
+                Combination?.Scored,
+                usable.Select(opinion => new Opinion(opinion.Provider, opinion.Text)).ToList(),
+                _owner.Index);
+
+            var referee = clients[0];
+            var text = await referee.AskStreamAsync(
+                AiConsultation.ModelFor(config, referee.Provider),
+                arbitration,
+                ArbitrationPrompt.MaxTokens,
                 delta => Dispatch(() =>
                 {
                     if (delta.IsReasoning)
@@ -226,20 +274,12 @@ public partial class AdviceViewModel : ViewModelBase
                 }),
                 _aiCts.Token);
 
-            // Modèle qui n'a produit que sa chaîne de pensée : on l'affiche, mais en le signalant,
-            // car c'est rarement la réponse attendue.
             if (AiText.Length == 0 && text.Length > 0)
-            {
                 AiText = text;
-                AiStatus = "Le modèle n'a renvoyé que sa réflexion (limite de tokens atteinte) : " +
-                           "relance pour avoir la réponse finale.";
-            }
-            else
-            {
-                AiStatus = AiText.Length > 0
-                    ? $"Conseil IA — {OpenCodeModels.Resolve(config.Model).Label}"
-                    : "L'IA n'a rien renvoyé : le classement local reste la référence.";
-            }
+
+            AiStatus = AiText.Length > 0
+                ? $"Synthèse de {usable.Count} avis ({string.Join(", ", usable.Select(opinion => opinion.Provider))})"
+                : "L'arbitre n'a rien renvoyé : les avis restent affichés.";
         }
         catch (OperationCanceledException)
         {
@@ -258,7 +298,14 @@ public partial class AdviceViewModel : ViewModelBase
     [RelayCommand]
     private void CancelAi() => _aiCts?.Cancel();
 
-    /// <summary>Le flux arrive d'un thread réseau : l'IU se met à jour depuis le sien.</summary>
+    /// <summary>Adds one voice to the panel, from the network thread.</summary>
+    private void AppendOpinion(AiOpinion opinion)
+    {
+        Opinions.Add(new AiOpinionRowViewModel(opinion));
+        OnPropertyChanged(nameof(HasOpinions));
+    }
+
+    /// <summary>The stream arrives on a network thread: the UI updates from its own.</summary>
     private static void Dispatch(Action action)
         => Dispatcher.UIThread.Post(action);
 

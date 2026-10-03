@@ -139,10 +139,34 @@ Le free tier **Personnel** n'accepte que les sessions OAuth de l'application Ope
 d'une application tierce qui n'utilise qu'une clé `oc_sk_`. Le bouton **Tester la connexion**
 vérifie la clé et le modèle choisi par une vraie requête.
 
+## Clés IA (avis croisés)
+
+Le conseil peut croiser plusieurs avis : **OpenCode** (la référence) et, **si vous renseignez leur
+clé**, **Gemini**, **Mistral** et **Groq**. Chaque voix reçoit la même sélection locale (3 presets
++ le bloc capturé) et répond indépendamment — donc souvent en désaccord — puis un arbitre
+confronte les avis et classe les **3 meilleures propositions** avec leur niveau de consensus.
+
+| Voix | Où demander une clé API | Modèle gratuit par défaut |
+|---|---|---|
+| **OpenCode Go** (référence) | <https://opencode.ai/> (offre *Go*) | `longcat-2.5-preview-free` |
+| **Gemini** (Google) | <https://aistudio.google.com/apikey> | `gemini-2.5-flash` |
+| **Mistral** | <https://console.mistral.ai/api-keys> | `mistral-small-latest` |
+| **Groq** | <https://console.groq.com/keys> | `llama-3.3-70b-versatile` |
+
+- Les clés se saisissent dans **Bases & réglages**, masquées, et sont stockées dans
+  `%APPDATA%\TonexAdvisor\config.json` — **jamais dans le dépôt**.
+- Vous n'êtes pas obligé de toutes les renseigner : **une clé absente = une voix silencieuse**,
+  et le conseil reste valable avec celles que vous avez. Une seule clé = un avis direct, deux ou
+  plus = avis contradictoires puis arbitrage.
+- Chaque voix a son propre délai (60 s) : un fournisseur lent ou en erreur est simplement signalé
+  dans la carte, sans faire échouer les autres.
+- Les modèles ci-dessus sont gratuits et remplacés depuis `config.json`
+  (`Providers.<id>.Model`) si les tarifs changent. Toutes ces API sont compatibles OpenAI : un
+  seul connecteur les pilote.
 ## Données de test
 
 Les bases TONEX ne sont **pas versionnées** (bibliothèque personnelle, 89 Mo). Pour exécuter les
-109 tests, copie tes propres fichiers dans `db/` :
+126 tests, copie tes propres fichiers dans `db/` :
 
 ```
 db\Library.db     ← format V1 (réglages numériques complets)
@@ -155,7 +179,7 @@ db\Library2.db    ← format V2 (métadonnées)
 |---|---|
 | `src\TonexAdvisor.Core` | lecture des bases (read-only), DTOs, index, tokeniseur, ranges |
 | `src\TonexAdvisor.App` | UI Avalonia, thème `Themes\DarkRock.axaml`, ViewModels |
-| `tests\TonexAdvisor.Core.Tests` | 109 tests |
+| `tests\TonexAdvisor.Core.Tests` | 126 tests |
 | `TODO.md` | état d'avancement et travail restant |
 
 ## Avancement
