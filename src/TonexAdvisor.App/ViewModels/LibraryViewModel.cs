@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using TonexAdvisor.App.Config;
 using TonexAdvisor.Core.Data;
 
 namespace TonexAdvisor.App.ViewModels;
@@ -81,9 +82,9 @@ public partial class LibraryViewModel : ViewModelBase
         private set => SetProperty(ref _toneModels, value);
     }
 
-    public LibraryViewModel()
+    public LibraryViewModel(Func<AppConfig>? aiConfig = null)
     {
-        Advice = new AdviceViewModel(this);
+        Advice = new AdviceViewModel(this, aiConfig);
     }
 
     /// <summary>The « Conseils » tab, which ranks this library against a song.</summary>

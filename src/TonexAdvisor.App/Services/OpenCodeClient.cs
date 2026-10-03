@@ -73,6 +73,85 @@ public sealed class OpenCodeClient
         return ExtractText(body);
     }
 
+    /// <summary>
+    /// Envoie un prompt en flux (SSE) et renvoie la réponse finale, en appelant
+    /// <paramref name="onDelta"/> au fil de l'eau.
+    /// </summary>
+    /// <remarks>
+    /// Si le service ne sait pas streamer (proxy, version ancienne), on retombe sur la réponse
+    /// complète plutôt que de perdre le conseil. Les modèles de raisonnement n'émettent parfois
+    /// que leur chaîne de pensée : elle sert alors de réponse, comme dans <see cref="AskAsync"/>.
+    /// </remarks>
+    public async Task<string> AskStreamAsync(
+        string model,
+        string prompt,
+        int maxTokens,
+        Action<SseDelta> onDelta,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(onDelta);
+        ArgumentException.ThrowIfNullOrWhiteSpace(model);
+        ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
+
+        if (string.IsNullOrWhiteSpace(_apiKey))
+            throw new InvalidOperationException("Aucune clé API OpenCode enregistrée (réglages → IA).");
+
+        var payload = JsonSerializer.Serialize(new
+        {
+            model,
+            messages = new[] { new { role = "user", content = prompt } },
+            max_tokens = maxTokens,
+            stream = true,
+        });
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, _endpoint + "/chat/completions")
+        {
+            Content = new StringContent(payload, Encoding.UTF8, "application/json"),
+        };
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _apiKey);
+        request.Headers.TryAddWithoutValidation("x-opencode-session", _sessionId);
+
+        using var response = await Http
+            .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            throw new InvalidOperationException(DescribeError(response.StatusCode, errorBody));
+        }
+
+        var mediaType = response.Content.Headers.ContentType?.MediaType;
+        if (!string.Equals(mediaType, "text/event-stream", StringComparison.OrdinalIgnoreCase))
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            var text = ExtractText(body);
+            if (text.Length > 0)
+                onDelta(new SseDelta(text, false));
+            return text;
+        }
+
+        var parser = new SseParser();
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var reader = new StreamReader(stream);
+
+        while (!reader.EndOfStream)
+        {
+            var line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+            if (line is null)
+                break;
+
+            var delta = parser.Feed(line);
+            if (delta is not null)
+                onDelta(delta);
+
+            if (parser.IsDone)
+                break;
+        }
+
+        return parser.Content.Length > 0 ? parser.Content : parser.Reasoning;
+    }
+
     private static HttpClient CreateClient()
     {
         var client = new HttpClient { Timeout = TimeSpan.FromSeconds(90) };

@@ -1,3 +1,4 @@
+using TonexAdvisor.App.Config;
 using TonexAdvisor.App.ViewModels;
 
 namespace TonexAdvisor.Core.Tests;
@@ -99,5 +100,55 @@ public class AdviceViewTests
         Assert.False(viewModel.Advice.HasPresets);
         Assert.False(viewModel.Advice.HasCombination);
         Assert.False(viewModel.Advice.HasError);
+    }
+
+    [Fact]
+    public void AskAi_WithoutApiKey_KeepsTheLocalAdviceAndSaysSo()
+    {
+        // A config without a key: the test must never reach the network.
+        var viewModel = new LibraryViewModel(() => new AppConfig());
+        viewModel.Attach(SampleLibraries.Gen1);
+
+        viewModel.Advice.Style = "metal";
+        viewModel.Advice.AdviseCommand.Execute(null);
+        viewModel.Advice.AskAiCommand.Execute(null);
+
+        Assert.Contains("Clé API", viewModel.Advice.AiStatus, StringComparison.Ordinal);
+        Assert.Equal("", viewModel.Advice.AiText);
+        Assert.False(viewModel.Advice.IsAiBusy);
+
+        // The local ranking is the fallback and it stays on screen.
+        Assert.True(viewModel.Advice.HasPresets);
+        Assert.True(viewModel.Advice.HasCombination);
+    }
+
+    [Fact]
+    public void AskAi_WithoutAQuery_OnlyAsksForOne()
+    {
+        var viewModel = new LibraryViewModel(() => new AppConfig());
+        viewModel.Attach(SampleLibraries.Gen1);
+
+        viewModel.Advice.AskAiCommand.Execute(null);
+
+        Assert.Contains("Décrivez", viewModel.Advice.AiStatus, StringComparison.Ordinal);
+        Assert.Equal("", viewModel.Advice.AiText);
+    }
+
+    [Fact]
+    public void Reset_ClearsTheAiAnswerToo()
+    {
+        var viewModel = new LibraryViewModel(() => new AppConfig());
+        viewModel.Attach(SampleLibraries.Gen1);
+
+        viewModel.Advice.Style = "metal";
+        viewModel.Advice.AdviseCommand.Execute(null);
+        viewModel.Advice.AskAiCommand.Execute(null);
+
+        viewModel.Attach(SampleLibraries.Gen1);
+
+        Assert.Equal("", viewModel.Advice.AiText);
+        Assert.Equal("", viewModel.Advice.AiThinking);
+        Assert.Equal("", viewModel.Advice.AiStatus);
+        Assert.True(viewModel.Advice.IsAiEnabled);
     }
 }

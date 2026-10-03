@@ -1,6 +1,9 @@
 using System.Collections.ObjectModel;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using TonexAdvisor.App.Config;
+using TonexAdvisor.App.Services;
 using TonexAdvisor.Core.Advice;
 
 namespace TonexAdvisor.App.ViewModels;
@@ -48,8 +51,32 @@ public partial class AdviceViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(HasCombination))]
     private AdviceCombinationRowViewModel? _combination;
 
-    public AdviceViewModel(LibraryViewModel owner)
-        => _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+    // ── Conseil IA (Phase 4) ───────────────────────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAiText), nameof(HasAiThinking))]
+    private string _aiText = "";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAiThinking))]
+    private string _aiThinking = "";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAiStatus))]
+    private string _aiStatus = "";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsAiEnabled), nameof(HasAiThinking))]
+    private bool _isAiBusy;
+
+    private readonly Func<AppConfig> _configLoader;
+    private CancellationTokenSource? _aiCts;
+
+    public AdviceViewModel(LibraryViewModel owner, Func<AppConfig>? configLoader = null)
+    {
+        _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        _configLoader = configLoader ?? (() => AppConfig.Load());
+    }
 
     public ObservableCollection<AdvicePresetRowViewModel> Presets { get; } = new();
 
@@ -59,6 +86,22 @@ public partial class AdviceViewModel : ViewModelBase
 
     public bool HasCombination => Combination is not null;
 
+    // ── Conseil IA ────────────────────────────────────────────────────────
+
+    /// <summary>La réponse de l'IA, remplie au fil du flux.</summary>
+    public bool HasAiText => AiText.Length > 0;
+
+    /// <summary>
+    /// La chaîne de pensée n'est montrée que pendant la génération : une fois la réponse là, ce
+    /// n'est plus que du bruit pour l'utilisateur.
+    /// </summary>
+    public bool HasAiThinking => AiThinking.Length > 0 && (IsAiBusy || AiText.Length == 0);
+
+    public bool HasAiStatus => AiStatus.Length > 0;
+
+    /// <summary>Le bouton « Demander à l'IA » est actif hors requête.</summary>
+    public bool IsAiEnabled => !IsAiBusy;
+
     /// <summary>Empties the previous answer, called whenever a new library is opened.</summary>
     public void Reset()
     {
@@ -67,6 +110,9 @@ public partial class AdviceViewModel : ViewModelBase
         HasRun = false;
         ErrorMessage = "";
         Hint = DefaultHint;
+        AiText = "";
+        AiThinking = "";
+        AiStatus = "";
         OnPropertyChanged(nameof(HasPresets));
     }
 
@@ -112,6 +158,109 @@ public partial class AdviceViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasPresets));
         Hint = BuildHint(Presets.Count, combinations.Count);
     }
+
+    /// <summary>
+    /// Demande un conseil IA à propos de la sélection locale. En cas d'échec — hors-ligne, clé
+    /// invalide, quota dépassé — le classement local reste affiché : l'IA est un plus, jamais la
+    /// seule source de conseil.
+    /// </summary>
+    [RelayCommand]
+    private async Task AskAiAsync()
+    {
+        if (IsAiBusy)
+            return;
+
+        AiText = "";
+        AiThinking = "";
+        AiStatus = "";
+
+        var query = AdviceQuery.Create(Artist, Song, Style);
+        if (query.IsBlank)
+        {
+            AiStatus = "Décrivez d'abord la chanson : un artiste, un titre ou un style.";
+            return;
+        }
+
+        // Le classement local d'abord : c'est lui qui alimente le contexte envoyé au modèle.
+        if (!HasPresets && Combination is null)
+            Advise();
+
+        if (!HasPresets && Combination is null)
+        {
+            AiStatus = "Rien à soumettre à l'IA : aucun preset de cette bibliothèque ne correspond.";
+            return;
+        }
+
+        var config = _configLoader();
+        if (!config.HasApiKey)
+        {
+            AiStatus = "Clé API absente : ouvre Réglages → Conseil IA pour l'enregistrer. " +
+                       "Le classement local reste valable.";
+            return;
+        }
+
+        var prompt = AdvicePrompt.Build(
+            query,
+            Presets.Select(row => row.Scored).ToList(),
+            Combination?.Scored,
+            _owner.Index);
+
+        _aiCts?.Cancel();
+        _aiCts = new CancellationTokenSource();
+
+        IsAiBusy = true;
+        try
+        {
+            var client = new OpenCodeClient(config);
+
+            var text = await client.AskStreamAsync(
+                config.Model,
+                prompt,
+                AdvicePrompt.MaxTokens,
+                delta => Dispatch(() =>
+                {
+                    if (delta.IsReasoning)
+                        AiThinking += delta.Text;
+                    else
+                        AiText += delta.Text;
+                }),
+                _aiCts.Token);
+
+            // Modèle qui n'a produit que sa chaîne de pensée : on l'affiche, mais en le signalant,
+            // car c'est rarement la réponse attendue.
+            if (AiText.Length == 0 && text.Length > 0)
+            {
+                AiText = text;
+                AiStatus = "Le modèle n'a renvoyé que sa réflexion (limite de tokens atteinte) : " +
+                           "relance pour avoir la réponse finale.";
+            }
+            else
+            {
+                AiStatus = AiText.Length > 0
+                    ? $"Conseil IA — {OpenCodeModels.Resolve(config.Model).Label}"
+                    : "L'IA n'a rien renvoyé : le classement local reste la référence.";
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            AiStatus = "Conseil IA annulé.";
+        }
+        catch (Exception exception)
+        {
+            AiStatus = $"{exception.Message} — le classement local reste affiché.";
+        }
+        finally
+        {
+            IsAiBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void CancelAi() => _aiCts?.Cancel();
+
+    /// <summary>Le flux arrive d'un thread réseau : l'IU se met à jour depuis le sien.</summary>
+    private static void Dispatch(Action action)
+        => Dispatcher.UIThread.Post(action);
 
     private static string BuildHint(int presets, int combinations)
     {

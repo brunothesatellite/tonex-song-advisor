@@ -18,7 +18,7 @@ Ce document liste ce qui reste à faire.
   en lecture seule, sections matériels masquables).
 - **UI** thème sombre « rock/metal » (`Themes/DarkRock.axaml`), DataGrid, disposition fixe
   (`DockPanel` : grille à gauche, carte de détail 400 px à droite).
-- **Tests** : 95 tests verts (données, readers V1/V2, tokeniseur, ranges, panneau de détail, filtres,
+- **Tests** : 109 tests verts (données, readers V1/V2, tokeniseur, ranges, panneau de détail, filtres,
   configuration IA).
 - **Barre de titre Windows** en mode sombre (`DwmSetWindowAttribute`).
 
@@ -64,18 +64,21 @@ Ce document liste ce qui reste à faire.
       la ligne dans la grille.
 - [x] Vérifié par automatisation UI (UIA) : saisie « metal » → 3 presets HI-GAIN (92/92/84 %) et
       le bloc `Ibanez Tube Screamer TS808 -> Mesa Boogie Triple Rectifier` + baffle libre.
-### Phase 4 — Conseil IA via OpenCode Go (priorité haute)
+### Phase 4 - Conseil IA via OpenCode Go (fait)
 - [x] Client HTTP : `https://opencode.ai/zen/go/v1/chat/completions` (OpenAI-compatible,
       `Authorization: Bearer`, `x-opencode-session`, `User-Agent: TonexAdvisor/1.0`).
 - [x] Saisie de la clé API + stockage local (`%APPDATA%\TonexAdvisor\config.json`, hors repo) et
       choix du modèle **gratuit** uniquement, avec test de connexion réel.
-- [ ] Streaming SSE + affichage progressif du conseil.
-- [ ] Contexte envoyé au modèle : chanson/artist + résumé des N presets les mieux notés (pas toute
-      la bibliothèque, pour rester dans les limites de tokens).
-- [ ] Gestion d'erreur : hors-ligne, clé invalide, quota dépassé → message + repli sur le
-      classement local (Phase 3).
-- [ ] Brancher le client à l'écran « Conseils » (le client existe, rien ne l'appelle encore).
-
+- [x] Streaming SSE + affichage progressif du conseil (`SseParser`, plusieurs schémas de delta
+      acceptés : `content`, `text`, `message`). La chaîne de pensée s'affiche pendant la
+      génération puis disparaît dès que la réponse arrive.
+- [x] Contexte envoyé au modèle : la demande + les 3 presets les mieux notés et le bloc capturé
+      (`AdvicePrompt`) — jamais toute la bibliothèque, et avec la règle « stomp + ampli
+      inséparables, seul le baffle se change ».
+- [x] Gestion d'erreur : clé absente, hors-ligne, clé invalide, quota dépassé, annulation —
+      message explicite et **repli sur le classement local**, qui reste affiché.
+- [x] Bouton « Demander à l'IA » branché à l'écran « Conseils », vérifié en réel par UIA :
+      réponse française en ~50 s (`Conseil IA — LongCat 2.5 Preview Free`).
 ### Phase 5 — Fiabilité et finitions
 - [ ] Test d'intégrité avant/après **automatisé** dans les tests (hash des 2 bases avant run,
       après run, assertion égale).
@@ -87,7 +90,7 @@ Ce document liste ce qui reste à faire.
       l'orange du thème (priorité basse).
 - [ ] Mode sombre de la barre de tâches / icône d'application.
 - [ ] Installeur / publication (`dotnet publish -r win-x64 --self-contained`).
-- [ ] CI : build + 95 tests à chaque modification.
+- [ ] CI : build + 109 tests à chaque modification.
 
 ### Références externes (pour la suite)
 - Format V1/V2 : `https://git.codence.de/pub/tonex-library-sync` (open-source, lit le format V1).
@@ -98,8 +101,8 @@ Ce document liste ce qui reste à faire.
 - **V2 (`Library2.db`)** : métadonnées uniquement, pas de réglages numériques → signalé dans l'IU
   via `SettingsNote`.
 - Aucune écriture dans les bases TONEX (contrainte non négociable), y compris pour les favoris.
-- Le conseil IA n'est pas encore branché à l'écran de conseil (Phase 4 : client + réglages faits,
-  intégration à l'IU restante).
+- Le conseil IA s'appuie sur le classement local (top 3) : c'est voulu, pour rester dans le
+  budget de tokens et ne jamais faire inventer de preset au modèle.
 
 ---
 
