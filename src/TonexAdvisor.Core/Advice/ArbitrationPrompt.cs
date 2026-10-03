@@ -70,9 +70,16 @@ public static class ArbitrationPrompt
         builder.AppendLine(
             "3. Termine par 2 à 3 réglages concrets (gain, EQ, réverb/delay).");
         builder.AppendLine(
+            "4. Puis ajoute ton CONSEIL LIBRE : ce que tu utiliserais toi, sans contrainte de " +
+            "bibliothèque — le matériel réel du morceau ou du style si tu le connais, et les " +
+            "réglages typiques qui vont avec. C'est la partie la plus utile quand la bibliothèque " +
+            "n'a rien de vraiment proche.");
+        builder.AppendLine(
             "Si tous les avis se trompent, dis-le et tranche avec tes propres arguments : un accord " +
             "unanime n'est pas une preuve.");
-        builder.AppendLine("N'invente aucun bloc ni aucun baffle absent du catalogue.");
+        builder.AppendLine(
+            "N'invente aucun bloc ni baffle absent du catalogue — cette contrainte ne vaut que pour " +
+            "les propositions classées ; le CONSEIL LIBRE est ouvert à tout ton savoir.");
 
         return builder.ToString();
     }

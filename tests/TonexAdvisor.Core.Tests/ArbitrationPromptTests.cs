@@ -34,14 +34,15 @@ public class ArbitrationPromptTests
         Assert.Contains("Blocs capturés disponibles", prompt, StringComparison.Ordinal);
         Assert.Contains("Baffles disponibles", prompt, StringComparison.Ordinal);
 
-        // The mission: confront, rank three proposals, stay inside the catalogue.
+        // The mission: confront, rank three proposals, stay inside the catalogue, then speak freely.
         Assert.Contains("Confronte les avis", prompt, StringComparison.Ordinal);
         Assert.Contains("3 meilleures propositions", prompt, StringComparison.Ordinal);
         Assert.Contains("consensus", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("CONSEIL LIBRE", prompt, StringComparison.Ordinal);
         Assert.Contains("N'invente aucun bloc", prompt, StringComparison.Ordinal);
 
         // And the captured block rule is recalled to the referee itself.
-        Assert.Contains("inséparable", prompt, StringComparison.Ordinal);
+        Assert.Contains("indissociable", prompt, StringComparison.Ordinal);
     }
 
     [LibraryFact]

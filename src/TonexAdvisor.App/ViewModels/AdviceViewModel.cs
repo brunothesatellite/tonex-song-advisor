@@ -28,8 +28,12 @@ public partial class AdviceViewModel : ViewModelBase
         "Décrivez la chanson : un artiste, un titre, ou simplement l'ambiance recherchée " +
         "(« metal », « blues », « clean funk »).";
 
-    /// <summary>Deadline for one voice: a slow provider never holds up the others.</summary>
-    private static readonly TimeSpan VoiceTimeout = TimeSpan.FromSeconds(60);
+    /// <summary>
+    /// Deadline for one voice. Generous on purpose: a prompt carrying the whole catalogue is
+    /// long, and a reasoning model spends its time before answering — cutting it at 60 s turned
+    /// every voice into « indisponible ».
+    /// </summary>
+    private static readonly TimeSpan VoiceTimeout = TimeSpan.FromSeconds(150);
 
     private readonly LibraryViewModel _owner;
 
@@ -227,6 +231,12 @@ public partial class AdviceViewModel : ViewModelBase
         _aiCts?.Cancel();
         _aiCts = new CancellationTokenSource();
 
+        // Chaque voix a sa ligne dès la première seconde, la référence en premier : le panneau ne
+        // change pas de forme pendant l'attente, il se remplit.
+        foreach (var client in clients)
+            Opinions.Add(new AiOpinionRowViewModel(client.Provider));
+        OnPropertyChanged(nameof(HasOpinions));
+
         IsAiBusy = true;
         try
         {
@@ -299,6 +309,10 @@ public partial class AdviceViewModel : ViewModelBase
         }
         finally
         {
+            // Une voix jamais revenue ne doit pas rester à tourner.
+            foreach (var row in Opinions.Where(candidate => candidate.IsPending).ToList())
+                row.Complete(new AiOpinion(row.Provider, "", "Interrompu", 0));
+
             IsAiBusy = false;
         }
     }
@@ -307,11 +321,21 @@ public partial class AdviceViewModel : ViewModelBase
     private void CancelAi() => _aiCts?.Cancel();
 
     /// <summary>
-    /// Ajoute une voix au panneau, depuis le thread réseau, à sa place : l'avis d'OpenCode
-    /// s'affiche en premier, puis les voix challengeres, puis seulement vient l'avis convergé.
+    /// Complète la ligne d'une voix depuis le thread réseau : la ligne existe déjà (elle tourne),
+    /// il lui suffit d'apprendre ce que la voix a répondu.
     /// </summary>
     private void AppendOpinion(AiOpinion opinion)
     {
+        var row = Opinions.FirstOrDefault(candidate =>
+            string.Equals(candidate.Provider, opinion.Provider, StringComparison.Ordinal));
+
+        if (row is not null)
+        {
+            row.Complete(opinion);
+            return;
+        }
+
+        // Voix inattendue : insérée à sa place pour garder l'ordre du panneau.
         var rank = OpinionOrder.Rank(opinion.Provider);
         var index = 0;
 

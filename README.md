@@ -80,11 +80,16 @@ sélection alimente le même panneau de détail.
 
 <img src="docs/images/04-conseils-ia.png" alt="Conseil IA en streaming à partir de la sélection locale" width="780">
 
-- **Demander à l'IA** envoie la demande + le **catalogue complet** de la bibliothèque :
-  les blocs capturés (`stomp → ampli`) et les baffles, **noms uniquement** (~894 blocs et 557
-  baffles, ≈ 9 600 tokens). L'IA choisit donc en connaissance de cause, y compris sur les noms
-  que la recherche locale ne peut pas deviner — tout en respectant la règle « stomp + ampli
-  inséparables », le baffle restant libre.
+- **Demander à l'IA** envoie la demande + le catalogue de la bibliothèque : chaque ampli avec
+  les stomp capturés avec lui, et la liste des baffles — **noms uniquement**, les plus utilisés
+  d'abord (200 amplis + 120 baffles, ≈ 3 400 tokens : la taille que les quotas gratuits
+  acceptent). L'IA choisit donc en connaissance de cause, y compris sur les noms que la recherche
+  locale ne peut pas deviner, tout en respectant la règle « stomp + ampli inséparables » — le
+  baffle restant libre.
+- La réponse a **deux parties** : ce que ta bibliothèque permet (`BLOC`, `BAFFLE`, `RÉGLAGES`,
+  `ALTERNATIVE`), puis un **CONSEIL LIBRE** — ce que l'IA utiliserait elle, sans contrainte : le
+  matériel réel du morceau ou du style, et les réglages typiques qui vont avec. C'est la partie
+  utile quand ta bibliothèque n'a rien de vraiment proche.
 - La réponse s'écrit **au fil de l'eau** ; la chaîne de pensée s'affiche pendant la génération
   puis disparaît quand la réponse arrive.
 - Clé absente, réseau en panne, quota dépassé : message explicite et **le classement local reste
