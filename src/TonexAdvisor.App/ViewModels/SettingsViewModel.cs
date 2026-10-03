@@ -378,7 +378,10 @@ public partial class SettingsViewModel : ViewModelBase
             return;
         }
 
-        DatabasePath = database.Path;
+        // En mode « dossier TONEX », le champ du choix 1 garde le chemin de l'utilisateur : c'est
+        // lui qui reprend quand on décoche la case. Recopier la base ouverte ici l'écraserait.
+        if (!UseTonexLibrary)
+            DatabasePath = database.Path;
         FormatLabel = database.Format switch
         {
             DatabaseFormat.V1 => "V1 — Library.db (réglages complets)",

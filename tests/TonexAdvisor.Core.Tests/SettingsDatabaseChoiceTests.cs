@@ -96,6 +96,34 @@ public class SettingsDatabaseChoiceTests
     }
 
     [Fact]
+    public void TickingTheBox_DoesNotStealThePathOfChoiceOne()
+    {
+        var folder = NewFolder();
+
+        try
+        {
+            var host = new FakeHost();
+            var viewModel = new SettingsViewModel(host, new InMemoryUserStateStore(), folder);
+            viewModel.DatabasePath = @"D:\ailleurs\Library.db";
+
+            viewModel.UseTonexLibrary = true;
+
+            // Le rechargement recopie le chemin de la base ouverte dans le champ : pas en mode
+            // TONEX, sinon le chemin de l'utilisateur est perdu.
+            Assert.Equal(@"D:\ailleurs\Library.db", viewModel.DatabasePath);
+
+            viewModel.UseTonexLibrary = false;
+
+            Assert.Equal(@"D:\ailleurs\Library.db", viewModel.DatabasePath);
+            Assert.EndsWith(@"D:\ailleurs\Library.db", host.Loaded[^1], StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(folder, recursive: true);
+        }
+    }
+
+    [Fact]
     public void TheChoiceIsRemembered()
     {
         var folder = NewFolder();
