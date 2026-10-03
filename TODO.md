@@ -43,10 +43,6 @@ Ce document liste ce qui reste à faire.
   remontée au-dessus de la ligne de flottaison — vérifié par automatisation UI (UIA) :
   `Connexion OK avec LongCat 2.5 Preview Free : « OK »`.
 
----
-
-## 🔜 Reste à faire
-
 ### Cycle : choix de la base de données (fait)
 
 - [x] Deux choix dans « Bases & réglages » : le **chemin manuel** (comme avant), ou la case
@@ -158,6 +154,11 @@ confirmer : c'est le desaccord qui fait la valeur de ce mode.
       bibliothèque V1 — les valeurs V2 sont chiffrées dans les fichiers .txp ».
 - [x] Les ~200 presets présents seulement en V2 restent sans réglage (valeur chiffrée, non lisible).
 - [x] Tests : jointure sur les deux bases (2 313 presets enrichis), non-régression V1 et V2, hash des bases inchangé. Règle : la jointe ne remplit que ce qui manque, une base V1 garde ses propres valeurs.
+
+---
+
+## 🔜 Reste à faire
+
 ### Phase 8 - Internationalisation (français / anglais)
 
 Objectif : l'application en français **ou** en anglais, la bonne langue détectée au premier
