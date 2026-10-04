@@ -1,6 +1,7 @@
 # TODO — Tonex Song Advisor
 
-Version **1.0** : lecture V1/V2, conseil local, avis croisés multi-IA, installeur et portable.
+Version **1.2.1** : lecture V1/V2, conseil local, avis croisés multi-IA (arbitre + voix),
+installeur et portable.
 Ce document liste ce qui reste à faire.
 
 ---
@@ -18,8 +19,8 @@ Ce document liste ce qui reste à faire.
   en lecture seule, sections matériels masquables).
 - **UI** thème sombre « rock/metal » (`Themes/DarkRock.axaml`), DataGrid, disposition fixe
   (`DockPanel` : grille à gauche, carte de détail 400 px à droite).
-- **Tests** : 169 tests verts (données, readers V1/V2, tokeniseur, ranges, panneau de détail, filtres,
-  configuration IA).
+- **Tests** : 195 tests verts (données, readers V1/V2, tokeniseur, ranges, panneau de détail, filtres,
+  configuration IA, persistance de l'état, découpage/coloration des réponses IA).
 - **Barre de titre Windows** en mode sombre (`DwmSetWindowAttribute`).
 
 ### Corrections récentes (dernier cycle)
@@ -155,6 +156,33 @@ confirmer : c'est le desaccord qui fait la valeur de ce mode.
 - [x] Les ~200 presets présents seulement en V2 restent sans réglage (valeur chiffrée, non lisible).
 - [x] Tests : jointure sur les deux bases (2 313 presets enrichis), non-régression V1 et V2, hash des bases inchangé. Règle : la jointe ne remplit que ce qui manque, une base V1 garde ses propres valeurs.
 
+### Cycle v1.2 — arbitre et voix (fait)
+
+- [x] **Choix de l'arbitre et des voix** : modèles **OpenCode** choisis dans toute la liste
+      (gratuits et payants), plus Gemini/Mistral/Groq gratuits. L'arbitre peut être coché comme
+      voix ; sans arbitre, les voix restent des suggestions et le bouton n'est jamais bloqué ;
+      sans aucune voix, l'arbitre répond seul. Ordre imposé : OpenCode (ordre de la liste) →
+      Gemini → Mistral → Groq.
+- [x] **Catalogue complet** transmis à toutes les voix et à l'arbitre (blocs appariés
+      `stomp → ampli` + baffles, plafond 200 amplis / 120 baffles ≈ 3 400 tokens) — les trois
+      presets d'exemple ne sont plus envoyés.
+- [x] **Pensée visible** : bouton « thinking » par voix et pour l'arbitre, masqué par défaut,
+      dépliable **en direct** pendant la génération, disparu à la fin. La pensée est alimentée
+      par tout le flux, car OpenCode écrit sa réflexion dans `content`.
+- [x] **Affichage** : titres `SUGGESTION — <modèle>` / `VERDICT — ARBITRÉ PAR <modèle>`, repères de
+      format en couleur (`BLOC :`, `BAFFLE :`, `RÉGLAGES :`, `ALTERNATIVE :`, `CONSEIL LIBRE :`,
+      `VERDICT :`, numéros de propositions) **y compris pendant le streaming** — et détectés malgré
+      retrait, puce, gras ou espace insécable ; `gratuit` en vert, `payant` en orange ; spinner
+      « L'arbitre tranche… ».
+- [x] **Fiabilité** : délai par voix 180 s, nouvelle tentative sur pannes transitoires (503/429),
+      une voix en échec devient une ligne « indisponible » avec détail au clic, jamais un pavé
+      d'erreur ; réponse nettoyée par ancre de format.
+- [x] **Spinners pilotés par le code** : l'animation indéterminée d'Avalonia s'arrête quand son
+      onglet est déchargé et ne revient pas — remplacée par un anneau tourné par un minuteur, avec
+      un compteur de secondes que rien ne peut figer.
+- [x] « Ouvrir » (conseil local) sélectionne **et fait défiler** la grille jusqu'à la ligne.
+- [x] Tests : 195 verts.
+
 ---
 
 ## 🔜 Reste à faire
@@ -201,15 +229,16 @@ Quelques tests assertent sur des textes français.
    hébreu) — à réexaminer si une telle langue est ajoutée.
 ### Autres évolutions demandées
 
-- [ ] **Colonnes redimensionnables à la main** : la mécanique existe déjà (`CanUserResizeColumns`
-      sur la grille, `CanUserResize` par colonne, poignée en bord d'en-tête), mais les largeurs
-      en `*` (`1.7*`, `1.3*`…) se partagent l'espace et **reprennent la main** quand la fenêtre
-      change de taille, ce qui annule le redimensionnement. Trois niveaux possibles :
-      1. forcer `CanUserResizeColumns="True"` (une ligne) ;
-      2. largeurs en **pixels fixes** + barre de défilement horizontale — prévisible, mais plus
-         d'adaptation à la largeur de fenêtre ;
-      3. **mémoriser les largeurs** dans `state.json` et neutraliser le `*` des colonnes touchées
-         — le confort attendu, dans la continuité de la persistance déjà en place.
+- [x] **Colonnes redimensionnables à la main** : `CanUserResizeColumns="True"` ajouté aux deux
+      grilles — la mécanique **n'existait pas en fait** (aucune poignée n'apparaissait), le
+      niveau 1 du plan. Le niveau 3 avec lui : à la fin d'un glissé, la colonne saisie est
+      **gelée en pixels** à sa largeur réelle (`ActualWidth`) et quitte donc le `*` — point
+      décisif, car Avalonia ne convertit pas d'elle-même : elle ne faisait que réécrire le
+      coefficient (`1.7*` → `1207*`), si bien que le redimensionnement n'était nulle part.
+      Largeurs mémorisées par en-tête dans `state.json`, restaurées au démarrage via le store
+      existant, en lecture-modification-écriture pour ne pas écraser les autres préférences.
+      Les colonnes non touchées gardent leur `*` et suivent la fenêtre ; un clic simple ne
+      réécrit rien. Le panneau de détail et les filtres ne sont pas concernés.
 ### Références externes (pour la suite)
 - Format V1/V2 : `https://git.codence.de/pub/tonex-library-sync` (open-source, lit le format V1).
 - Les outils de référence `bcho/` (Bcho-Suite-Pro, seul outil connu lisant la V2) et

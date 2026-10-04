@@ -48,6 +48,17 @@ public sealed class UserState
     /// <summary>0 presets, 1 tone models, 2 advice.</summary>
     public int SelectedTabIndex { get; set; }
 
+    // Grilles ---------------------------------------------------------------
+
+    /// <summary>
+    /// Column widths chosen by hand, by column header: a column the user resized must keep that
+    /// width when the window changes size, so it leaves the proportional units (1.7*, 1.3*) behind.
+    /// </summary>
+    public Dictionary<string, double> PresetColumnWidths { get; set; } = new();
+
+    /// <summary>Same, for the tone models grid.</summary>
+    public Dictionary<string, double> ToneModelColumnWidths { get; set; } = new();
+
     /// <summary>Next to the API configuration, outside any repository.</summary>
     public static string DefaultPath { get; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -76,7 +87,17 @@ public sealed class UserState
     /// Copies this state. Screens modify their own read, never the stored one: the file store
     /// hands out a fresh object on every read, and the in-memory one must behave the same way.
     /// </summary>
-    public UserState Clone() => (UserState)MemberwiseClone();
+    public UserState Clone()
+    {
+        var copy = (UserState)MemberwiseClone();
+
+        // MemberwiseClone shares the dictionaries: a screen that reads-modifies-writes would
+        // rewrite what another screen is holding.
+        copy.PresetColumnWidths = new Dictionary<string, double>(PresetColumnWidths);
+        copy.ToneModelColumnWidths = new Dictionary<string, double>(ToneModelColumnWidths);
+
+        return copy;
+    }
 
     /// <summary>Writes the state in place, creating the folder when needed.</summary>
     public void Save(string? path = null)

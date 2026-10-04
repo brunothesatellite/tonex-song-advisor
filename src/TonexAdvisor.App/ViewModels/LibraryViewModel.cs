@@ -58,6 +58,12 @@ public partial class LibraryViewModel : ViewModelBase
     private int _selectedTabIndex;
 
     [ObservableProperty]
+    private IReadOnlyDictionary<string, double> _presetColumnWidths = new Dictionary<string, double>();
+
+    [ObservableProperty]
+    private IReadOnlyDictionary<string, double> _toneModelColumnWidths = new Dictionary<string, double>();
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasDetail))]
     private object? _detailContent;
 
@@ -256,6 +262,32 @@ public partial class LibraryViewModel : ViewModelBase
         SelectedFolder = Folders.Contains(state.Folder) ? state.Folder : AnyFilter;
         OnlyFavorites = state.OnlyFavorites;
         SelectedTabIndex = state.SelectedTabIndex is >= 0 and <= 2 ? state.SelectedTabIndex : 0;
+
+        // Notifies the view: the grids restore the widths the user chose by hand, and the columns
+        // concerned leave the proportional units behind for good.
+        PresetColumnWidths = new Dictionary<string, double>(state.PresetColumnWidths);
+        ToneModelColumnWidths = new Dictionary<string, double>(state.ToneModelColumnWidths);
+    }
+
+    /// <summary>
+    /// Keeps the widths the user chose by hand on the presets grid. Read-modify-write like every
+    /// other field: the settings screen writes the same file and must not lose them.
+    /// </summary>
+    public void SavePresetColumnWidths(IReadOnlyDictionary<string, double> widths)
+    {
+        var state = _stateStore.Load();
+        state.PresetColumnWidths = new Dictionary<string, double>(widths);
+        _stateStore.Save(state);
+        PresetColumnWidths = state.PresetColumnWidths;
+    }
+
+    /// <summary>Same, for the tone models grid.</summary>
+    public void SaveToneModelColumnWidths(IReadOnlyDictionary<string, double> widths)
+    {
+        var state = _stateStore.Load();
+        state.ToneModelColumnWidths = new Dictionary<string, double>(widths);
+        _stateStore.Save(state);
+        ToneModelColumnWidths = state.ToneModelColumnWidths;
     }
 
     /// <summary>

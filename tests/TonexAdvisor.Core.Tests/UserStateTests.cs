@@ -79,6 +79,44 @@ public class UserStateTests
         Assert.Equal(AppConfigPath(), Path.GetDirectoryName(UserState.DefaultPath));
     }
 
+    [Fact]
+    public void SaveThenLoad_RoundTripsTheChosenColumnWidths()
+    {
+        var file = TempFile();
+        try
+        {
+            new UserState
+            {
+                PresetColumnWidths = new Dictionary<string, double> { ["Nom"] = 200, ["Stomp"] = 175 },
+                ToneModelColumnWidths = new Dictionary<string, double> { ["Ampli"] = 180 },
+            }.Save(file);
+
+            var loaded = UserState.Load(file);
+
+            Assert.Equal(200, loaded.PresetColumnWidths["Nom"]);
+            Assert.Equal(175, loaded.PresetColumnWidths["Stomp"]);
+            Assert.Equal(180, loaded.ToneModelColumnWidths["Ampli"]);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
+    [Fact]
+    public void Clone_HandsOutItsOwnColumnWidths()
+    {
+        var original = new UserState
+        {
+            PresetColumnWidths = new Dictionary<string, double> { ["Nom"] = 200 },
+        };
+
+        var copy = original.Clone();
+        copy.PresetColumnWidths["Nom"] = 999;
+
+        Assert.Equal(200, original.PresetColumnWidths["Nom"]);
+    }
+
     private static string TempFile()
         => Path.Combine(Path.GetTempPath(), "tonex-state-" + Guid.NewGuid().ToString("N") + ".json");
 
