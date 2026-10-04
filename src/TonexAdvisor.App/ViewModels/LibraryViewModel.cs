@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TonexAdvisor.App.Config;
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.App.Services;
 using TonexAdvisor.Core.Data;
 
@@ -49,7 +50,7 @@ public partial class LibraryViewModel : ViewModelBase
     private ToneModelDetailViewModel? _toneModelDetail;
 
     [ObservableProperty]
-    private string _emptyMessage = "Aucune bibliothèque chargée.";
+    private string _emptyMessage = Localizer.Instance["Message.AucuneBibliotheque"];
 
     [ObservableProperty]
     private string _summary = "";
@@ -359,12 +360,12 @@ public partial class LibraryViewModel : ViewModelBase
         Presets = new ObservableCollection<PresetRowViewModel>(presets);
         ToneModels = new ObservableCollection<ToneModelRowViewModel>(toneModels);
 
-        Summary = $"{presets.Count:N0} preset(s) · {toneModels.Count:N0} tone model(s)" +
-                  (HasActiveFilter ? "  —  filtre actif" : "");
+        Summary = Localizer.Instance.Get("Message.Resume.Bibliotheque", presets.Count, toneModels.Count) +
+                  (HasActiveFilter ? Localizer.Instance["Biblio.Resume.FiltreActif"] : "");
 
         EmptyMessage = _presetRows.Count == 0
-            ? "Cette base ne contient aucun preset."
-            : "Aucun résultat pour ces filtres.";
+            ? Localizer.Instance["Biblio.Vide.AucunPreset"]
+            : Localizer.Instance["Biblio.Vide.AucunResultat"];
 
         OnPropertyChanged(nameof(HasPresets));
     }

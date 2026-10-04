@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TonexAdvisor.App.ViewModels"
+             xmlns:loc="using:TonexAdvisor.App.Localization"
              xmlns:converters="using:Avalonia.Data.Converters"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -8,37 +9,59 @@
              x:Class="TonexAdvisor.App.Views.LibraryView"
              x:DataType="vm:LibraryViewModel">
 
+    <UserControl.Resources>
+        <loc:FilterLabelConverter x:Key="FilterLabel" />
+    </UserControl.Resources>
+
     <Grid RowDefinitions="Auto,Auto,*" Margin="18,14,18,14">
 
         <!-- ── Filters ────────────────────────────────────────────────── -->
         <Grid Grid.Row="0" ColumnDefinitions="*,170,170,230,Auto,Auto" ColumnSpacing="10">
 
             <StackPanel Grid.Column="0" Spacing="4">
-                <TextBlock Text="RECHERCHE" Classes="faint" />
+                <TextBlock Text="{loc:Loc Biblio.Recherche.Titre}" Classes="faint" />
                 <TextBox Text="{Binding SearchText}"
-                         PlaceholderText="Nom, artiste, chanson, ampli, dossier…"
+                         PlaceholderText="{loc:Loc Biblio.Recherche.Placeholder}"
                          Classes="search" />
             </StackPanel>
 
             <StackPanel Grid.Column="1" Spacing="4">
-                <TextBlock Text="CATÉGORIE" Classes="faint" />
+                <TextBlock Text="{loc:Loc Biblio.Filtre.Categorie}" Classes="faint" />
                 <ComboBox ItemsSource="{Binding Categories}"
                           SelectedItem="{Binding SelectedCategory}"
-                          HorizontalAlignment="Stretch" />
+                          HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource FilterLabel}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
 
             <StackPanel Grid.Column="2" Spacing="4">
-                <TextBlock Text="GENRE" Classes="faint" />
+                <TextBlock Text="{loc:Loc Biblio.Filtre.Genre}" Classes="faint" />
                 <ComboBox ItemsSource="{Binding Genres}"
                           SelectedItem="{Binding SelectedGenre}"
-                          HorizontalAlignment="Stretch" />
+                          HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource FilterLabel}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
 
             <StackPanel Grid.Column="3" Spacing="4">
-                <TextBlock Text="DOSSIER" Classes="faint" />
+                <TextBlock Text="{loc:Loc Biblio.Filtre.Dossier}" Classes="faint" />
                 <ComboBox ItemsSource="{Binding Folders}"
                           SelectedItem="{Binding SelectedFolder}"
-                          HorizontalAlignment="Stretch" />
+                          HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource FilterLabel}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
 
             <StackPanel Grid.Column="4" Spacing="4">
@@ -46,14 +69,15 @@
                 <ToggleButton Classes="chip" IsChecked="{Binding OnlyFavorites}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <Path Classes="favStar" Width="11" Height="11" />
-                        <TextBlock Text="Favoris" />
+                        <TextBlock Text="{loc:Loc Biblio.Filtre.Favoris}" />
                     </StackPanel>
                 </ToggleButton>
             </StackPanel>
 
             <StackPanel Grid.Column="5" Spacing="4">
                 <TextBlock Text=" " Classes="faint" />
-                <Button Command="{Binding ClearFiltersCommand}">Réinitialiser</Button>
+                <Button Command="{Binding ClearFiltersCommand}"
+                        Content="{loc:Loc Biblio.Filtre.Reinitialiser}" />
             </StackPanel>
         </Grid>
 
@@ -62,10 +86,10 @@
             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
                 <TextBlock Text="{Binding Summary}" Classes="dim" VerticalAlignment="Center" />
                 <Border Classes="chip-static" IsVisible="{Binding KnobSettingsAvailable}">
-                    <TextBlock Text="Réglages numériques disponibles" Classes="faint" />
+                    <TextBlock Text="{loc:Loc Biblio.Chip.ReglagesDisponibles}" Classes="faint" />
                 </Border>
                 <Border Classes="chip-static warn" IsVisible="{Binding !KnobSettingsAvailable}">
-                    <TextBlock Text="Génération 2 : aucun réglage stocké par TONEX" Classes="faint" />
+                    <TextBlock Text="{loc:Loc Biblio.Chip.Generation2}" Classes="faint" />
                 </Border>
             </StackPanel>
         </Grid>
@@ -89,9 +113,9 @@
                                 VerticalAlignment="Center"
                                 HorizontalAlignment="Center"
                                 MaxWidth="280">
-                        <TextBlock Text="Sélectionnez une ligne" Classes="dim"
+                        <TextBlock Text="{loc:Loc Biblio.Detail.Vide.Titre}" Classes="dim"
                                    HorizontalAlignment="Center" />
-                        <TextBlock Text="Le détail du preset s'affiche ici : réglages, baffle, micros et tone models liés."
+                        <TextBlock Text="{loc:Loc Biblio.Detail.Vide.Texte}"
                                    Classes="faint" TextWrapping="Wrap" TextAlignment="Center" />
                     </StackPanel>
                 </Grid>
@@ -105,7 +129,7 @@
                         Margin="0,0,12,0"
                         ClipToBounds="True">
 
-                <TabItem Header="Presets">
+                <TabItem Header="{loc:Loc Biblio.Presets}">
                     <DataGrid x:Name="PresetsGrid" ItemsSource="{Binding Presets}"
                               SelectedItem="{Binding SelectedPreset}"
                               AutoGenerateColumns="False"
@@ -116,38 +140,38 @@
                               BorderThickness="0"
                               SelectionMode="Single">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Fav" Width="64">
+                            <DataGridTemplateColumn Header="{loc:Loc Biblio.Col.Fav}" Width="64">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:PresetRowViewModel">
                                         <Panel>
-                                            <Path Classes="favStar" ToolTip.Tip="Favori" />
+                                            <Path Classes="favStar" ToolTip.Tip="{loc:Loc Biblio.Tooltip.Favori}" />
                                             <Path Classes="favStar favOff"
                                                   IsVisible="{Binding Favorite, Converter={x:Static converters:BoolConverters.Not}}" />
                                         </Panel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Nom" Binding="{Binding Name}"
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Nom}" Binding="{Binding Name}"
                                                 Width="1.7*" MinWidth="150" />
-                            <DataGridTextColumn Header="Catégorie" Binding="{Binding Category}" Width="104" />
-                            <DataGridTextColumn Header="Genre" Binding="{Binding Genre}" Width="96" />
-                            <DataGridTextColumn Header="Artiste" Binding="{Binding Artist}" Width="132" />
-                            <DataGridTextColumn Header="Chanson" Binding="{Binding Song}" Width="124" />
-                            <DataGridTextColumn Header="Stomp" Binding="{Binding Stomp}"
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Categorie}" Binding="{Binding Category}" Width="104" />
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Genre}" Binding="{Binding Genre}" Width="96" />
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Artiste}" Binding="{Binding Artist}" Width="132" />
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Chanson}" Binding="{Binding Song}" Width="124" />
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Stomp}" Binding="{Binding Stomp}"
                                                 Width="1.3*" MinWidth="110" />
-                            <DataGridTextColumn Header="Ampli" Binding="{Binding Amp}"
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Ampli}" Binding="{Binding Amp}"
                                                 Width="1.3*" MinWidth="110" />
-                            <DataGridTextColumn Header="Baffle" Binding="{Binding Cab}"
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Baffle}" Binding="{Binding Cab}"
                                                 Width="1.3*" MinWidth="110" />
-                            <DataGridTemplateColumn Header="Réglages" Width="88">
+                            <DataGridTemplateColumn Header="{loc:Loc Biblio.Col.Reglages}" Width="88">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:PresetRowViewModel">
                                         <Panel>
                                             <Path Classes="checkGlyph"
-                                                  ToolTip.Tip="Réglages numériques exploitables"
+                                                  ToolTip.Tip="{loc:Loc Biblio.Tooltip.ReglagesExploitables}"
                                                   IsVisible="{Binding HasSettings}" />
                                             <Path Classes="checkGlyph checkOff"
-                                                  ToolTip.Tip="Aucun réglage stocké par TONEX"
+                                                  ToolTip.Tip="{loc:Loc Biblio.Tooltip.AucunReglage}"
                                                   IsVisible="{Binding HasSettings, Converter={x:Static converters:BoolConverters.Not}}" />
                                         </Panel>
                                     </DataTemplate>
@@ -157,7 +181,7 @@
                     </DataGrid>
                 </TabItem>
 
-                <TabItem Header="Tone models">
+                <TabItem Header="{loc:Loc Biblio.Onglet.ToneModels}">
                     <DataGrid x:Name="ToneModelsGrid" ItemsSource="{Binding ToneModels}"
                               SelectedItem="{Binding SelectedToneModel}"
                               AutoGenerateColumns="False"
@@ -168,34 +192,34 @@
                               BorderThickness="0"
                               SelectionMode="Single">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Fav" Width="64">
+                            <DataGridTemplateColumn Header="{loc:Loc Biblio.Col.Fav}" Width="64">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:ToneModelRowViewModel">
                                         <Panel>
-                                            <Path Classes="favStar" ToolTip.Tip="Favori" />
+                                            <Path Classes="favStar" ToolTip.Tip="{loc:Loc Biblio.Tooltip.Favori}" />
                                             <Path Classes="favStar favOff"
                                                   IsVisible="{Binding Favorite, Converter={x:Static converters:BoolConverters.Not}}" />
                                         </Panel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Nom" Binding="{Binding Name}"
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Nom}" Binding="{Binding Name}"
                                                 Width="1.5*" MinWidth="140" />
-                            <DataGridTextColumn Header="Stomp" Binding="{Binding Stomp}"
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Stomp}" Binding="{Binding Stomp}"
                                                 Width="1.3*" MinWidth="110" />
-                            <DataGridTextColumn Header="Ampli" Binding="{Binding Amp}"
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Ampli}" Binding="{Binding Amp}"
                                                 Width="1.4*" MinWidth="120" />
-                            <DataGridTextColumn Header="Baffle" Binding="{Binding Cab}"
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Baffle}" Binding="{Binding Cab}"
                                                 Width="1.4*" MinWidth="120" />
-                            <DataGridTextColumn Header="Micros" Binding="{Binding Mics}" Width="104" />
-                            <DataGridTextColumn Header="Catégorie" Binding="{Binding Category}" Width="104" />
-                            <DataGridTextColumn Header="Type" Binding="{Binding Kind}" Width="100" />
-                            <DataGridTextColumn Header="Presets" Binding="{Binding PresetCount}" Width="62" />
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Micros}" Binding="{Binding Mics}" Width="104" />
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Categorie}" Binding="{Binding Category}" Width="104" />
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Col.Type}" Binding="{Binding Kind}" Width="100" />
+                            <DataGridTextColumn Header="{loc:Loc Biblio.Presets}" Binding="{Binding PresetCount}" Width="62" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
 
-                <TabItem Header="Conseils">
+                <TabItem Header="{loc:Loc Biblio.Onglet.Conseils}">
                     <ScrollViewer>
                         <StackPanel Spacing="12" Margin="4,10,4,4">
 
@@ -204,25 +228,26 @@
                                 <StackPanel Spacing="9">
                                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                                         <StackPanel Grid.Column="0" Spacing="3">
-                                            <TextBlock Text="ARTISTE" Classes="faint" />
+                                            <TextBlock Text="{loc:Loc Conseil.Requete.Artiste}" Classes="faint" />
                                             <TextBox Text="{Binding Advice.Artist}"
-                                                     PlaceholderText="Guns N’ Roses…" />
+                                                     PlaceholderText="{loc:Loc Conseil.Requete.PlaceholderArtiste}" />
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Spacing="3">
-                                            <TextBlock Text="CHANSON" Classes="faint" />
+                                            <TextBlock Text="{loc:Loc Conseil.Requete.Chanson}" Classes="faint" />
                                             <TextBox Text="{Binding Advice.Song}"
-                                                     PlaceholderText="Back in Black…" />
+                                                     PlaceholderText="{loc:Loc Conseil.Requete.PlaceholderChanson}" />
                                         </StackPanel>
                                         <StackPanel Grid.Column="2" Spacing="3">
-                                            <TextBlock Text="STYLE / AMBIANCE" Classes="faint" />
+                                            <TextBlock Text="{loc:Loc Conseil.Requete.Style}" Classes="faint" />
                                             <TextBox Text="{Binding Advice.Style}"
-                                                     PlaceholderText="metal, blues, clean funk…" />
+                                                     PlaceholderText="{loc:Loc Conseil.Requete.PlaceholderStyle}" />
                                         </StackPanel>
                                     </Grid>
 
                                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                                         <Button Grid.Column="0" Classes="accent"
-                                                Command="{Binding Advice.AdviseCommand}">Conseiller</Button>
+                                                Command="{Binding Advice.AdviseCommand}"
+                                                Content="{loc:Loc Conseil.Bouton.Conseiller}" />
                                         <TextBlock Grid.Column="1" Text="{Binding Advice.Hint}"
                                                    Classes="faint" FontSize="11"
                                                    TextWrapping="Wrap" VerticalAlignment="Center" />
@@ -238,7 +263,7 @@
 
                             <!-- ── Ranked presets ────────────────────────── -->
                             <StackPanel Spacing="6" IsVisible="{Binding Advice.HasPresets}">
-                                <TextBlock Text="MEILLEURS PRESETS" Classes="faint" />
+                                <TextBlock Text="{loc:Loc Conseil.Presets.Titre}" Classes="faint" />
 
                                 <ItemsControl ItemsSource="{Binding Advice.Presets}">
                                     <ItemsControl.ItemTemplate>
@@ -264,7 +289,8 @@
                                                     </StackPanel>
 
                                                     <Button Grid.Column="2" VerticalAlignment="Top"
-                                                            Command="{Binding OpenCommand}">Ouvrir</Button>
+                                                            Command="{Binding OpenCommand}"
+                                                            Content="{loc:Loc Action.Ouvrir}" />
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -274,9 +300,9 @@
 
                             <!-- ── Best combination ──────────────────────── -->
                             <StackPanel Spacing="6" IsVisible="{Binding Advice.HasCombination}">
-                                <TextBlock Text="MEILLEURE COMBINAISON — BLOC CAPTURÉ + BAFFLE"
+                                <TextBlock Text="{loc:Loc Conseil.Combination.Titre}"
                                            Classes="faint" />
-                                <TextBlock Text="Le stomp et l’ampli viennent d’une même capture : ils sont inséparables. Seul le baffle se change."
+                                <TextBlock Text="{loc:Loc Conseil.Combination.Texte}"
                                            Classes="dim" FontSize="11" TextWrapping="Wrap" />
 
                                 <Border Classes="card" Padding="12"
@@ -297,7 +323,8 @@
                                             <Border Classes="chip-static">
                                                 <TextBlock Text="{Binding ScoreLabel}" Classes="accent" />
                                             </Border>
-                                            <Button Command="{Binding OpenCommand}">Ouvrir</Button>
+                                            <Button Command="{Binding OpenCommand}"
+                                                    Content="{loc:Loc Action.Ouvrir}" />
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -308,17 +335,19 @@
                                 <StackPanel Spacing="8">
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                         <StackPanel Grid.Column="0" Spacing="3">
-                                            <TextBlock Text="AVIS CROISÉS — OPENCODE, GEMINI, MISTRAL, GROQ" Classes="faint" />
-                                            <TextBlock Text="Chaque voix reçoit la demande et le catalogue complet des blocs (stomp → ampli) et des baffles, noms uniquement. Les voix challengent la référence, puis un arbitre classe les 3 meilleures propositions."
+                                            <TextBlock Text="{loc:Loc Conseil.Avis.Titre}" Classes="faint" />
+                                            <TextBlock Text="{loc:Loc Conseil.Avis.Texte}"
                                                        Classes="dim" FontSize="11" TextWrapping="Wrap" />
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
                                             <Button Classes="accent"
                                                     Command="{Binding Advice.AskAiCommand}"
-                                                    IsEnabled="{Binding Advice.IsAiEnabled}">Demander à l’IA</Button>
+                                                    IsEnabled="{Binding Advice.IsAiEnabled}"
+                                                    Content="{loc:Loc Conseil.Bouton.DemanderIA}" />
                                             <Button Command="{Binding Advice.CancelAiCommand}"
-                                                    IsVisible="{Binding Advice.IsAiBusy}">Annuler</Button>
+                                                    IsVisible="{Binding Advice.IsAiBusy}"
+                                                    Content="{loc:Loc Conseil.Bouton.Annuler}" />
                                         </StackPanel>
                                     </Grid>
 
@@ -360,14 +389,14 @@
                                                                         Command="{Binding ToggleErrorCommand}"
                                                                         FontSize="11" Padding="8,1"
                                                                         IsVisible="{Binding HasError}"
-                                                                        ToolTip.Tip="Afficher le détail de l'erreur" />
+                                                                        ToolTip.Tip="{loc:Loc Conseil.Tooltip.VoirErreur}" />
 
                                                                 <!-- Sortie complète du modèle, même bouton : le travail, pas la réponse. -->
-                                                                <Button Content="thinking"
+                                                                <Button Content="{loc:Loc Conseil.Bouton.Thinking}"
                                                                         Command="{Binding ToggleThinkingCommand}"
                                                                         FontSize="11" Padding="8,1"
                                                                         IsVisible="{Binding CanToggleThinking}"
-                                                                        ToolTip.Tip="Afficher la sortie complète du modèle" />
+                                                                        ToolTip.Tip="{loc:Loc Conseil.Tooltip.VoirThinking}" />
                                                             </StackPanel>
                                                         </Grid>
 
@@ -412,7 +441,7 @@
                                                      RenderTransformOrigin="50%,50%"
                                                      VerticalAlignment="Center"
                                                      IsVisible="{Binding Advice.IsArbitreWorking}" />
-                                             <TextBlock Text="L'arbitre tranche." Classes="faint" FontSize="11"
+                                             <TextBlock Text="{loc:Loc Conseil.Arbitre.Tranche}" Classes="faint" FontSize="11"
                                                         VerticalAlignment="Center"
                                                         IsVisible="{Binding Advice.IsArbitreWorking}" />
                                              <TextBlock Text="{Binding Advice.ArbitreElapsedLabel}"
@@ -423,11 +452,11 @@
                                                        IsVisible="{Binding Advice.HasAiTitle}" />
                                         </StackPanel>
 
-                                        <Button Grid.Column="1" Content="thinking" FontSize="11"
+                                        <Button Grid.Column="1" Content="{loc:Loc Conseil.Bouton.Thinking}" FontSize="11"
                                                 Padding="8,1"
                                                 Command="{Binding Advice.ToggleAiThinkingCommand}"
                                                 IsVisible="{Binding Advice.CanToggleAiThinking}"
-                                                ToolTip.Tip="Afficher la reflexion de l'arbitre" />
+                                                ToolTip.Tip="{loc:Loc Conseil.Tooltip.VoirReflexionArbitre}" />
                                     </Grid>
 
 

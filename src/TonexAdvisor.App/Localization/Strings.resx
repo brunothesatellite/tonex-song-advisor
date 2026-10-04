@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Ressources neutres de l'application — langue de référence : anglais (§17, décision 3).
+    Le français vit dans Strings.fr.resx (satellite). Mêmes clés, même ordre dans les deux
+    fichiers (contrôle de parité en phase 2). Voir INTERNATIONALISATION.md §5 et §12.
+  -->
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Action.Ouvrir" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Biblio.Chip.Generation2" xml:space="preserve">
+    <value>Generation 2: no settings stored by TONEX</value>
+  </data>
+  <data name="Biblio.Chip.ReglagesDisponibles" xml:space="preserve">
+    <value>Digital settings available</value>
+  </data>
+  <data name="Biblio.Col.Ampli" xml:space="preserve">
+    <value>Amp</value>
+  </data>
+  <data name="Biblio.Col.Artiste" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="Biblio.Col.Baffle" xml:space="preserve">
+    <value>Cabinet</value>
+  </data>
+  <data name="Biblio.Col.Categorie" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Biblio.Col.Chanson" xml:space="preserve">
+    <value>Song</value>
+  </data>
+  <data name="Biblio.Col.Fav" xml:space="preserve">
+    <value>Fav</value>
+  </data>
+  <data name="Biblio.Col.Genre" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="Biblio.Col.Micros" xml:space="preserve">
+    <value>Mics</value>
+  </data>
+  <data name="Biblio.Col.Nom" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Biblio.Col.Reglages" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Biblio.Col.Stomp" xml:space="preserve">
+    <value>Stomp</value>
+  </data>
+  <data name="Biblio.Col.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Biblio.Detail.Vide.Texte" xml:space="preserve">
+    <value>The preset detail shows here: settings, cabinet, mics and linked tone models.</value>
+  </data>
+  <data name="Biblio.Detail.Vide.Titre" xml:space="preserve">
+    <value>Select a row</value>
+  </data>
+  <data name="Biblio.Filtre.Categorie" xml:space="preserve">
+    <value>CATEGORY</value>
+  </data>
+  <data name="Biblio.Filtre.Dossier" xml:space="preserve">
+    <value>FOLDER</value>
+  </data>
+  <data name="Biblio.Filtre.Favoris" xml:space="preserve">
+    <value>Favorites</value>
+  </data>
+  <data name="Biblio.Filtre.Genre" xml:space="preserve">
+    <value>GENRE</value>
+  </data>
+  <data name="Biblio.Filtre.Reinitialiser" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Biblio.Onglet.Conseils" xml:space="preserve">
+    <value>Advice</value>
+  </data>
+  <data name="Biblio.Onglet.ToneModels" xml:space="preserve">
+    <value>Tone models</value>
+  </data>
+  <data name="Biblio.Presets" xml:space="preserve">
+    <value>Presets</value>
+  </data>
+  <data name="Biblio.Recherche.Placeholder" xml:space="preserve">
+    <value>Name, artist, song, amp, folder…</value>
+  </data>
+  <data name="Biblio.Recherche.Titre" xml:space="preserve">
+    <value>SEARCH</value>
+  </data>
+  <data name="Biblio.Resume.FiltreActif" xml:space="preserve">
+    <value>  —  active filter</value>
+  </data>
+  <data name="Biblio.Tooltip.AucunReglage" xml:space="preserve">
+    <value>No settings stored by TONEX</value>
+  </data>
+  <data name="Biblio.Tooltip.Favori" xml:space="preserve">
+    <value>Favourite</value>
+  </data>
+  <data name="Biblio.Tooltip.ReglagesExploitables" xml:space="preserve">
+    <value>Usable digital settings</value>
+  </data>
+  <data name="Biblio.Vide.AucunPreset" xml:space="preserve">
+    <value>This database contains no preset.</value>
+  </data>
+  <data name="Biblio.Vide.AucunResultat" xml:space="preserve">
+    <value>No result for these filters.</value>
+  </data>
+  <data name="Conseil.Arbitre.Tranche" xml:space="preserve">
+    <value>The arbitrator decides.</value>
+  </data>
+  <data name="Conseil.Avis.Texte" xml:space="preserve">
+    <value>Each voice receives the request plus the full catalogue of blocks (stomp → amp) and cabinets, names only. The voices challenge the reference, then an arbitrator ranks the top 3 picks.</value>
+  </data>
+  <data name="Conseil.Avis.Titre" xml:space="preserve">
+    <value>CROSS-CHECKED OPINIONS — OPENCODE, GEMINI, MISTRAL, GROQ</value>
+  </data>
+  <data name="Conseil.Bouton.Annuler" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Conseil.Bouton.Conseiller" xml:space="preserve">
+    <value>Get advice</value>
+  </data>
+  <data name="Conseil.Bouton.DemanderIA" xml:space="preserve">
+    <value>Ask the AI</value>
+  </data>
+  <data name="Conseil.Bouton.Thinking" xml:space="preserve">
+    <value>thinking</value>
+  </data>
+  <data name="Conseil.Combination.Texte" xml:space="preserve">
+    <value>The stomp and amp come from the same capture: they are inseparable. Only the cabinet changes.</value>
+  </data>
+  <data name="Conseil.Combination.Titre" xml:space="preserve">
+    <value>BEST COMBINATION — CAPTURED BLOCK + CABINET</value>
+  </data>
+  <data name="Conseil.Combination.Uses.one" xml:space="preserve">
+    <value>Used by {0} preset in the library</value>
+  </data>
+  <data name="Conseil.Combination.Uses.other" xml:space="preserve">
+    <value>Used by {0} presets in the library</value>
+  </data>
+  <data name="Conseil.Presets.Titre" xml:space="preserve">
+    <value>TOP PRESETS</value>
+  </data>
+  <data name="Conseil.Requete.Artiste" xml:space="preserve">
+    <value>ARTIST</value>
+  </data>
+  <data name="Conseil.Requete.Chanson" xml:space="preserve">
+    <value>SONG</value>
+  </data>
+  <data name="Conseil.Requete.PlaceholderArtiste" xml:space="preserve">
+    <value>Guns N’ Roses…</value>
+  </data>
+  <data name="Conseil.Requete.PlaceholderChanson" xml:space="preserve">
+    <value>Back in Black…</value>
+  </data>
+  <data name="Conseil.Requete.PlaceholderStyle" xml:space="preserve">
+    <value>metal, blues, clean funk…</value>
+  </data>
+  <data name="Conseil.Requete.Style" xml:space="preserve">
+    <value>STYLE / MOOD</value>
+  </data>
+  <data name="Conseil.Tooltip.VoirErreur" xml:space="preserve">
+    <value>Show the error detail</value>
+  </data>
+  <data name="Conseil.Tooltip.VoirReflexionArbitre" xml:space="preserve">
+    <value>Show the arbitrator's reasoning</value>
+  </data>
+  <data name="Conseil.Tooltip.VoirThinking" xml:space="preserve">
+    <value>Show the full model output</value>
+  </data>
+  <data name="Fenetre.Badge.Tx" xml:space="preserve">
+    <value>TX</value>
+  </data>
+  <data name="Fenetre.Lecture.Ecriture1" xml:space="preserve">
+    <value>No write possible to your</value>
+  </data>
+  <data name="Fenetre.Lecture.Ecriture2" xml:space="preserve">
+    <value>TONEX files.</value>
+  </data>
+  <data name="Fenetre.Lecture.Mode" xml:space="preserve">
+    <value>Read-only mode only.</value>
+  </data>
+  <data name="Fenetre.Marque" xml:space="preserve">
+    <value>TONEX SONG ADVISOR</value>
+  </data>
+  <data name="Fenetre.Nav.Bibliotheque" xml:space="preserve">
+    <value>Library</value>
+  </data>
+  <data name="Fenetre.Nav.Reglages" xml:space="preserve">
+    <value>Databases &amp; settings</value>
+  </data>
+  <data name="Fenetre.Rail.Lecture" xml:space="preserve">
+    <value>READ-ONLY</value>
+  </data>
+  <data name="Fenetre.Rail.Navigation" xml:space="preserve">
+    <value>NAVIGATION</value>
+  </data>
+  <data name="Fenetre.Slogan" xml:space="preserve">
+    <value>Library · settings · tone advice</value>
+  </data>
+  <data name="Fenetre.Statut.Sha256" xml:space="preserve">
+    <value>SHA-256 verified on open</value>
+  </data>
+  <data name="Filtre.Tous" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Marqueur.Bloc" xml:space="preserve">
+    <value>BLOCK :</value>
+  </data>
+  <data name="Marqueur.Verdict" xml:space="preserve">
+    <value>VERDICT :</value>
+  </data>
+  <data name="Message.AucuneBibliotheque" xml:space="preserve">
+    <value>No library loaded.</value>
+  </data>
+  <data name="Message.Echec" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="Message.Resume.Bibliotheque" xml:space="preserve">
+    <value>{0:N0} preset(s) · {1:N0} tone model(s)</value>
+  </data>
+</root>

@@ -4,8 +4,15 @@ namespace TonexAdvisor.Core.Tests;
 internal static class TestPaths
 {
     private static readonly Lazy<string> Root = new(FindWorkspaceRoot);
+    private static readonly Lazy<string> Repo = new(FindRepoRoot);
 
     public static string WorkspaceRoot => Root.Value;
+
+    /// <summary>
+    /// Workspace root located via the solution file — required by the i18n guard tests
+    /// (literal scan, resource parity). Throws when the tests run outside the repo tree.
+    /// </summary>
+    public static string RepoRoot => Repo.Value;
 
     /// <summary>True when both sample libraries sit where the tests expect them.</summary>
     public static bool Exists
@@ -56,5 +63,21 @@ internal static class TestPaths
         // Absent: the tests relying on the libraries are skipped (see LibraryFactAttribute) and
         // the paths below simply point somewhere that has no database.
         return AppContext.BaseDirectory;
+    }
+
+    private static string FindRepoRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (directory is not null)
+        {
+            if (File.Exists(Path.Combine(directory.FullName, "TonexAdvisor.sln")))
+                return directory.FullName;
+            directory = directory.Parent;
+        }
+
+        throw new InvalidOperationException(
+            $"TonexAdvisor.sln introuvable au-dessus de « {AppContext.BaseDirectory} » : " +
+            "les tests de garde-fous i18n doivent s'exécuter depuis l'arborescence du dépôt.");
     }
 }

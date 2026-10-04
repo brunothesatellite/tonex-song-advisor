@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:TonexAdvisor.App.ViewModels"
+        xmlns:loc="using:TonexAdvisor.App.Localization"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1360" d:DesignHeight="860"
@@ -24,11 +25,11 @@
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Border Classes="badge-mark">
-                        <TextBlock Text="TX" Classes="badge-mark-text" />
+                        <TextBlock Text="{loc:Loc Fenetre.Badge.Tx}" Classes="badge-mark-text" />
                     </Border>
                     <StackPanel Spacing="1">
-                        <TextBlock Text="TONEX SONG ADVISOR" Classes="h1" FontSize="17" />
-                        <TextBlock Text="Bibliothèque · réglages · conseil tonalité" Classes="faint" />
+                        <TextBlock Text="{loc:Loc Fenetre.Marque}" Classes="h1" FontSize="17" />
+                        <TextBlock Text="{loc:Loc Fenetre.Slogan}" Classes="faint" />
                     </StackPanel>
                 </StackPanel>
 
@@ -56,13 +57,13 @@
             <!-- Navigation rail -->
             <Border Grid.Column="0" Classes="rail" BorderThickness="0,0,1,0" Padding="12,16">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="NAVIGATION" Classes="faint" Margin="8,0,0,10" />
+                    <TextBlock Text="{loc:Loc Fenetre.Rail.Navigation}" Classes="faint" Margin="8,0,0,10" />
 
                     <Button Classes="nav" Classes.active="{Binding IsLibrarySection}"
                             Command="{Binding ShowLibraryCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <TextBlock Text="▤" />
-                            <TextBlock Text="Bibliothèque" />
+                            <TextBlock Text="{loc:Loc Fenetre.Nav.Bibliotheque}" />
                         </StackPanel>
                     </Button>
 
@@ -70,18 +71,18 @@
                             Command="{Binding ShowSettingsCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <TextBlock Text="⚙" />
-                            <TextBlock Text="Bases &amp; réglages" />
+                            <TextBlock Text="{loc:Loc Fenetre.Nav.Reglages}" />
                         </StackPanel>
                     </Button>
 
                     <Separator Margin="6,16,6,14" />
 
-                    <TextBlock Text="LECTURE" Classes="faint" Margin="8,0,0,8" />
-                    <TextBlock Text="Mode lecture seule uniquement." Classes="faint"
+                    <TextBlock Text="{loc:Loc Fenetre.Rail.Lecture}" Classes="faint" Margin="8,0,0,8" />
+                    <TextBlock Text="{loc:Loc Fenetre.Lecture.Mode}" Classes="faint"
                                TextWrapping="Wrap" Margin="8,0,8,0" />
-                    <TextBlock Text="Aucune écriture possible dans vos" Classes="faint"
+                    <TextBlock Text="{loc:Loc Fenetre.Lecture.Ecriture1}" Classes="faint"
                                TextWrapping="Wrap" Margin="8,0,8,0" />
-                    <TextBlock Text="fichiers TONEX." Classes="faint"
+                    <TextBlock Text="{loc:Loc Fenetre.Lecture.Ecriture2}" Classes="faint"
                                TextWrapping="Wrap" Margin="8,0,8,0" />
                 </StackPanel>
             </Border>
@@ -94,7 +95,7 @@
         <Border Grid.Row="2" Classes="rail" BorderThickness="0,1,0,0" Padding="20,0">
             <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
                 <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Classes="faint" />
-                <TextBlock Grid.Column="1" Text="SHA-256 vérifié à l'ouverture" Classes="faint" />
+                <TextBlock Grid.Column="1" Text="{loc:Loc Fenetre.Statut.Sha256}" Classes="faint" />
             </Grid>
         </Border>
 

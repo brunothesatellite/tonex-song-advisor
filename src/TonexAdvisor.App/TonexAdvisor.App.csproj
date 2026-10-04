@@ -3,6 +3,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <!-- Phase 8 (§17) : langue neutre des ressources = anglais ; français en satellite fr\. -->
+    <NeutralResourcesLanguage>en</NeutralResourcesLanguage>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>

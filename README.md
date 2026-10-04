@@ -1,5 +1,7 @@
 # Tonex Song Advisor
 
+> 🌐 **English : [README.en.md](README.en.md)**
+
 Application de bureau (.NET 9 + Avalonia 12) qui **lit** les bibliothèques IK Multimedia TONEX
 (format V1 `Library.db` et V2 `Library2.db`), les affiche en tableau et conseille le meilleur
 preset / la meilleure combinaison **ampli + stomp + cab** pour une chanson ou un artiste donné.
@@ -42,7 +44,8 @@ Les captures viennent d'une bibliothèque d'exemple : les noms de presets change
 - **Filtres** : catégorie, genre, dossier, et le bouton **Favoris** qui garde les presets marqués
   étoile dans TONEX.
 - **Réinitialiser** efface recherche et filtres.
-- Les colonnes se **trient** : un clic sur l'en-tête trie en croissant, un second en décroissant.
+- Les colonnes se **trient** (un clic : croissant, deux : décroissant) et se **redimensionnent
+  à la main** : la largeur choisie est gardée, y compris au redémarrage.
 - La chaîne capturée se lit de gauche à droite : **Stomp → Ampli → Baffle**. Le stomp et l'ampli
   viennent de la même capture et sont inséparables ; le baffle est le seul élément interchangeable
   — y compris pour un « rig complet », dont le stomp reste affiché même sans ampli nommé.
@@ -202,7 +205,7 @@ confronte les avis et classe les **3 meilleures propositions** avec leur niveau 
 - Vous n'êtes pas obligé de toutes les renseigner : **une clé absente = une voix silencieuse**,
   et le conseil reste valable avec celles que vous avez. Une seule clé = un avis direct, deux ou
   plus = avis contradictoires puis arbitrage.
-- Chaque voix a son propre délai (60 s) : un fournisseur lent ou en erreur est simplement signalé
+- Chaque voix a son propre délai (180 s) : un fournisseur lent ou en erreur est simplement signalé
   dans la carte, sans faire échouer les autres.
 - Les modèles ci-dessus sont gratuits et remplacés depuis `config.json`
   (`Providers.<id>.Model`) si les tarifs changent. Toutes ces API sont compatibles OpenAI : un
@@ -210,7 +213,7 @@ confronte les avis et classe les **3 meilleures propositions** avec leur niveau 
 ## Données de test
 
 Les bases TONEX ne sont **pas versionnées** (bibliothèque personnelle, 89 Mo). Pour exécuter les
-130 tests, copie tes propres fichiers dans `db/` :
+195 tests, copie tes propres fichiers dans `db/` :
 
 ```
 db\Library.db     ← format V1 (réglages numériques complets)
@@ -223,12 +226,12 @@ db\Library2.db    ← format V2 (métadonnées)
 |---|---|
 | `src\TonexAdvisor.Core` | lecture des bases (read-only), DTOs, index, tokeniseur, ranges |
 | `src\TonexAdvisor.App` | UI Avalonia, thème `Themes\DarkRock.axaml`, ViewModels |
-| `tests\TonexAdvisor.Core.Tests` | 168 tests |
+| `tests\TonexAdvisor.Core.Tests` | 195 tests |
 | `TODO.md` | état d'avancement et travail restant |
 
 ## Avancement
 
-**v1.0** — le détail est dans [TODO.md](TODO.md) :
+**v1.2.1** — le détail est dans [TODO.md](TODO.md) :
 
 - lecture **strictement en lecture seule** des bibliothèques TONEX **V1 et V2**, navigateur
   (presets et tone models), tri, filtres mémorisés, panneau de détail ;
@@ -240,7 +243,8 @@ db\Library2.db    ← format V2 (métadonnées)
 - **Réglages en génération 2** : les valeurs ne sont pas dans Library2.db (chiffrées dans les
   .txp d'IK) — quand une bibliothèque V1 est à côté, elles sont jointes automatiquement
   (2 313 presets sur la bibliothèque d'exemple), avec la mention de leur origine.
-- **Installateur** et **version portable**, CI GitHub Actions, 168 tests, garantie de lecture
+- **Installateur** et **version portable**, CI GitHub Actions, 195 tests, garantie de lecture
   seule vérifiée par empreinte SHA-256.
 
-Reste (Phase 7) : retrouver les réglages des potards en génération 2.
+Reste : **Phase 8 — internationalisation (français / anglais)** ; le plan détaillé est dans
+[INTERNATIONALISATION.md](INTERNATIONALISATION.md), l'avancement dans [TODO.md](TODO.md).
