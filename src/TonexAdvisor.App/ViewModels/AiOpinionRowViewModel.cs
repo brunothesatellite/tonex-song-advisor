@@ -9,10 +9,11 @@ namespace TonexAdvisor.App.ViewModels;
 /// One voice of the crossed panel, ready to render.
 /// </summary>
 /// <remarks>
-/// A row exists <b>before</b> its voice answers: it spins while the voice works, so the panel
-/// reads the same from the first second — reference first, then the challengers. When a voice
-/// fails, its row stays compact (« indisponible ») and the detail unfolds on a click: a raw error
-/// block makes a working advice look broken, but hiding it completely hides the diagnosis.
+/// A row exists <b>before</b> its voice answers: it spins while the voice works. Its thinking is
+/// hidden by default — a long chain of thought is noise on screen — and the « thinking » button
+/// shows it live, then disappears with the generation. When the answer arrives, the row keeps
+/// only the answer, with its format markers coloured. A voice that fails is compact
+/// (« indisponible ») with its detail one click away.
 /// </remarks>
 public partial class AiOpinionRowViewModel : ViewModelBase
 {
@@ -21,7 +22,7 @@ public partial class AiOpinionRowViewModel : ViewModelBase
     private bool _hasError;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowPlainStatus), nameof(HasThinking))]
+    [NotifyPropertyChangedFor(nameof(ShowPlainStatus), nameof(CanToggleThinking))]
     private bool _isPending = true;
 
     [ObservableProperty]
@@ -31,28 +32,23 @@ public partial class AiOpinionRowViewModel : ViewModelBase
     private string _status = "";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasText))]
+    [NotifyPropertyChangedFor(nameof(HasText), nameof(Lines))]
     private string _text = "";
 
-    /// <summary>Ce que le modèle est en train d'écrire — son travail, pas sa réponse.</summary>
+    /// <summary>What the model is writing: its working, not its answer.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasThinking), nameof(CanToggleThinking))]
+    private string _thinking = "";
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasThinking))]
-    private string _thinking = "";
+    private bool _isThinkingExpanded;
 
     [ObservableProperty]
     private string _errorDetail = "";
 
     [ObservableProperty]
     private bool _isErrorExpanded;
-
-    /// <summary>La sortie complète du modèle, travail compris — opposée à la réponse nettoyée.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowRawText), nameof(CanShowRaw))]
-    private string _rawText = "";
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowRawText))]
-    private bool _isThinkingExpanded;
 
     /// <summary>A voice that has not answered yet.</summary>
     public AiOpinionRowViewModel(string provider)
@@ -68,14 +64,14 @@ public partial class AiOpinionRowViewModel : ViewModelBase
 
     public bool HasText => Text.Length > 0;
 
-    /// <summary>La réflexion s'affiche pendant qu'elle s'écrit, puis laisse la réponse seule.</summary>
-    public bool HasThinking => IsPending && Thinking.Length > 0;
+    /// <summary>The answer, split so its markers can be coloured.</summary>
+    public IReadOnlyList<AnswerLineViewModel> Lines => AnswerLineViewModel.Split(Text);
 
-    /// <summary>Le bouton « thinking » n'apparaît qu'une fois la réponse arrivée.</summary>
-    public bool CanShowRaw => !IsPending && RawText.Length > 0;
+    /// <summary>The working, shown only while the user asks for it.</summary>
+    public bool HasThinking => IsThinkingExpanded && Thinking.Length > 0;
 
-    /// <summary>La sortie complète, repliée par défaut : c'est le travail, pas la réponse.</summary>
-    public bool ShowRawText => IsThinkingExpanded && RawText.Length > 0;
+    /// <summary>The « thinking » button lives as long as the generation does.</summary>
+    public bool CanToggleThinking => IsPending && Thinking.Length > 0;
 
     /// <summary>True when the row carries a message worth unfolding.</summary>
     public bool HasErrorDetail => HasError && ErrorDetail.Length > 0;
@@ -83,7 +79,7 @@ public partial class AiOpinionRowViewModel : ViewModelBase
     /// <summary>Plain status (working, or the time it took) — no click needed there.</summary>
     public bool ShowPlainStatus => !HasError;
 
-    /// <summary>Ajoute un fragment de la réflexion en cours, tant que la voix n'a pas répondu.</summary>
+    /// <summary>Adds a fragment of the thinking, as long as the voice has not answered.</summary>
     public void AddThinking(SseDelta delta)
     {
         if (IsPending)
@@ -99,18 +95,18 @@ public partial class AiOpinionRowViewModel : ViewModelBase
 
         // Un modèle raisonneur écrit son travail dans sa réponse : brouillons, vérifications,
         // comptages. On ne garde que le bloc de réponse, du marqueur de format à la fin du
-        // CONSEIL LIBRE — la sortie complète, elle, reste consultable au bouton « thinking ».
-        RawText = opinion.Text;
+        // CONSEIL LIBRE.
         Text = HasError ? "" : AnswerCleaner.Extract(opinion.Text, "BLOC :", "CONSEIL LIBRE");
         ErrorDetail = opinion.Error ?? "";
         IsErrorExpanded = false;
+        IsThinkingExpanded = false;
     }
-
-    [RelayCommand]
-    private void ToggleThinking()
-        => IsThinkingExpanded = !IsThinkingExpanded;
 
     [RelayCommand]
     private void ToggleError()
         => IsErrorExpanded = !IsErrorExpanded;
+
+    [RelayCommand]
+    private void ToggleThinking()
+        => IsThinkingExpanded = !IsThinkingExpanded;
 }

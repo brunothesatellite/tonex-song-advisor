@@ -23,8 +23,13 @@ public partial class SettingsViewModel : ViewModelBase
     /// <summary>Le dossier TONEX à explorer ; le dossier officiel par défaut.</summary>
     private readonly string? _tonexFolder;
 
-    /// <summary>How to reach the model catalogue ; the real API when nothing is injected.</summary>
     private readonly Func<string, Task<IReadOnlyList<string>>>? _modelFetcher;
+
+    /// <summary>
+    /// How the configuration is written. The default writes the real file; tests inject a no-op,
+    /// because a test must never touch the configuration of the person running it.
+    /// </summary>
+    private readonly Action<AppConfig> _saveConfig;
 
     [ObservableProperty]
     private string _databasePath = "";
@@ -93,6 +98,19 @@ public partial class SettingsViewModel : ViewModelBase
 
     [ObservableProperty]
     private OpenCodeModel? _selectedModel;
+
+    /// <summary>
+    /// The OpenCode models offered as voices. Ticked = one voice each, in the order of the list;
+    /// the arbitre is a different job and lives in <see cref="SelectedModel"/>.
+    /// </summary>
+    public ObservableCollection<VoiceChoiceViewModel> VoiceChoices { get; } = new();
+
+    /// <summary>What happened to the ticked voices at the last catalogue update.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasVoiceModelsStatus))]
+    private string _voiceModelsStatus = "";
+
+    public bool HasVoiceModelsStatus => VoiceModelsStatus.Length > 0;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasAiStatus))]
@@ -170,13 +188,16 @@ public partial class SettingsViewModel : ViewModelBase
         IDatabaseHost host,
         IUserStateStore? stateStore = null,
         string? tonexFolder = null,
-        Func<string, Task<IReadOnlyList<string>>>? modelFetcher = null)
+        Func<string, Task<IReadOnlyList<string>>>? modelFetcher = null,
+        AppConfig? config = null,
+        Action<AppConfig>? saveConfig = null)
     {
         _host = host ?? throw new ArgumentNullException(nameof(host));
         _stateStore = stateStore ?? new UserStateStore();
         _tonexFolder = tonexFolder;
         _modelFetcher = modelFetcher;
-        _config = AppConfig.Load();
+        _saveConfig = saveConfig ?? (saved => saved.Save());
+        _config = config ?? AppConfig.Load();
 
         var state = _stateStore.Load();
         _databasePath = state.DatabasePath;
@@ -191,8 +212,7 @@ public partial class SettingsViewModel : ViewModelBase
         _mistralModel = _config.CredentialFor("mistral").Model;
         _groqModel = _config.CredentialFor("groq").Model;
 
-        // Les voix : une clé renseignée ne suffit pas, il faut que la voix soit active.
-        _openCodeActive = !state.DisabledVoices.Contains(AiProviders.OpenCodeId);
+        // Les voix gratuites : une clé renseignée ne suffit pas, il faut que la voix soit active.
         _geminiActive = !state.DisabledVoices.Contains("gemini");
         _mistralActive = !state.DisabledVoices.Contains("mistral");
         _groqActive = !state.DisabledVoices.Contains("groq");
@@ -208,6 +228,10 @@ public partial class SettingsViewModel : ViewModelBase
         _selectedModel = AvailableModels.FirstOrDefault(model =>
                              string.Equals(model.Id, _config.Model, StringComparison.OrdinalIgnoreCase))
                          ?? OpenCodeModels.Fallback(AvailableModels);
+
+        // Les voix sont construites tout de suite : une liste vide tant qu'on n'a pas cliqué
+        // « Mise à jour » n'est pas une liste.
+        RebuildVoiceChoices();
 
         RefreshTonexLibraries();
         _ready = true;
@@ -254,10 +278,14 @@ public partial class SettingsViewModel : ViewModelBase
         _config.Model = SelectedModel?.Id ?? OpenCodeModels.Fallback(AvailableModels).Id;
         _config.Endpoint = OpenCodeModels.EndPoint;
         _config.ModelCatalog = AvailableModels.Select(model => model.Id).ToList();
+        _config.VoiceModels = VoiceChoices
+            .Where(choice => choice.IsChecked)
+            .Select(choice => choice.Model.Id)
+            .ToList();
         PersistProvider("gemini", GeminiKey, GeminiModel);
         PersistProvider("mistral", MistralKey, MistralModel);
         PersistProvider("groq", GroqKey, GroqModel);
-        _config.Save();
+        _saveConfig(_config);
         return _config;
     }
 
@@ -551,9 +579,6 @@ public partial class SettingsViewModel : ViewModelBase
     // ── Les voix : une clé renseignée ne suffit pas, il faut l'activer ─────
 
     [ObservableProperty]
-    private bool _openCodeActive = true;
-
-    [ObservableProperty]
     private bool _geminiActive = true;
 
     [ObservableProperty]
@@ -562,32 +587,61 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _groqActive = true;
 
-    partial void OnOpenCodeActiveChanged(bool value) => SaveVoices();
-
     partial void OnGeminiActiveChanged(bool value) => SaveVoices();
+
 
     partial void OnMistralActiveChanged(bool value) => SaveVoices();
 
     partial void OnGroqActiveChanged(bool value) => SaveVoices();
 
     /// <summary>
-    /// Une voix désactivée n'est pas appelée et ne s'affiche pas lors d'un conseil, même si sa
-    /// clé est renseignée.
+    /// Les voix qui participent au conseil : les modèles OpenCode cochés, et les voix gratuites
+    /// laissées allumées.
     /// </summary>
+    /// <summary>
+    /// One ticked box per model of the catalogue. A ticked voice that has disappeared is named
+    /// in the message — never silently replaced.
+    /// </summary>
+    private void RebuildVoiceChoices()
+    {
+        var wanted = _config.VoiceModels
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        VoiceChoices.Clear();
+        foreach (var model in AvailableModels)
+            VoiceChoices.Add(new VoiceChoiceViewModel(model, wanted.Contains(model.Id), SaveVoices));
+
+        var gone = wanted
+            .Where(id => AvailableModels.All(model =>
+                !string.Equals(model.Id, id, StringComparison.OrdinalIgnoreCase)))
+            .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        VoiceModelsStatus = gone.Count == 0
+            ? ""
+            : $"{gone.Count} voix cochée(s) ne sont plus disponibles : " +
+              $"{string.Join(", ", gone)}. Elles ont été décochées — rien n'a été coché à leur place.";
+    }
+
     private void SaveVoices()
     {
+        _config.VoiceModels = VoiceChoices
+            .Where(choice => choice.IsChecked)
+            .Select(choice => choice.Model.Id)
+            .ToList();
+        _saveConfig(_config);
+
         var state = _stateStore.Load();
         state.DisabledVoices = DisabledVoicesFromToggles();
         _stateStore.Save(state);
     }
 
-    /// <summary>Les identifiants des voix que l'utilisateur a éteintes.</summary>
+    /// <summary>Les identifiants des voix gratuites que l'utilisateur a éteintes.</summary>
     private List<string> DisabledVoicesFromToggles()
     {
         var disabled = new List<string>();
 
-        if (!OpenCodeActive)
-            disabled.Add(AiProviders.OpenCodeId);
         if (!GeminiActive)
             disabled.Add("gemini");
         if (!MistralActive)
@@ -658,6 +712,9 @@ public partial class SettingsViewModel : ViewModelBase
                 AvailableModels.Add(model);
         }
 
+        // Les voix : une case par modèle, dans l'ordre de la liste du catalogue.
+        RebuildVoiceChoices();
+
         var selected = AvailableModels.FirstOrDefault(model =>
             string.Equals(model.Id, SelectedModel?.Id, StringComparison.OrdinalIgnoreCase));
 
@@ -676,6 +733,6 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         _config.ModelCatalog = AvailableModels.Select(model => model.Id).ToList();
-        _config.Save();
+        _saveConfig(_config);
     }
 }

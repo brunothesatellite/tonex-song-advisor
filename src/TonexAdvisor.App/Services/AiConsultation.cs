@@ -3,8 +3,14 @@ using TonexAdvisor.App.Config;
 
 namespace TonexAdvisor.App.Services;
 
-/// <param name="Provider">Which voice.</param>
-/// <param name="Text">What it answered, empty when it failed.</param>
+/// <summary>One voice of the panel: a client, the model it speaks with, and its display name.</summary>
+/// <param name="Client">The API client to ask.</param>
+/// <param name="Model">The model this voice speaks with — several voices may share one client.</param>
+/// <param name="Label">What the panel shows: « OpenCode · longcat-… », « Gemini (Google) »…</param>
+public sealed record Voice(IAiClient Client, string Model, string Label);
+
+/// <param name="Provider">Which voice said it.</param>
+/// <param name="Text">What it said, empty when it failed.</param>
 /// <param name="Error">What went wrong, null when it answered.</param>
 /// <param name="ElapsedMs">How long it took, useful to explain a timeout.</param>
 public sealed record AiOpinion(string Provider, string Text, string? Error, long ElapsedMs)
@@ -14,31 +20,53 @@ public sealed record AiOpinion(string Provider, string Text, string? Error, long
 }
 
 /// <summary>
-/// Consults several AI voices on the same prompt, in parallel, and keeps going when one of them
-/// fails.
+/// Consults the voices in parallel, and keeps the arbitre apart from them.
 /// </summary>
 /// <remarks>
-/// A panel is only useful if it survives a missing key, a rate limit or a slow provider: every
-/// voice is asked independently, with its own deadline, and reports its own error. The caller
-/// then decides what to do with what came back.
+/// <para>
+/// The panel has two roles, never mixed: the <b>voices</b> propose — every OpenCode model the
+/// user ticked, plus the free voices he left on — and the <b>arbitre</b> decides between them.
+/// With no voice at all, the arbitre speaks alone from the full prompt; with no arbitre (no
+/// OpenCode key), the voices show as suggestions and no verdict is produced.
+/// </para>
+/// <para>
+/// A voice that fails or times out becomes an opinion of its own, never an exception: the panel
+/// must render with whatever arrived.
+/// </para>
 /// </remarks>
 public static class AiConsultation
 {
     /// <summary>
-    /// The voices to consult: OpenCode first (the reference), then every challenger whose key
-    /// the user filled in. No key, no voice.
+    /// Deadline for one voice. Generous on purpose: a reasoning model writes a long chain of
+    /// thought before its first word, and cutting it at 60 s returned « délai dépassé » to voices
+    /// that were seconds away from answering.
     /// </summary>
-    public static IReadOnlyList<IAiClient> BuildClients(AppConfig config, UserState? state = null)
+    public static readonly TimeSpan VoiceTimeout = TimeSpan.FromSeconds(180);
+
+    /// <summary>
+    /// The voices to consult: the OpenCode models the user ticked as voices, then the free
+    /// voices whose key is filled in and whose switch is on.
+    /// </summary>
+    public static IReadOnlyList<Voice> BuildVoices(AppConfig config, UserState? state = null)
     {
         ArgumentNullException.ThrowIfNull(config);
 
         var disabled = state?.DisabledVoices ?? new List<string>();
-        var clients = new List<IAiClient>();
+        var voices = new List<Voice>();
 
-        // Une voix désactivée n'est même pas construite : elle n'est pas appelée, et le panneau
-        // ne l'affiche pas puisqu'il se remplit à partir de cette liste.
-        if (config.HasApiKey && !IsDisabled(disabled, AiProviders.OpenCodeId))
-            clients.Add(new OpenCodeClient(config));
+        // Un modèle OpenCode coché comme voix = une voix, dans l'ordre de la liste.
+        if (config.HasApiKey)
+        {
+            var client = new OpenCodeClient(config);
+
+            foreach (var model in config.VoiceModels)
+            {
+                if (string.IsNullOrWhiteSpace(model))
+                    continue;
+
+                voices.Add(new Voice(client, model, $"OpenCode · {model}"));
+            }
+        }
 
         foreach (var provider in AiProviders.Challengers)
         {
@@ -46,33 +74,33 @@ public static class AiConsultation
             if (string.IsNullOrWhiteSpace(credential.ApiKey))
                 continue;
 
-            if (IsDisabled(disabled, provider.Id))
+            if (disabled.Any(id => string.Equals(id, provider.Id, StringComparison.OrdinalIgnoreCase)))
                 continue;
 
-            clients.Add(new OpenAiCompatClient(provider.Label, provider.EndPoint, credential.ApiKey));
+            var model = string.IsNullOrWhiteSpace(credential.Model)
+                ? provider.DefaultModel
+                : credential.Model;
+
+            voices.Add(new Voice(
+                new OpenAiCompatClient(provider.Label, provider.EndPoint, credential.ApiKey),
+                model,
+                provider.Label));
         }
 
-        return clients;
+        return voices;
     }
 
-    private static bool IsDisabled(IEnumerable<string> disabled, string providerId)
-        => disabled.Any(id => string.Equals(id, providerId, StringComparison.OrdinalIgnoreCase));
-
-    /// <summary>The model to use for a given voice, falling back to the catalogue.</summary>
-    public static string ModelFor(AppConfig config, string providerLabel)
+    /// <summary>
+    /// The arbitre: one OpenCode model, present only when the key is. It never appears among the
+    /// voices — its job is to decide between them.
+    /// </summary>
+    public static Voice? BuildArbitre(AppConfig config)
     {
         ArgumentNullException.ThrowIfNull(config);
 
-        foreach (var provider in AiProviders.Challengers)
-        {
-            if (!string.Equals(provider.Label, providerLabel, StringComparison.Ordinal))
-                continue;
-
-            var model = config.CredentialFor(provider.Id).Model;
-            return string.IsNullOrWhiteSpace(model) ? provider.DefaultModel : model;
-        }
-
-        return config.Model;
+        return config.HasApiKey
+            ? new Voice(new OpenCodeClient(config), config.Model, config.Model)
+            : null;
     }
 
     /// <summary>
@@ -80,30 +108,26 @@ public static class AiConsultation
     /// never as an exception: the panel must render with whatever arrived.
     /// </summary>
     public static async Task<IReadOnlyList<AiOpinion>> ConsultAsync(
-        IReadOnlyList<IAiClient> clients,
-        Func<IAiClient, string> modelFor,
+        IReadOnlyList<Voice> voices,
         string prompt,
         int maxTokens,
-        TimeSpan timeout,
         Action<string, SseDelta>? onDelta = null,
         Action<AiOpinion>? onOpinion = null,
+        TimeSpan? timeout = null,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(clients);
-        ArgumentNullException.ThrowIfNull(modelFor);
+        ArgumentNullException.ThrowIfNull(voices);
 
-        var tasks = clients
-            .Select(client => AskOneAsync(
-                client, modelFor(client), prompt, maxTokens, timeout, onDelta, onOpinion, cancellationToken))
+        var deadline = timeout ?? VoiceTimeout;
+        var tasks = voices
+            .Select(voice => AskOneAsync(voice, prompt, maxTokens, deadline, onDelta, onOpinion, cancellationToken))
             .ToList();
 
-        var opinions = await Task.WhenAll(tasks).ConfigureAwait(false);
-        return opinions;
+        return await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
     private static async Task<AiOpinion> AskOneAsync(
-        IAiClient client,
-        string model,
+        Voice voice,
         string prompt,
         int maxTokens,
         TimeSpan timeout,
@@ -122,21 +146,21 @@ public static class AiConsultation
 
             try
             {
-                var text = await client.AskStreamAsync(
-                    model,
+                var text = await voice.Client.AskStreamAsync(
+                    voice.Model,
                     prompt,
                     maxTokens,
-                    delta => onDelta?.Invoke(client.Provider, delta),
+                    delta => onDelta?.Invoke(voice.Label, delta),
                     deadline.Token).ConfigureAwait(false);
 
                 stopwatch.Stop();
-                return Publish(new AiOpinion(client.Provider, text, null, stopwatch.ElapsedMilliseconds), onOpinion);
+                return Publish(new AiOpinion(voice.Label, text, null, stopwatch.ElapsedMilliseconds), onOpinion);
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             {
                 stopwatch.Stop();
                 return Publish(new AiOpinion(
-                    client.Provider,
+                    voice.Label,
                     "",
                     $"Délai dépassé ({timeout.TotalSeconds:0} s)",
                     stopwatch.ElapsedMilliseconds), onOpinion);
@@ -144,7 +168,7 @@ public static class AiConsultation
             catch (OperationCanceledException)
             {
                 stopwatch.Stop();
-                return Publish(new AiOpinion(client.Provider, "", "Annulé", stopwatch.ElapsedMilliseconds), onOpinion);
+                return Publish(new AiOpinion(voice.Label, "", "Annulé", stopwatch.ElapsedMilliseconds), onOpinion);
             }
             catch (AiRequestException exception) when (exception.IsTransient && attempt == 0)
             {
@@ -153,12 +177,14 @@ public static class AiConsultation
             catch (Exception exception)
             {
                 stopwatch.Stop();
-                return Publish(new AiOpinion(client.Provider, "", exception.Message, stopwatch.ElapsedMilliseconds), onOpinion);
+                return Publish(new AiOpinion(voice.Label, "", exception.Message, stopwatch.ElapsedMilliseconds), onOpinion);
             }
         }
 
         stopwatch.Stop();
-        return Publish(new AiOpinion(client.Provider, "", "Toujours en erreur après un second essai", stopwatch.ElapsedMilliseconds), onOpinion);
+        return Publish(
+            new AiOpinion(voice.Label, "", "Toujours en erreur après un second essai", stopwatch.ElapsedMilliseconds),
+            onOpinion);
     }
 
     /// <summary>Reports an opinion as soon as it is ready, then returns it.</summary>

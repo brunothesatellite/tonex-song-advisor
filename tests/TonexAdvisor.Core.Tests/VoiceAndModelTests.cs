@@ -7,8 +7,8 @@ namespace TonexAdvisor.Core.Tests;
 
 /// <summary>
 /// A key is not enough to be consulted: a voice the user switched off is neither called nor
-/// shown. And the model list comes from the API — free and paid — with a fallback when the chosen
-/// model has disappeared.
+/// shown. The model list comes from the API — free and paid — and a ticked voice that disappeared
+/// is named, never silently replaced.
 /// </summary>
 public class VoiceAndModelTests
 {
@@ -23,8 +23,19 @@ public class VoiceAndModelTests
         => Directory.CreateDirectory(Path.Combine(
             Path.GetTempPath(), "tonex-vm-" + Guid.NewGuid().ToString("N"))).FullName;
 
+    /// <summary>
+    /// A settings screen that writes nothing real: a test must never touch the configuration of
+    /// the person running it, nor the file it lives in.
+    /// </summary>
+    private static SettingsViewModel NewViewModel(
+        IUserStateStore store,
+        string folder,
+        Func<string, Task<IReadOnlyList<string>>>? fetcher = null,
+        AppConfig? config = null)
+        => new(new FakeHost(), store, folder, fetcher, config ?? new AppConfig(), _ => { });
+
     [Fact]
-    public void A_disabled_voice_is_not_consulted_even_with_its_key()
+    public void A_disabled_free_voice_is_not_consulted_even_with_its_key()
     {
         var config = new AppConfig
         {
@@ -37,48 +48,39 @@ public class VoiceAndModelTests
         };
 
         var state = new UserState { DisabledVoices = new List<string> { "gemini" } };
-        var labels = AiConsultation.BuildClients(config, state)
-            .Select(client => client.Provider)
+        var labels = AiConsultation.BuildVoices(config, state)
+            .Select(voice => voice.Label)
             .ToList();
 
-        Assert.Equal(new[] { "OpenCode Go", "Groq" }, labels.ToArray());
+        Assert.Equal(new[] { "Groq" }, labels.ToArray());
     }
 
     [Fact]
-    public void Everything_switched_off_leaves_the_panel_empty()
+    public void NothingTickedLeavesTheArbitreAlone()
     {
-        var config = new AppConfig
-        {
-            ApiKey = "oc_sk_test",
-            Providers = { ["groq"] = new ProviderCredential { ApiKey = "gsk-test" } },
-        };
+        var config = new AppConfig { ApiKey = "oc_sk_test", Model = "longcat-2.5-preview-free" };
 
-        var state = new UserState
-        {
-            DisabledVoices = new List<string> { "opencode", "gemini", "mistral", "groq" },
-        };
-
-        Assert.Empty(AiConsultation.BuildClients(config, state));
+        Assert.Empty(AiConsultation.BuildVoices(config));
+        Assert.NotNull(AiConsultation.BuildArbitre(config));
     }
 
     [Fact]
-    public void Switching_a_voice_off_is_remembered()
+    public void SwitchingAFreeVoiceOffIsRemembered()
     {
         var folder = EmptyFolder();
 
         try
         {
             var store = new InMemoryUserStateStore();
-            var viewModel = new SettingsViewModel(new FakeHost(), store, folder);
+            var viewModel = NewViewModel(store, folder);
 
-            viewModel.OpenCodeActive = false;
             viewModel.GeminiActive = false;
+            viewModel.MistralActive = false;
 
             var state = store.Load();
-            Assert.Contains(AiProviders.OpenCodeId, state.DisabledVoices);
             Assert.Contains("gemini", state.DisabledVoices);
+            Assert.Contains("mistral", state.DisabledVoices);
             Assert.DoesNotContain("groq", state.DisabledVoices);
-            Assert.DoesNotContain("mistral", state.DisabledVoices);
         }
         finally
         {
@@ -93,8 +95,7 @@ public class VoiceAndModelTests
 
         try
         {
-            var viewModel = new SettingsViewModel(
-                new FakeHost(),
+            var viewModel = NewViewModel(
                 new InMemoryUserStateStore(),
                 folder,
                 _ => Task.FromResult<IReadOnlyList<string>>(
@@ -120,8 +121,7 @@ public class VoiceAndModelTests
 
         try
         {
-            var viewModel = new SettingsViewModel(
-                new FakeHost(),
+            var viewModel = NewViewModel(
                 new InMemoryUserStateStore(),
                 folder,
                 _ => Task.FromResult<IReadOnlyList<string>>(
@@ -145,8 +145,7 @@ public class VoiceAndModelTests
 
         try
         {
-            var viewModel = new SettingsViewModel(
-                new FakeHost(),
+            var viewModel = NewViewModel(
                 new InMemoryUserStateStore(),
                 folder,
                 _ => Task.FromResult<IReadOnlyList<string>>(new[] { "glm-5.3-flash", "space-bunny-free" }));
@@ -158,6 +157,70 @@ public class VoiceAndModelTests
             Assert.False(viewModel.AvailableModels[0].IsFree);
             Assert.Contains("payant", viewModel.AvailableModels[0].Label, StringComparison.Ordinal);
             Assert.Contains("gratuit", viewModel.AvailableModels[1].Label, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(folder, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task A_ticked_voice_that_disappeared_is_named_and_never_replaced()
+    {
+        var folder = EmptyFolder();
+
+        try
+        {
+            // L'utilisateur avait coché deux voix, dont une qui n'existe plus.
+            var config = new AppConfig
+            {
+                ApiKey = "oc_sk_test",
+                VoiceModels = { "kimi-k2.6", "space-bunny-free" },
+            };
+
+            var viewModel = NewViewModel(
+                new InMemoryUserStateStore(),
+                folder,
+                _ => Task.FromResult<IReadOnlyList<string>>(
+                    new[] { "longcat-2.5-preview-free", "space-bunny-free" }),
+                config);
+
+            await viewModel.RefreshModelsCommand.ExecuteAsync(null);
+
+            Assert.Contains("kimi-k2.6", viewModel.VoiceModelsStatus, StringComparison.Ordinal);
+            Assert.Contains("ne sont plus disponibles", viewModel.VoiceModelsStatus, StringComparison.Ordinal);
+
+            // Rien n'a été coché à sa place : seule la voix encore présente reste active.
+            var ticked = viewModel.VoiceChoices.Where(choice => choice.IsChecked).ToList();
+            Assert.Single(ticked);
+            Assert.Equal("space-bunny-free", ticked[0].Model.Id);
+        }
+        finally
+        {
+            Directory.Delete(folder, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task Ticking_a_voice_is_remembered()
+    {
+        var folder = EmptyFolder();
+
+        try
+        {
+            var config = new AppConfig { ApiKey = "oc_sk_test" };
+            var viewModel = NewViewModel(
+                new InMemoryUserStateStore(),
+                folder,
+                _ => Task.FromResult<IReadOnlyList<string>>(
+                    new[] { "longcat-2.5-preview-free", "space-bunny-free" }),
+                config);
+
+            await viewModel.RefreshModelsCommand.ExecuteAsync(null);
+
+            viewModel.VoiceChoices.First(choice => choice.Model.Id == "space-bunny-free").IsChecked = true;
+
+            Assert.Equal(new[] { "space-bunny-free" }, config.VoiceModels.ToArray());
         }
         finally
         {

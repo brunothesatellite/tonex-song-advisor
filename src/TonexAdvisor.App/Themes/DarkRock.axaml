@@ -369,4 +369,21 @@
         <Setter Property="Background" Value="{StaticResource B.SurfaceLift}" />
     </Style>
 
+    <!-- Etiquettes de modele : gratuit en vert, payant en orange. -->
+    <Style Selector="Border.chip-static.free TextBlock">
+        <Setter Property="Foreground" Value="#3FBF7F" />
+    </Style>
+
+    <Style Selector="Border.chip-static.paid TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource B.Accent}" />
+    </Style>
+
+    <Style Selector="TextBlock.free">
+        <Setter Property="Foreground" Value="#3FBF7F" />
+    </Style>
+
+    <Style Selector="TextBlock.paid">
+        <Setter Property="Foreground" Value="{StaticResource B.Accent}" />
+    </Style>
+
 </Styles>

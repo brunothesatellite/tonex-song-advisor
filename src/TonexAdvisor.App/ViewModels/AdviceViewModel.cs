@@ -75,7 +75,7 @@ public partial class AdviceViewModel : ViewModelBase
     private string _aiTitle = "";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasAiThinking))]
+    [NotifyPropertyChangedFor(nameof(HasAiThinking), nameof(CanToggleAiThinking))]
     private string _aiThinking = "";
 
     [ObservableProperty]
@@ -87,8 +87,25 @@ public partial class AdviceViewModel : ViewModelBase
     private string _aiStatus = "";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsAiEnabled), nameof(HasAiThinking), nameof(CanShowAiThinking))]
+    [NotifyPropertyChangedFor(nameof(IsAiEnabled), nameof(HasAiThinking), nameof(CanToggleAiThinking))]
     private bool _isAiBusy;
+
+    /// <summary>
+    /// The arbitre is working: the panel says so instead of leaving a blank where the verdict
+    /// will be.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isArbitreWorking;
+
+    /// <summary>
+    /// The answer, split so its markers can be coloured. Built once the verdict is complete;
+    /// while it streams, the plain text does the job.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAiLines))]
+    private IReadOnlyList<AnswerLineViewModel> _aiLines = Array.Empty<AnswerLineViewModel>();
+
+    public bool HasAiLines => AiLines.Count > 0;
 
     private readonly Func<AppConfig> _configLoader;
     private readonly IUserStateStore _stateStore;
@@ -120,13 +137,19 @@ public partial class AdviceViewModel : ViewModelBase
     public bool HasAiTitle => AiTitle.Length > 0;
 
     /// <summary>
-    /// The referee's thinking streams live while it works; once the verdict is there, it only
-    /// comes back on the « thinking » button.
+    /// Title of the voices block: they propose when an arbitre will decide, they suggest when
+    /// nobody will.
     /// </summary>
-    public bool HasAiThinking => AiThinking.Length > 0 && (IsAiBusy || IsAiThinkingExpanded);
+    public string VoicesTitle { get; private set; } = "AVIS DES VOIX";
 
-    /// <summary>The verdict's « thinking » button: the referee's full output.</summary>
-    public bool CanShowAiThinking => AiThinking.Length > 0 && !IsAiBusy;
+    /// <summary>
+    /// The referee's thinking streams live while it works — hidden unless the user asks for it —
+    /// and the « thinking » button leaves with the generation.
+    /// </summary>
+    public bool HasAiThinking => IsAiThinkingExpanded && AiThinking.Length > 0;
+
+    /// <summary>The « thinking » button of the verdict lives as long as the generation does.</summary>
+    public bool CanToggleAiThinking => IsAiBusy && AiThinking.Length > 0;
 
     [RelayCommand]
     private void ToggleAiThinking()
@@ -231,10 +254,13 @@ public partial class AdviceViewModel : ViewModelBase
             Advise();
 
         var config = _configLoader();
+        var state = _stateStore.Load();
+        var voices = AiConsultation.BuildVoices(config, state);
+        var arbitre = AiConsultation.BuildArbitre(config);
 
-        // Une clé renseignée ne suffit pas : chaque voix doit aussi être active.
-        var clients = AiConsultation.BuildClients(config, _stateStore.Load());
-        if (clients.Count == 0)
+        VoicesTitle = arbitre is null ? "SUGGESTIONS DES VOIX" : "AVIS DES VOIX";
+
+        if (voices.Count == 0 && arbitre is null)
         {
             AiStatus = "Clé API absente : renseigne au moins une voix (OpenCode, Gemini, Mistral " +
                        "ou Groq) dans Réglages → Bases & réglages. Le classement local reste valable.";
@@ -246,22 +272,49 @@ public partial class AdviceViewModel : ViewModelBase
         _aiCts?.Cancel();
         _aiCts = new CancellationTokenSource();
 
-        // Chaque voix a sa ligne dès la première seconde, la référence en premier : le panneau ne
-        // change pas de forme pendant l'attente, il se remplit.
-        foreach (var client in clients)
-            Opinions.Add(new AiOpinionRowViewModel(client.Provider));
+        // Chaque voix a sa ligne dès la première seconde : le panneau ne change pas de forme
+        // pendant l'attente, il se remplit.
+        foreach (var voice in voices)
+            Opinions.Add(new AiOpinionRowViewModel(voice.Label));
         OnPropertyChanged(nameof(HasOpinions));
 
         IsAiBusy = true;
         try
         {
-            // 1. Every voice at once, each opinion appearing as it lands.
+            // Aucune voix : l'arbitre parle seul, à partir du prompt complet.
+            if (voices.Count == 0)
+            {
+                IsArbitreWorking = true;
+                var alone = await arbitre!.Client.AskStreamAsync(
+                    arbitre.Model,
+                    prompt,
+                    CataloguePrompt.MaxTokens,
+                    delta => Dispatch(() =>
+                    {
+                        // Tout le flux est la réflexion de l'arbitre : dépliable au bouton.
+                        // La réponse, elle, s'écrit aussi dans AiText, puis se nettoie à la fin.
+                        AiThinking += delta.Text;
+
+                        if (!delta.IsReasoning)
+                            AiText += delta.Text;
+                    }),
+                    _aiCts.Token);
+
+                if (AiText.Length == 0 && alone.Length > 0)
+                    AiText = alone;
+
+                AiText = AnswerCleaner.Extract(AiText, "BLOC :", "CONSEIL LIBRE");
+                AiLines = AnswerLineViewModel.Split(AiText);
+                AiTitle = $"SUGGESTION — {arbitre.Model}";
+                AiStatus = $"Conseil IA — {arbitre.Model}";
+                return;
+            }
+
+            // Des voix : chacune propose dans sa ligne, au fil de l'eau.
             var opinions = await AiConsultation.ConsultAsync(
-                clients,
-                client => AiConsultation.ModelFor(config, client.Provider),
+                voices,
                 prompt,
                 CataloguePrompt.MaxTokens,
-                VoiceTimeout,
                 onDelta: (provider, delta) => Dispatch(() => AppendThinking(provider, delta)),
                 onOpinion: opinion => Dispatch(() => AppendOpinion(opinion)),
                 cancellationToken: _aiCts.Token);
@@ -270,38 +323,35 @@ public partial class AdviceViewModel : ViewModelBase
 
             if (usable.Count == 0)
             {
-                // Aucune voix disponible : on le dit sans détailler les erreurs, qui n'ajoutent
-                // rien au conseil et donnent l'impression d'un blocage général.
                 var names = string.Join(", ", opinions.Select(opinion => opinion.Provider));
                 AiStatus = $"Voix indisponibles ({names}) — le classement local reste affiché.";
                 return;
             }
 
-            // 2. Une seule voix : pas d'arbitrage utile, on affiche son avis.
-            if (usable.Count == 1)
+            // Pas d'arbitre (clé OpenCode absente) : les voix restent des suggestions.
+            if (arbitre is null)
             {
-                AiText = AnswerCleaner.Extract(usable[0].Text, "BLOC :", "CONSEIL LIBRE");
-                AiTitle = $"AVIS — {usable[0].Provider}";
-                AiStatus = $"Conseil IA - {usable[0].Provider}";
+                AiStatus = $"{usable.Count} suggestion(s) — aucun arbitre : la clé OpenCode n'est pas renseignée.";
                 return;
             }
 
-            // 3. Several voices: a referee confronts them and ranks the three best proposals.
+            // L'arbitre tranche, même quand une seule voix s'est exprimée.
             var arbitration = ArbitrationPrompt.Build(
                 query,
                 usable.Select(opinion => new Opinion(opinion.Provider, opinion.Text)).ToList(),
                 _owner.Index!);
 
-            var referee = clients[0];
-            var text = await referee.AskStreamAsync(
-                AiConsultation.ModelFor(config, referee.Provider),
+            IsArbitreWorking = true;
+            var text = await arbitre.Client.AskStreamAsync(
+                arbitre.Model,
                 arbitration,
                 ArbitrationPrompt.MaxTokens,
                 delta => Dispatch(() =>
                 {
-                    if (delta.IsReasoning)
-                        AiThinking += delta.Text;
-                    else
+                    // Idem : tout le flux est la réflexion, la réponse arrive en même temps.
+                    AiThinking += delta.Text;
+
+                    if (!delta.IsReasoning)
                         AiText += delta.Text;
                 }),
                 _aiCts.Token);
@@ -309,10 +359,11 @@ public partial class AdviceViewModel : ViewModelBase
             if (AiText.Length == 0 && text.Length > 0)
                 AiText = text;
 
-            // L'arbitre écrit son travail (évaluation des avis, brouillons) dans sa sortie : on ne
-            // garde que son verdict, du marqueur à la fin du CONSEIL LIBRE.
+            // L'arbitre écrit son travail (évaluation des avis, brouillons) dans sa sortie : on
+            // ne garde que son verdict, du marqueur à la fin du CONSEIL LIBRE.
             AiText = AnswerCleaner.Extract(AiText, "VERDICT :", "CONSEIL LIBRE");
-            AiTitle = $"VERDICT — ARBITRÉ PAR {referee.Provider}";
+            AiLines = AnswerLineViewModel.Split(AiText);
+            AiTitle = $"VERDICT — ARBITRÉ PAR {arbitre.Model}";
 
             AiStatus = AiText.Length > 0
                 ? $"Verdict sur {usable.Count} avis ({string.Join(", ", usable.Select(opinion => opinion.Provider))})"
@@ -332,6 +383,7 @@ public partial class AdviceViewModel : ViewModelBase
             foreach (var row in Opinions.Where(candidate => candidate.IsPending).ToList())
                 row.Complete(new AiOpinion(row.Provider, "", "Interrompu", 0));
 
+            IsArbitreWorking = false;
             IsAiBusy = false;
         }
     }

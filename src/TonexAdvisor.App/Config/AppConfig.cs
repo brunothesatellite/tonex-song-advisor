@@ -40,6 +40,12 @@ public sealed class AppConfig
     /// </summary>
     public List<string> ModelCatalog { get; set; } = new();
 
+    /// <summary>
+    /// The OpenCode models the user ticked as voices. One ticked model = one voice; the arbitre
+    /// is <see cref="Model"/>, a different job — it decides between the voices.
+    /// </summary>
+    public List<string> VoiceModels { get; set; } = new();
+
     /// <summary>La clé (et le modèle) d'un fournisseur challenger, vide s'il n'est pas renseigné.</summary>
     public ProviderCredential CredentialFor(string providerId)
         => Providers.TryGetValue(providerId, out var credential) && credential is not null

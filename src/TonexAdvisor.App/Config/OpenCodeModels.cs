@@ -7,6 +7,11 @@ public sealed record OpenCodeModel(string Id, bool IsFree)
 {
     public string Label => IsFree ? $"{Id}  ·  gratuit" : $"{Id}  ·  payant";
 
+    /// <summary>« gratuit » ou « payant », ce que la liste colore.</summary>
+    public string Tag => IsFree ? "gratuit" : "payant";
+
+    public bool IsPaid => !IsFree;
+
     /// <summary>What the drop-down shows.</summary>
     public override string ToString() => Label;
 }

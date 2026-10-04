@@ -106,7 +106,7 @@
                         ClipToBounds="True">
 
                 <TabItem Header="Presets">
-                    <DataGrid ItemsSource="{Binding Presets}"
+                    <DataGrid x:Name="PresetsGrid" ItemsSource="{Binding Presets}"
                               SelectedItem="{Binding SelectedPreset}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
@@ -157,7 +157,7 @@
                 </TabItem>
 
                 <TabItem Header="Tone models">
-                    <DataGrid ItemsSource="{Binding ToneModels}"
+                    <DataGrid x:Name="ToneModelsGrid" ItemsSource="{Binding ToneModels}"
                               SelectedItem="{Binding SelectedToneModel}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
@@ -358,21 +358,25 @@
                                                                 <Button Content="thinking"
                                                                         Command="{Binding ToggleThinkingCommand}"
                                                                         FontSize="11" Padding="8,1"
-                                                                        IsVisible="{Binding CanShowRaw}"
+                                                                        IsVisible="{Binding CanToggleThinking}"
                                                                         ToolTip.Tip="Afficher la sortie complète du modèle" />
                                                             </StackPanel>
                                                         </Grid>
 
-                                                        <TextBlock Text="{Binding Text}" Classes="dim"
-                                                                   FontSize="11" TextWrapping="Wrap"
-                                                                   IsVisible="{Binding HasText}" />
+                                                        <ItemsControl ItemsSource="{Binding Lines}"
+                                                                      IsVisible="{Binding HasText}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate x:DataType="vm:AnswerLineViewModel">
+                                                                    <TextBlock TextWrapping="Wrap" FontSize="11">
+                                                                        <Run Text="{Binding Label}"
+                                                                             Foreground="{StaticResource B.Accent}" />
+                                                                        <Run Text="{Binding Body}" />
+                                                                    </TextBlock>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
 
-                                                        <!-- La sortie complète, repliée : c'est le travail du modèle. -->
-                                                        <TextBlock Text="{Binding RawText}" Classes="faint"
-                                                                   FontSize="11" TextWrapping="Wrap"
-                                                                   IsVisible="{Binding ShowRawText}" />
-
-                                                        <!-- La réflexion s'écrit en direct, puis laisse la réponse seule. -->
+                                                        <!-- La reflexion : masquee tant qu on ne l a pas demandee. -->
                                                         <TextBlock Text="{Binding Thinking}" Classes="faint"
                                                                    FontStyle="Italic" FontSize="11"
                                                                    TextWrapping="Wrap"
@@ -391,21 +395,45 @@
                                                FontStyle="Italic" FontSize="11" TextWrapping="Wrap"
                                                IsVisible="{Binding Advice.HasAiThinking}" />
 
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"
-                                          IsVisible="{Binding Advice.HasAiTitle}">
-                                        <TextBlock Grid.Column="0" Text="{Binding Advice.AiTitle}"
-                                                   Classes="faint" FontSize="11"
-                                                   VerticalAlignment="Center" />
+
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                                            <ProgressBar IsIndeterminate="True" Width="90" Height="4"
+                                                         VerticalAlignment="Center"
+                                                         IsVisible="{Binding Advice.IsArbitreWorking}" />
+                                            <TextBlock Text="L'arbitre tranche…" Classes="faint" FontSize="11"
+                                                       VerticalAlignment="Center"
+                                                       IsVisible="{Binding Advice.IsArbitreWorking}" />
+                                            <TextBlock Text="{Binding Advice.AiTitle}" Classes="faint"
+                                                       FontSize="11" VerticalAlignment="Center"
+                                                       IsVisible="{Binding Advice.HasAiTitle}" />
+                                        </StackPanel>
+
                                         <Button Grid.Column="1" Content="thinking" FontSize="11"
                                                 Padding="8,1"
                                                 Command="{Binding Advice.ToggleAiThinkingCommand}"
-                                                IsVisible="{Binding Advice.CanShowAiThinking}"
-                                                ToolTip.Tip="Afficher la sortie complète de l'arbitre" />
+                                                IsVisible="{Binding Advice.CanToggleAiThinking}"
+                                                ToolTip.Tip="Afficher la reflexion de l'arbitre" />
                                     </Grid>
 
+                                    <!-- Pendant le flux : texte brut ; une fois le verdict fini,
+                                         les lignes colorees. -->
                                     <TextBlock Text="{Binding Advice.AiText}" FontSize="13"
                                                LineHeight="21" TextWrapping="Wrap"
-                                               IsVisible="{Binding Advice.HasAiText}" />
+                                               IsVisible="{Binding Advice.IsAiBusy}" />
+
+                                    <ItemsControl ItemsSource="{Binding Advice.AiLines}"
+                                                  IsVisible="{Binding Advice.HasAiLines}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:AnswerLineViewModel">
+                                                <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="21">
+                                                    <Run Text="{Binding Label}"
+                                                         Foreground="{StaticResource B.Accent}" />
+                                                    <Run Text="{Binding Body}" />
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </StackPanel>
                             </Border>
 

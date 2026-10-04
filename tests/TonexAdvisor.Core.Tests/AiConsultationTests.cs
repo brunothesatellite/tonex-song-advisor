@@ -1,11 +1,12 @@
 using TonexAdvisor.App.Config;
 using TonexAdvisor.App.Services;
+using TonexAdvisor.Core.Data;
 
 namespace TonexAdvisor.Core.Tests;
 
 /// <summary>
-/// A panel is only useful if it survives one voice failing: every opinion must come back,
-/// including the failed ones, and no voice may hold up the others.
+/// Two roles, never mixed: the voices propose, the arbitre decides. A voice that fails becomes an
+/// opinion of its own, and a slow one never holds up the others.
 /// </summary>
 public class AiConsultationTests
 {
@@ -30,31 +31,32 @@ public class AiConsultationTests
             => _reply(cancellationToken);
     }
 
+    private static Voice Voice(string label, Func<CancellationToken, Task<string>> reply)
+        => new(new FakeClient(label, reply), "test-model", label);
+
     [Fact]
     public async Task Consultation_KeepsEveryVoice_EvenWhenOneOfThemFails()
     {
-        var clients = new IAiClient[]
+        var voices = new[]
         {
-            new FakeClient("Gemini (Google)", _ => Task.FromResult("Je choisis le preset 1.")),
-            new FakeClient("Mistral", _ => throw new InvalidOperationException("401 Unauthorized")),
-            new FakeClient("Groq", _ => Task.FromResult("Non, le preset 2 est meilleur.")),
+            Voice("OpenCode · a", _ => Task.FromResult("Je choisis le preset 1.")),
+            Voice("Gemini (Google)", _ => throw new InvalidOperationException("401 Unauthorized")),
+            Voice("Groq", _ => Task.FromResult("Non, le preset 2 est meilleur.")),
         };
 
         var seen = new List<string>();
 
         var opinions = await AiConsultation.ConsultAsync(
-            clients,
-            _ => "test-model",
+            voices,
             "prompt",
             100,
-            TimeSpan.FromSeconds(30),
             onOpinion: opinion => seen.Add(opinion.Provider));
 
         Assert.Equal(3, opinions.Count);
         Assert.Equal(2, opinions.Count(opinion => opinion.Ok));
         Assert.True(seen.Count == 3, "each voice must be reported as soon as it lands");
 
-        var failure = opinions.Single(opinion => opinion.Provider == "Mistral");
+        var failure = opinions.Single(opinion => opinion.Provider == "Gemini (Google)");
         Assert.False(failure.Ok);
         Assert.Contains("401", failure.Error ?? "");
     }
@@ -62,18 +64,17 @@ public class AiConsultationTests
     [Fact]
     public async Task Consultation_TimesOutASlowVoice_InsteadOfWaitingForIt()
     {
-        var slow = new FakeClient("Mistral", async cancellation =>
+        var slow = Voice("Mistral", async cancellation =>
         {
             await Task.Delay(TimeSpan.FromSeconds(30), cancellation);
             return "trop tard";
         });
 
         var opinions = await AiConsultation.ConsultAsync(
-            new IAiClient[] { slow },
-            _ => "test-model",
+            new[] { slow },
             "prompt",
             100,
-            TimeSpan.FromMilliseconds(200));
+            timeout: TimeSpan.FromMilliseconds(200));
 
         var opinion = Assert.Single(opinions);
         Assert.False(opinion.Ok);
@@ -82,58 +83,13 @@ public class AiConsultationTests
     }
 
     [Fact]
-    public async Task Consultation_RetriesAVoiceThatFailedOnHighDemand()
+    public void BuildVoices_TakesTheTickedOpenCodeModelsThenTheFreeVoices()
     {
-        var calls = 0;
-        var flaky = new FakeClient("Gemini (Google)", _ =>
-        {
-            calls++;
-            if (calls == 1)
-                throw new AiRequestException(503, "This model is currently experiencing high demand.");
-
-            return Task.FromResult("Réponse après nouvel essai.");
-        });
-
-        var opinions = await AiConsultation.ConsultAsync(
-            new IAiClient[] { flaky }, _ => "test-model", "prompt", 100, TimeSpan.FromSeconds(30));
-
-        var opinion = Assert.Single(opinions);
-        Assert.True(opinion.Ok, opinion.Error ?? "");
-        Assert.Equal("Réponse après nouvel essai.", opinion.Text);
-        Assert.Equal(2, calls);
-    }
-
-    [Fact]
-    public async Task Consultation_DoesNotRetryARejectedKey()
-    {
-        var calls = 0;
-        var rejected = new FakeClient("Groq", _ =>
-        {
-            calls++;
-            throw new AiRequestException(401, "invalid api key");
-        });
-
-        var opinions = await AiConsultation.ConsultAsync(
-            new IAiClient[] { rejected }, _ => "test-model", "prompt", 100, TimeSpan.FromSeconds(30));
-
-        var opinion = Assert.Single(opinions);
-        Assert.False(opinion.Ok);
-        Assert.True(calls == 1, "a bad key will not become good by asking twice");
-        Assert.Contains("invalid api key", opinion.Error ?? "");
-    }
-
-    [Fact]
-    public void BuildClients_TakesOnlyTheVoicesWithAKey()
-    {
-        var silent = new AppConfig { ApiKey = "" };
-        Assert.Empty(AiConsultation.BuildClients(silent));
-
-        var oneVoice = new AppConfig { ApiKey = "oc_sk_test" };
-        Assert.Single(AiConsultation.BuildClients(oneVoice));
-
-        var panel = new AppConfig
+        var config = new AppConfig
         {
             ApiKey = "oc_sk_test",
+            Model = "longcat-2.5-preview-free",
+            VoiceModels = { "space-bunny-free", "kimi-k2.6" },
             Providers =
             {
                 ["gemini"] = new ProviderCredential { ApiKey = "AIza-test" },
@@ -141,30 +97,62 @@ public class AiConsultationTests
             },
         };
 
-        var labels = AiConsultation.BuildClients(panel).Select(client => client.Provider).ToList();
+        var labels = AiConsultation.BuildVoices(config)
+            .Select(voice => voice.Label)
+            .ToList();
 
-        Assert.Equal(new[] { "OpenCode Go", "Gemini (Google)", "Groq" }, labels.ToArray());
+        // Les modèles OpenCode dans l'ordre de la liste, puis les voix gratuites.
+        Assert.Equal(
+            new[]
+            {
+                "OpenCode · space-bunny-free",
+                "OpenCode · kimi-k2.6",
+                "Gemini (Google)",
+                "Groq",
+            },
+            labels.ToArray());
     }
 
     [Fact]
-    public void ModelFor_FallsBackToTheFreeModelOfTheCatalogue()
+    public void AVoiceWithoutAnExplicitModelUsesTheFreeDefaultOfItsProvider()
     {
         var config = new AppConfig
         {
-            Model = "longcat-2.5-preview-free",
-            Providers =
-            {
-                ["groq"] = new ProviderCredential { ApiKey = "gsk-test", Model = "llama-custom" },
-            },
+            Providers = { ["groq"] = new ProviderCredential { ApiKey = "gsk-test" } },
         };
 
-        // The reference voice uses the model chosen in the settings.
-        Assert.Equal("longcat-2.5-preview-free", AiConsultation.ModelFor(config, "OpenCode Go"));
+        var voice = Assert.Single(AiConsultation.BuildVoices(config));
+        Assert.Equal("openai/gpt-oss-120b", voice.Model);
+    }
 
-        // A challenger without an explicit model gets the free default of its catalogue.
-        Assert.Equal("gemini-flash-latest", AiConsultation.ModelFor(config, "Gemini (Google)"));
+    [Fact]
+    public void TheArbitreIsNeverOneOfTheVoices()
+    {
+        var config = new AppConfig
+        {
+            ApiKey = "oc_sk_test",
+            Model = "longcat-2.5-preview-free",
+            VoiceModels = { "space-bunny-free" },
+        };
 
-        // And one with an explicit model keeps it.
-        Assert.Equal("llama-custom", AiConsultation.ModelFor(config, "Groq"));
+        var arbitre = AiConsultation.BuildArbitre(config);
+
+        Assert.NotNull(arbitre);
+        Assert.Equal("longcat-2.5-preview-free", arbitre!.Model);
+        Assert.DoesNotContain(
+            AiConsultation.BuildVoices(config),
+            voice => string.Equals(voice.Model, arbitre.Model, StringComparison.OrdinalIgnoreCase)
+                     && voice.Label == arbitre.Label);
+    }
+
+    [Fact]
+    public void WithoutAnOpenCodeKeyThereIsNoArbitre()
+    {
+        var config = new AppConfig
+        {
+            Providers = { ["groq"] = new ProviderCredential { ApiKey = "gsk-test" } },
+        };
+
+        Assert.Null(AiConsultation.BuildArbitre(config));
     }
 }
