@@ -95,15 +95,30 @@ public partial class AdviceViewModel : ViewModelBase
     /// will be.
     /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ArbitreElapsedLabel))]
     private bool _isArbitreWorking;
 
+    /// <summary>Seconds the arbitre has been working — proof of life while it thinks.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ArbitreElapsedLabel))]
+    private int _arbitreElapsed;
+
+    public string ArbitreElapsedLabel => IsArbitreWorking ? $"{ArbitreElapsed} s" : "";
+
+    private readonly DispatcherTimer _ticker = new DispatcherTimer
+    {
+        Interval = TimeSpan.FromSeconds(1),
+    };
+
     /// <summary>
-    /// The answer, split so its markers can be coloured. Built once the verdict is complete;
-    /// while it streams, the plain text does the job.
+    /// The answer, split so its markers can be coloured. Rebuilt as it streams, so the markers
+    /// are coloured while they appear and not only at the end.
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasAiLines))]
     private IReadOnlyList<AnswerLineViewModel> _aiLines = Array.Empty<AnswerLineViewModel>();
+
+    private int _linesBuiltLength;
 
     public bool HasAiLines => AiLines.Count > 0;
 
@@ -116,6 +131,25 @@ public partial class AdviceViewModel : ViewModelBase
         _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         _configLoader = configLoader ?? (() => AppConfig.Load());
         _stateStore = stateStore ?? new UserStateStore();
+
+        _ticker.Tick += (_, _) => Tick();
+        _ticker.Start();
+    }
+
+    /// <summary>
+    /// One more second of waiting, for every voice still working and for the arbitre. A stalled
+    /// spinner cannot lie about this one.
+    /// </summary>
+    private void Tick()
+    {
+        if (!IsAiBusy)
+            return;
+
+        foreach (var row in Opinions.Where(row => row.IsPending).ToList())
+            row.Tick();
+
+        if (IsArbitreWorking)
+            ArbitreElapsed++;
     }
 
     public ObservableCollection<AdvicePresetRowViewModel> Presets { get; } = new();
@@ -174,6 +208,7 @@ public partial class AdviceViewModel : ViewModelBase
         AiThinking = "";
         AiStatus = "";
         AiTitle = "";
+        ArbitreElapsed = 0;
         Opinions.Clear();
         OnPropertyChanged(nameof(HasPresets));
         OnPropertyChanged(nameof(HasOpinions));
@@ -237,6 +272,7 @@ public partial class AdviceViewModel : ViewModelBase
         AiThinking = "";
         AiStatus = "";
         AiTitle = "";
+        ArbitreElapsed = 0;
         Opinions.Clear();
         OnPropertyChanged(nameof(HasOpinions));
 
@@ -296,7 +332,12 @@ public partial class AdviceViewModel : ViewModelBase
                         AiThinking += delta.Text;
 
                         if (!delta.IsReasoning)
+                        {
                             AiText += delta.Text;
+
+                            if (AiText.Length - _linesBuiltLength > 120)
+                                RebuildAiLines();
+                        }
                     }),
                     _aiCts.Token);
 
@@ -304,7 +345,7 @@ public partial class AdviceViewModel : ViewModelBase
                     AiText = alone;
 
                 AiText = AnswerCleaner.Extract(AiText, "BLOC :", "CONSEIL LIBRE");
-                AiLines = AnswerLineViewModel.Split(AiText);
+                RebuildAiLines();
                 AiTitle = $"SUGGESTION — {arbitre.Model}";
                 AiStatus = $"Conseil IA — {arbitre.Model}";
                 return;
@@ -362,7 +403,7 @@ public partial class AdviceViewModel : ViewModelBase
             // L'arbitre écrit son travail (évaluation des avis, brouillons) dans sa sortie : on
             // ne garde que son verdict, du marqueur à la fin du CONSEIL LIBRE.
             AiText = AnswerCleaner.Extract(AiText, "VERDICT :", "CONSEIL LIBRE");
-            AiLines = AnswerLineViewModel.Split(AiText);
+            RebuildAiLines();
             AiTitle = $"VERDICT — ARBITRÉ PAR {arbitre.Model}";
 
             AiStatus = AiText.Length > 0
@@ -401,6 +442,16 @@ public partial class AdviceViewModel : ViewModelBase
             string.Equals(candidate.Provider, provider, StringComparison.Ordinal));
 
         row?.AddThinking(delta);
+    }
+
+    /// <summary>
+    /// Rebuilds the coloured lines of the answer. Called while it streams, throttled: the
+    /// markers must be coloured as they appear, not only once the answer is complete.
+    /// </summary>
+    private void RebuildAiLines()
+    {
+        AiLines = AnswerLineViewModel.Split(AiText);
+        _linesBuiltLength = AiText.Length;
     }
 
     /// <summary>

@@ -1,5 +1,7 @@
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using TonexAdvisor.App.ViewModels;
 
 namespace TonexAdvisor.App.Views;
@@ -12,6 +14,20 @@ public partial class LibraryView : UserControl
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
+    }
+
+    /// <summary>
+    /// The indeterminate animation of a progress bar stops when its tab is unloaded and does not
+    /// always come back: toggling the property restarts it. The elapsed seconds around it are the
+    /// real sign of life anyway.
+    /// </summary>
+    private void RestartSpinners()
+    {
+        foreach (var bar in this.GetVisualDescendants().OfType<ProgressBar>())
+        {
+            bar.IsIndeterminate = false;
+            bar.IsIndeterminate = true;
+        }
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
@@ -46,6 +62,12 @@ public partial class LibraryView : UserControl
         {
             Dispatcher.UIThread.Post(() =>
                 ToneModelsGrid.ScrollIntoView(model, ToneModelsGrid.Columns[0]));
+        }
+        else if (e.PropertyName == nameof(LibraryViewModel.SelectedTabIndex)
+                 && _viewModel.SelectedTabIndex == 2)
+        {
+            // Retour sur « Conseils » : les animations des spinners reprennent.
+            RestartSpinners();
         }
     }
 }

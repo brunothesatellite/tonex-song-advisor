@@ -342,6 +342,9 @@
                                                                              Width="54" Height="4"
                                                                              IsVisible="{Binding IsPending}"
                                                                              VerticalAlignment="Center" />
+                                                                <TextBlock Text="{Binding ElapsedLabel}"
+                                                                           Classes="faint" FontSize="11"
+                                                                           VerticalAlignment="Center" />
 
                                                                 <TextBlock Text="{Binding Status}" Classes="faint"
                                                                            FontSize="11" VerticalAlignment="Center"
@@ -401,9 +404,12 @@
                                             <ProgressBar IsIndeterminate="True" Width="90" Height="4"
                                                          VerticalAlignment="Center"
                                                          IsVisible="{Binding Advice.IsArbitreWorking}" />
-                                            <TextBlock Text="L'arbitre tranche…" Classes="faint" FontSize="11"
-                                                       VerticalAlignment="Center"
-                                                       IsVisible="{Binding Advice.IsArbitreWorking}" />
+                                             <TextBlock Text="L'arbitre tranche." Classes="faint" FontSize="11"
+                                                        VerticalAlignment="Center"
+                                                        IsVisible="{Binding Advice.IsArbitreWorking}" />
+                                             <TextBlock Text="{Binding Advice.ArbitreElapsedLabel}"
+                                                        Classes="faint" FontSize="11"
+                                                        VerticalAlignment="Center" />
                                             <TextBlock Text="{Binding Advice.AiTitle}" Classes="faint"
                                                        FontSize="11" VerticalAlignment="Center"
                                                        IsVisible="{Binding Advice.HasAiTitle}" />
@@ -416,11 +422,6 @@
                                                 ToolTip.Tip="Afficher la reflexion de l'arbitre" />
                                     </Grid>
 
-                                    <!-- Pendant le flux : texte brut ; une fois le verdict fini,
-                                         les lignes colorees. -->
-                                    <TextBlock Text="{Binding Advice.AiText}" FontSize="13"
-                                               LineHeight="21" TextWrapping="Wrap"
-                                               IsVisible="{Binding Advice.IsAiBusy}" />
 
                                     <ItemsControl ItemsSource="{Binding Advice.AiLines}"
                                                   IsVisible="{Binding Advice.HasAiLines}">

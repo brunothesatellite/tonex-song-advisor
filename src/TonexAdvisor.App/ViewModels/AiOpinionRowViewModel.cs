@@ -22,8 +22,16 @@ public partial class AiOpinionRowViewModel : ViewModelBase
     private bool _hasError;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowPlainStatus), nameof(CanToggleThinking))]
+    [NotifyPropertyChangedFor(nameof(ShowPlainStatus), nameof(CanToggleThinking), nameof(ElapsedLabel))]
     private bool _isPending = true;
+
+    /// <summary>Seconds spent waiting — a sign of life no stalled animation can fake.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ElapsedLabel))]
+    private int _elapsed;
+
+    /// <summary>Shown while the voice works.</summary>
+    public string ElapsedLabel => IsPending ? $"{Elapsed} s" : "";
 
     [ObservableProperty]
     private string _provider = "";
@@ -84,6 +92,13 @@ public partial class AiOpinionRowViewModel : ViewModelBase
     {
         if (IsPending)
             Thinking += delta.Text;
+    }
+
+    /// <summary>One more second of waiting.</summary>
+    public void Tick()
+    {
+        if (IsPending)
+            Elapsed++;
     }
 
     /// <summary>Replaces the spinning row with what the voice finally said.</summary>
