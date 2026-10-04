@@ -1,36 +1,74 @@
 namespace TonexAdvisor.App.Config;
 
-/// <summary>Un modèle OpenCode Go proposé à l'utilisateur.</summary>
-/// <param name="Id">Identifiant attendu par l'API <c>chat/completions</c>.</param>
-/// <param name="Label">Libellé affiché dans la liste.</param>
-public sealed record FreeModel(string Id, string Label);
+/// <summary>A model offered by OpenCode Go, free or paid.</summary>
+/// <param name="Id">Identifier sent to the API.</param>
+/// <param name="IsFree">True for the « Free » tier.</param>
+public sealed record OpenCodeModel(string Id, bool IsFree)
+{
+    public string Label => IsFree ? $"{Id}  ·  gratuit" : $"{Id}  ·  payant";
+
+    /// <summary>What the drop-down shows.</summary>
+    public override string ToString() => Label;
+}
 
 /// <summary>
-/// Modèles OpenCode Go <b>gratuits</b> (tarif « Free », quota illimité, offre limitée dans le temps).
+/// The models of the OpenCode Go endpoint.
 /// </summary>
 /// <remarks>
-/// Source : <see href="https://opencode.ai/docs/go/#usage-limits">la table de tarification de Go</see>,
-/// où seuls <c>LongCat 2.5 Preview Free</c> et <c>Space Bunny Free</c> sont facturés « Free ».
-/// Tous les autres modèles de Go sont payants (consomment l'abonnement mensuel) : ils ne sont donc
-/// jamais proposés ici. Les deux modèles ci-dessous ont été vérifiés avec la clé de l'utilisateur
-/// (HTTP 200 sur <c>POST /zen/go/v1/chat/completions</c>).
+/// The catalogue used to be a fixed list of the two known free models; it now comes from the API
+/// itself, so paid models are offered too and a withdrawn model does not leave a dead choice in
+/// the list. The free tier is announced in the identifier — OpenCode names them
+/// <c>longcat-2.5-preview-free</c>, <c>space-bunny-free</c> — which is what
+/// <see cref="IsFree"/> reads.
 /// </remarks>
 public static class OpenCodeModels
 {
-    /// <summary>Base URL de l'offre OpenCode Go.</summary>
+    /// <summary>Base URL of the OpenCode Go offer.</summary>
     public const string EndPoint = "https://opencode.ai/zen/go/v1";
 
-    /// <summary>Les seuls modèles gratuits, à proposer à l'utilisateur.</summary>
-    public static IReadOnlyList<FreeModel> Free { get; } = new[]
+    /// <summary>The model to prefer when nothing else is known: LongCat, then any free one.</summary>
+    public const string PreferredId = "longcat-2.5-preview-free";
+
+    /// <summary>Known before the first call to the API, so the list is never empty.</summary>
+    public static IReadOnlyList<OpenCodeModel> Defaults { get; } =
+    [
+        new OpenCodeModel(PreferredId, true),
+        new OpenCodeModel("space-bunny-free", true),
+    ];
+
+    /// <summary>The free tier is written in the identifier.</summary>
+    public static bool IsFree(string id)
+        => id.Contains("free", StringComparison.OrdinalIgnoreCase);
+
+    public static OpenCodeModel FromId(string id)
+        => new(id, IsFree(id));
+
+    /// <summary>
+    /// What to select when the chosen model is gone: LongCat if it is still there, else the first
+    /// free model, else anything the list holds.
+    /// </summary>
+    public static OpenCodeModel Fallback(IEnumerable<OpenCodeModel> models)
     {
-        new FreeModel("longcat-2.5-preview-free", "LongCat 2.5 Preview Free"),
-        new FreeModel("space-bunny-free", "Space Bunny Free"),
-    };
+        var list = models.ToList();
 
-    /// <summary>Modèle utilisé quand la configuration n'en précise aucun.</summary>
-    public static string Default => Free[0].Id;
+        return list.FirstOrDefault(model => model.Id == PreferredId)
+               ?? list.FirstOrDefault(model => model.IsFree)
+               ?? list.FirstOrDefault()
+               ?? Defaults[0];
+    }
 
-    /// <summary>Retourne le modèle demandé s'il fait partie de la liste gratuite, sinon le défaut.</summary>
-    public static FreeModel Resolve(string? id)
-        => Free.FirstOrDefault(model => string.Equals(model.Id, id, StringComparison.OrdinalIgnoreCase)) ?? Free[0];
+    /// <summary>
+    /// Normalises an identifier found in the configuration: the canonical spelling when the model
+    /// is known, the identifier as written otherwise — a paid model is not rewritten away.
+    /// </summary>
+    public static OpenCodeModel Resolve(string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+            return Fallback(Defaults);
+
+        var known = Defaults.FirstOrDefault(model =>
+            string.Equals(model.Id, id, StringComparison.OrdinalIgnoreCase));
+
+        return known ?? FromId(id);
+    }
 }

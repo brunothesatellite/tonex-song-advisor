@@ -73,7 +73,7 @@
             <!-- ── AI : OpenCode Go ─────────────────────────────────────── -->
             <StackPanel Spacing="3">
                 <TextBlock Text="Conseil IA" Classes="h1" />
-                <TextBlock Text="Le conseil s'appuie sur l'API OpenCode Go, avec des modèles gratuits uniquement."
+                <TextBlock Text="Le conseil s'appuie sur l'API OpenCode Go : la liste des modèles, gratuits comme payants, vient de votre clé."
                            Classes="dim" TextWrapping="Wrap" />
             </StackPanel>
 
@@ -83,17 +83,26 @@
                     <TextBox Text="{Binding ApiKey}"
                              PasswordChar="*"
                              PlaceholderText="oc_sk_…" />
+                    <CheckBox IsChecked="{Binding OpenCodeActive}"
+                              Content="Consulter OpenCode lors des avis" />
 
-                    <TextBlock Text="MODÈLE GRATUIT" Classes="faint" />
-                    <ComboBox ItemsSource="{Binding FreeModels}"
-                              SelectedItem="{Binding SelectedModel}"
-                              HorizontalAlignment="Stretch">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate x:DataType="config:FreeModel">
-                                <TextBlock Text="{Binding Label}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <StackPanel Grid.Column="0" Spacing="3">
+                            <TextBlock Text="MODÈLE (gratuits et payants)" Classes="faint" />
+                            <ComboBox ItemsSource="{Binding AvailableModels}"
+                                      SelectedItem="{Binding SelectedModel}"
+                                      HorizontalAlignment="Stretch"
+                                      PlaceholderText="Choisir un modèle" />
+                        </StackPanel>
+                        <Button Grid.Column="1" VerticalAlignment="Bottom"
+                                Command="{Binding RefreshModelsCommand}"
+                                IsEnabled="{Binding CanRefreshModels}">Mise à jour</Button>
+                    </Grid>
+
+                    <Border Classes="chip-static" Padding="10,7" HorizontalAlignment="Stretch"
+                            IsVisible="{Binding HasModelStatus}">
+                        <TextBlock Text="{Binding ModelStatus}" TextWrapping="Wrap" FontSize="12" />
+                    </Border>
 
                     <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
                         <Button Grid.Column="0" Classes="accent"
@@ -112,7 +121,7 @@
                         <TextBlock Text="{Binding ConfigPath}" Classes="faint" FontSize="11"
                                    TextWrapping="Wrap" />
                         <TextBlock Classes="faint" FontSize="11" TextWrapping="Wrap"
-                                   Text="Seuls les modèles gratuits (tarifs « Free », illimité) sont proposés. Les modèles payants de Go sont exclus, et le free tier « Personnel » refuse toute clé API (403) : il ne fonctionne que depuis l'application OpenCode." />
+                               Text="Le tarif « Free » d'OpenCode Go est limité dans le temps ; le free tier « Personnel » n'est pas accessible depuis une application tierce (403). Le choix du modèle vous appartient." />
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -130,7 +139,8 @@
 
                     <StackPanel Spacing="3">
                         <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
-                            <TextBlock Grid.Column="0" Text="Gemini" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="0" IsChecked="{Binding GeminiActive}" Content="Gemini"
+                                  VerticalAlignment="Center" />
                             <TextBox Grid.Column="1" Text="{Binding GeminiKey}" PasswordChar="*"
                                      PlaceholderText="AIza..." />
                             <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
@@ -146,7 +156,8 @@
 
                     <StackPanel Spacing="3">
                         <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
-                            <TextBlock Grid.Column="0" Text="Mistral" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="0" IsChecked="{Binding MistralActive}" Content="Mistral"
+                                   VerticalAlignment="Center" />
                             <TextBox Grid.Column="1" Text="{Binding MistralKey}" PasswordChar="*"
                                      PlaceholderText="..." />
                             <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
@@ -162,7 +173,8 @@
 
                     <StackPanel Spacing="3">
                         <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
-                            <TextBlock Grid.Column="0" Text="Groq" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="0" IsChecked="{Binding GroqActive}" Content="Groq"
+                                VerticalAlignment="Center" />
                             <TextBox Grid.Column="1" Text="{Binding GroqKey}" PasswordChar="*"
                                      PlaceholderText="gsk_..." />
                             <TextBlock Grid.Column="2" Classes="faint" FontSize="11"

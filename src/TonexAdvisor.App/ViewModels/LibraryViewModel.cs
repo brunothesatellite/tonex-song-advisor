@@ -86,7 +86,7 @@ public partial class LibraryViewModel : ViewModelBase
     public LibraryViewModel(Func<AppConfig>? aiConfig = null, IUserStateStore? stateStore = null)
     {
         _stateStore = stateStore ?? new UserStateStore();
-        Advice = new AdviceViewModel(this, aiConfig);
+        Advice = new AdviceViewModel(this, aiConfig, _stateStore);
     }
 
     /// <summary>Where filters are remembered between two runs.</summary>

@@ -23,6 +23,9 @@ public partial class SettingsViewModel : ViewModelBase
     /// <summary>Le dossier TONEX à explorer ; le dossier officiel par défaut.</summary>
     private readonly string? _tonexFolder;
 
+    /// <summary>How to reach the model catalogue ; the real API when nothing is injected.</summary>
+    private readonly Func<string, Task<IReadOnlyList<string>>>? _modelFetcher;
+
     [ObservableProperty]
     private string _databasePath = "";
 
@@ -89,7 +92,7 @@ public partial class SettingsViewModel : ViewModelBase
     private string _apiKey = "";
 
     [ObservableProperty]
-    private FreeModel? _selectedModel;
+    private OpenCodeModel? _selectedModel;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasAiStatus))]
@@ -98,8 +101,23 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isTestingAi;
 
-    /// <summary>Modèles gratuits uniquement : les modèles payants de Go ne sont jamais exposés.</summary>
-    public IReadOnlyList<FreeModel> FreeModels => OpenCodeModels.Free;
+    /// <summary>
+    /// Tous les modèles accessibles avec la clé, gratuits comme payants — la liste vient de
+    /// l'API, pas d'une liste en dur qui deviendrait fausse le jour où un modèle disparaît.
+    /// </summary>
+    public ObservableCollection<OpenCodeModel> AvailableModels { get; } = new();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanRefreshModels))]
+    private bool _isRefreshingModels;
+
+    public bool CanRefreshModels => !IsRefreshingModels;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasModelStatus))]
+    private string _modelStatus = "";
+
+    public bool HasModelStatus => ModelStatus.Length > 0;
 
     // ── Avis croisés : voix challengeres (Gemini, Mistral, Groq) ───────────
 
@@ -148,11 +166,16 @@ public partial class SettingsViewModel : ViewModelBase
     /// <summary>True dès qu'un message de statut IA s'affiche.</summary>
     public bool HasAiStatus => AiStatusMessage.Length > 0;
 
-    public SettingsViewModel(IDatabaseHost host, IUserStateStore? stateStore = null, string? tonexFolder = null)
+    public SettingsViewModel(
+        IDatabaseHost host,
+        IUserStateStore? stateStore = null,
+        string? tonexFolder = null,
+        Func<string, Task<IReadOnlyList<string>>>? modelFetcher = null)
     {
         _host = host ?? throw new ArgumentNullException(nameof(host));
         _stateStore = stateStore ?? new UserStateStore();
         _tonexFolder = tonexFolder;
+        _modelFetcher = modelFetcher;
         _config = AppConfig.Load();
 
         var state = _stateStore.Load();
@@ -161,13 +184,30 @@ public partial class SettingsViewModel : ViewModelBase
         _selectedTonexPath = state.TonexDatabasePath;
 
         _apiKey = _config.ApiKey;
-        _selectedModel = OpenCodeModels.Resolve(_config.Model);
         _geminiKey = _config.CredentialFor("gemini").ApiKey;
         _mistralKey = _config.CredentialFor("mistral").ApiKey;
         _groqKey = _config.CredentialFor("groq").ApiKey;
         _geminiModel = _config.CredentialFor("gemini").Model;
         _mistralModel = _config.CredentialFor("mistral").Model;
         _groqModel = _config.CredentialFor("groq").Model;
+
+        // Les voix : une clé renseignée ne suffit pas, il faut que la voix soit active.
+        _openCodeActive = !state.DisabledVoices.Contains(AiProviders.OpenCodeId);
+        _geminiActive = !state.DisabledVoices.Contains("gemini");
+        _mistralActive = !state.DisabledVoices.Contains("mistral");
+        _groqActive = !state.DisabledVoices.Contains("groq");
+
+        // Le catalogue de modèles : celui en cache, ou les deux connus par défaut.
+        var catalog = _config.ModelCatalog.Count > 0
+            ? _config.ModelCatalog.Select(OpenCodeModels.FromId).ToList()
+            : OpenCodeModels.Defaults.ToList();
+
+        foreach (var model in catalog)
+            AvailableModels.Add(model);
+
+        _selectedModel = AvailableModels.FirstOrDefault(model =>
+                             string.Equals(model.Id, _config.Model, StringComparison.OrdinalIgnoreCase))
+                         ?? OpenCodeModels.Fallback(AvailableModels);
 
         RefreshTonexLibraries();
         _ready = true;
@@ -211,8 +251,9 @@ public partial class SettingsViewModel : ViewModelBase
     private AppConfig PersistAi()
     {
         _config.ApiKey = ApiKey.Trim();
-        _config.Model = (SelectedModel ?? OpenCodeModels.Free[0]).Id;
+        _config.Model = SelectedModel?.Id ?? OpenCodeModels.Fallback(AvailableModels).Id;
         _config.Endpoint = OpenCodeModels.EndPoint;
+        _config.ModelCatalog = AvailableModels.Select(model => model.Id).ToList();
         PersistProvider("gemini", GeminiKey, GeminiModel);
         PersistProvider("mistral", MistralKey, MistralModel);
         PersistProvider("groq", GroqKey, GroqModel);
@@ -235,8 +276,14 @@ public partial class SettingsViewModel : ViewModelBase
     [RelayCommand]
     private void SaveAi()
     {
+        var keyChanged = !string.Equals(ApiKey.Trim(), _config.ApiKey, StringComparison.Ordinal);
+
         PersistAi();
         AiStatusMessage = $"Enregistré dans {AppConfig.DefaultPath}";
+
+        // Une clé qui change ouvre d'autres modèles : on relit la liste.
+        if (keyChanged)
+            _ = RefreshModelsAsync();
     }
 
     /// <summary>Réduit une réponse IA à une ligne courte, pour la barre de statut.</summary>
@@ -258,7 +305,7 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         var config = PersistAi();
-        var label = OpenCodeModels.Resolve(config.Model).Label;
+        var label = config.Model;
         IsTestingAi = true;
         AiStatusMessage = $"Test avec {label}…";
 
@@ -488,8 +535,7 @@ public partial class SettingsViewModel : ViewModelBase
         }
     }
 
-    /// <summary>
-    /// Mémorise le choix de base. Lecture-modification-écriture : l'écran de la bibliothèque
+    /// <summary>Mémorise le choix de base. Lecture-modification-écriture : l'écran de la bibliothèque
     /// écrit le même fichier, et aucun des deux ne doit effacer les champs de l'autre.
     /// </summary>
     private void SaveState()
@@ -498,6 +544,138 @@ public partial class SettingsViewModel : ViewModelBase
         state.DatabasePath = DatabasePath;
         state.UseTonexLibrary = UseTonexLibrary;
         state.TonexDatabasePath = SelectedTonexLibrary?.Path ?? _selectedTonexPath;
+        state.DisabledVoices = DisabledVoicesFromToggles();
         _stateStore.Save(state);
+    }
+
+    // ── Les voix : une clé renseignée ne suffit pas, il faut l'activer ─────
+
+    [ObservableProperty]
+    private bool _openCodeActive = true;
+
+    [ObservableProperty]
+    private bool _geminiActive = true;
+
+    [ObservableProperty]
+    private bool _mistralActive = true;
+
+    [ObservableProperty]
+    private bool _groqActive = true;
+
+    partial void OnOpenCodeActiveChanged(bool value) => SaveVoices();
+
+    partial void OnGeminiActiveChanged(bool value) => SaveVoices();
+
+    partial void OnMistralActiveChanged(bool value) => SaveVoices();
+
+    partial void OnGroqActiveChanged(bool value) => SaveVoices();
+
+    /// <summary>
+    /// Une voix désactivée n'est pas appelée et ne s'affiche pas lors d'un conseil, même si sa
+    /// clé est renseignée.
+    /// </summary>
+    private void SaveVoices()
+    {
+        var state = _stateStore.Load();
+        state.DisabledVoices = DisabledVoicesFromToggles();
+        _stateStore.Save(state);
+    }
+
+    /// <summary>Les identifiants des voix que l'utilisateur a éteintes.</summary>
+    private List<string> DisabledVoicesFromToggles()
+    {
+        var disabled = new List<string>();
+
+        if (!OpenCodeActive)
+            disabled.Add(AiProviders.OpenCodeId);
+        if (!GeminiActive)
+            disabled.Add("gemini");
+        if (!MistralActive)
+            disabled.Add("mistral");
+        if (!GroqActive)
+            disabled.Add("groq");
+
+        return disabled;
+    }
+
+    // ── Les modèles OpenCode : la liste vient de l'API ─────────────────────
+
+    /// <summary>
+    /// Demande la liste des modèles à l'API. Déclenché à l'enregistrement quand la clé change et
+    /// au bouton « Mise à jour » : un appel par frappe dans le champ de clé serait absurde.
+    /// </summary>
+    [RelayCommand]
+    private async Task RefreshModelsAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ApiKey))
+        {
+            ModelStatus = "Renseignez d'abord la clé API OpenCode.";
+            return;
+        }
+
+        IsRefreshingModels = true;
+        ModelStatus = "Lecture des modèles…";
+
+        try
+        {
+            var ids = _modelFetcher is not null
+                ? await _modelFetcher(ApiKey.Trim()).ConfigureAwait(true)
+                : await new OpenCodeClient(new AppConfig
+                    {
+                        ApiKey = ApiKey.Trim(),
+                        Model = SelectedModel?.Id ?? "",
+                        Endpoint = OpenCodeModels.EndPoint,
+                    })
+                    .ListModelsAsync()
+                    .ConfigureAwait(true);
+
+            ApplyModelCatalog(ids);
+        }
+        catch (Exception exception)
+        {
+            ModelStatus = exception.Message;
+        }
+        finally
+        {
+            IsRefreshingModels = false;
+        }
+    }
+
+    /// <summary>
+    /// Replace the catalogue. When the chosen model has disappeared, say so and fall back on the
+    /// first free model — LongCat if it is still there.
+    /// </summary>
+    private void ApplyModelCatalog(IReadOnlyList<string> ids)
+    {
+        AvailableModels.Clear();
+
+        foreach (var id in ids.OrderBy(id => id, StringComparer.OrdinalIgnoreCase))
+            AvailableModels.Add(OpenCodeModels.FromId(id));
+
+        if (AvailableModels.Count == 0)
+        {
+            foreach (var model in OpenCodeModels.Defaults)
+                AvailableModels.Add(model);
+        }
+
+        var selected = AvailableModels.FirstOrDefault(model =>
+            string.Equals(model.Id, SelectedModel?.Id, StringComparison.OrdinalIgnoreCase));
+
+        if (selected is null)
+        {
+            var fallback = OpenCodeModels.Fallback(AvailableModels);
+            ModelStatus = SelectedModel is null
+                ? $"{AvailableModels.Count} modèles trouvés, dont {AvailableModels.Count(model => model.IsFree)} gratuits."
+                : $"Le modèle « {SelectedModel.Id} » n'est plus disponible : « {fallback.Id} » est sélectionné à sa place.";
+            SelectedModel = fallback;
+        }
+        else
+        {
+            ModelStatus = $"{AvailableModels.Count} modèles trouvés, dont {AvailableModels.Count(model => model.IsFree)} gratuits.";
+            SelectedModel = selected;
+        }
+
+        _config.ModelCatalog = AvailableModels.Select(model => model.Id).ToList();
+        _config.Save();
     }
 }

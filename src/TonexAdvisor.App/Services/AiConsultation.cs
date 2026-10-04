@@ -28,13 +28,16 @@ public static class AiConsultation
     /// The voices to consult: OpenCode first (the reference), then every challenger whose key
     /// the user filled in. No key, no voice.
     /// </summary>
-    public static IReadOnlyList<IAiClient> BuildClients(AppConfig config)
+    public static IReadOnlyList<IAiClient> BuildClients(AppConfig config, UserState? state = null)
     {
         ArgumentNullException.ThrowIfNull(config);
 
+        var disabled = state?.DisabledVoices ?? new List<string>();
         var clients = new List<IAiClient>();
 
-        if (config.HasApiKey)
+        // Une voix désactivée n'est même pas construite : elle n'est pas appelée, et le panneau
+        // ne l'affiche pas puisqu'il se remplit à partir de cette liste.
+        if (config.HasApiKey && !IsDisabled(disabled, AiProviders.OpenCodeId))
             clients.Add(new OpenCodeClient(config));
 
         foreach (var provider in AiProviders.Challengers)
@@ -43,11 +46,17 @@ public static class AiConsultation
             if (string.IsNullOrWhiteSpace(credential.ApiKey))
                 continue;
 
+            if (IsDisabled(disabled, provider.Id))
+                continue;
+
             clients.Add(new OpenAiCompatClient(provider.Label, provider.EndPoint, credential.ApiKey));
         }
 
         return clients;
     }
+
+    private static bool IsDisabled(IEnumerable<string> disabled, string providerId)
+        => disabled.Any(id => string.Equals(id, providerId, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>The model to use for a given voice, falling back to the catalogue.</summary>
     public static string ModelFor(AppConfig config, string providerLabel)

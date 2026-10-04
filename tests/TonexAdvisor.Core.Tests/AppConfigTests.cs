@@ -74,7 +74,9 @@ public class AppConfigTests
 
             var loaded = AppConfig.Load(file);
 
-            Assert.Contains(loaded.Model, OpenCodeModels.Free.Select(model => model.Id));
+            // La liste des modèles vient de l'API : un modèle payant est un choix légitime et
+            // n'est plus réécrit en silence.
+            Assert.Equal("glm-5.3-flash", loaded.Model);
         }
         finally
         {
@@ -84,20 +86,40 @@ public class AppConfigTests
     }
 
     [Fact]
-    public void Only_free_tier_models_are_proposed()
+    public void Free_models_are_told_apart_by_their_identifier()
     {
-        Assert.NotEmpty(OpenCodeModels.Free);
-        Assert.All(OpenCodeModels.Free, model => Assert.EndsWith("-free", model.Id));
-        Assert.All(OpenCodeModels.Free, model => Assert.False(string.IsNullOrWhiteSpace(model.Label)));
+        Assert.True(OpenCodeModels.IsFree("longcat-2.5-preview-free"));
+        Assert.True(OpenCodeModels.IsFree("space-bunny-free"));
+        Assert.False(OpenCodeModels.IsFree("glm-5.3-flash"));
+
+        Assert.All(OpenCodeModels.Defaults, model => Assert.True(model.IsFree));
+        Assert.All(OpenCodeModels.Defaults, model => Assert.False(string.IsNullOrWhiteSpace(model.Label)));
     }
 
     [Fact]
-    public void Default_model_belongs_to_the_free_list()
+    public void The_fallback_prefers_longcat_then_any_free_model()
     {
-        Assert.Contains(OpenCodeModels.Default, OpenCodeModels.Free.Select(model => model.Id));
-        Assert.Equal(OpenCodeModels.Free[0].Id, OpenCodeModels.Resolve(null).Id);
+        Assert.Equal(OpenCodeModels.PreferredId, OpenCodeModels.Fallback(OpenCodeModels.Defaults).Id);
+
+        // LongCat parti : le premier gratuit.
+        var withoutLongCat = new[]
+        {
+            OpenCodeModels.FromId("kimi-k3"),
+            OpenCodeModels.FromId("space-bunny-free"),
+        };
+        Assert.Equal("space-bunny-free", OpenCodeModels.Fallback(withoutLongCat).Id);
+
+        // Aucun gratuit : on prend ce qu'il y a plutôt que de rester sans modèle.
+        var paidOnly = new[] { OpenCodeModels.FromId("kimi-k3") };
+        Assert.Equal("kimi-k3", OpenCodeModels.Fallback(paidOnly).Id);
+    }
+
+    [Fact]
+    public void Resolve_normalises_an_identifier_without_forcing_the_free_tier()
+    {
+        Assert.Equal(OpenCodeModels.PreferredId, OpenCodeModels.Resolve(null).Id);
         Assert.Equal("space-bunny-free", OpenCodeModels.Resolve("Space-BUNNY-free").Id);
-        Assert.Equal(OpenCodeModels.Free[0].Id, OpenCodeModels.Resolve("kimi-k3").Id);
+        Assert.Equal("kimi-k3", OpenCodeModels.Resolve("kimi-k3").Id);
     }
 
     [Fact]

@@ -20,6 +20,11 @@ public sealed class UserState
 
     public string SearchText { get; set; } = "";
 
+    /// <summary>
+    /// The voices the user switched off, by provider id: a key is not enough to be consulted.
+    /// </summary>
+    public List<string> DisabledVoices { get; set; } = new();
+
     // ── Base de données ────────────────────────────────────────────────────
 
     /// <summary>True when the library comes from the TONEX folder rather than from a path.</summary>

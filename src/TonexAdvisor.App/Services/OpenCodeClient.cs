@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using TonexAdvisor.App.Config;
@@ -33,6 +34,51 @@ public sealed class OpenCodeClient : IAiClient
 
     /// <summary>Le fournisseur de référence du panneau d'avis croisés.</summary>
     public string Provider => "OpenCode Go";
+
+    /// <summary>
+    /// The models this key can reach (<c>GET /models</c>), free and paid together. The list is
+    /// what the settings offer: a fixed list goes stale the day a model is withdrawn.
+    /// </summary>
+    public async Task<IReadOnlyList<string>> ListModelsAsync(CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, _endpoint + "/models");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+
+        using var response = await Http.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+            throw new AiRequestException((int)response.StatusCode, DescribeError(response.StatusCode, body));
+
+        var ids = new List<string>();
+
+        try
+        {
+            using var document = JsonDocument.Parse(body);
+
+            if (document.RootElement.ValueKind == JsonValueKind.Object
+                && document.RootElement.TryGetProperty("data", out var data)
+                && data.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var entry in data.EnumerateArray())
+                {
+                    if (entry.ValueKind == JsonValueKind.Object
+                        && entry.TryGetProperty("id", out var id)
+                        && id.ValueKind == JsonValueKind.String
+                        && !string.IsNullOrWhiteSpace(id.GetString()))
+                    {
+                        ids.Add(id.GetString() ?? "");
+                    }
+                }
+            }
+        }
+        catch (JsonException)
+        {
+            // Liste illisible : on renverra une liste vide, l'appelant dira quoi faire.
+        }
+
+        return ids;
+    }
 
     /// <summary>Ping de connectivité : vérifie la clé et le modèle en une seule requête.</summary>
     public Task<string> PingAsync(string model, CancellationToken cancellationToken = default)

@@ -23,7 +23,7 @@ public sealed class AppConfig
     public string ApiKey { get; set; } = "";
 
     /// <summary>Identifiant du modèle utilisé, voir <see cref="OpenCodeModels.Free"/>.</summary>
-    public string Model { get; set; } = OpenCodeModels.Default;
+    public string Model { get; set; } = OpenCodeModels.PreferredId;
 
     /// <summary>Base URL de l'API, sans le suffixe <c>/chat/completions</c>.</summary>
     public string Endpoint { get; set; } = OpenCodeModels.EndPoint;
@@ -33,6 +33,12 @@ public sealed class AppConfig
     /// L'utilisateur renseigne celles qu'il souhaite : une clé absente = une voix absente.
     /// </summary>
     public Dictionary<string, ProviderCredential> Providers { get; set; } = new();
+
+    /// <summary>
+    /// The last catalogue of models returned by the API, kept so the drop-down is not empty
+    /// between two runs. Refreshed when the key changes and on the « Mise à jour » button.
+    /// </summary>
+    public List<string> ModelCatalog { get; set; } = new();
 
     /// <summary>La clé (et le modèle) d'un fournisseur challenger, vide s'il n'est pas renseigné.</summary>
     public ProviderCredential CredentialFor(string providerId)
@@ -67,8 +73,10 @@ public sealed class AppConfig
             if (config is null)
                 return new AppConfig();
 
-            // Ne jamais retenir un modèle payant écrit à la main dans le fichier.
-            config.Model = OpenCodeModels.Resolve(config.Model).Id;
+            // Le modèle est conservé tel quel : la liste des modèles vient de l'API, et un modèle
+            // payant est un choix légitime. Seul un identifiant vide reçoit le défaut.
+            if (string.IsNullOrWhiteSpace(config.Model))
+                config.Model = OpenCodeModels.Fallback(OpenCodeModels.Defaults).Id;
             return config;
         }
         catch (Exception exception) when (exception is IOException or JsonException or UnauthorizedAccessException)

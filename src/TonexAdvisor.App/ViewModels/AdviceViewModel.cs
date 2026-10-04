@@ -91,12 +91,14 @@ public partial class AdviceViewModel : ViewModelBase
     private bool _isAiBusy;
 
     private readonly Func<AppConfig> _configLoader;
+    private readonly IUserStateStore _stateStore;
     private CancellationTokenSource? _aiCts;
 
-    public AdviceViewModel(LibraryViewModel owner, Func<AppConfig>? configLoader = null)
+    public AdviceViewModel(LibraryViewModel owner, Func<AppConfig>? configLoader = null, IUserStateStore? stateStore = null)
     {
         _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         _configLoader = configLoader ?? (() => AppConfig.Load());
+        _stateStore = stateStore ?? new UserStateStore();
     }
 
     public ObservableCollection<AdvicePresetRowViewModel> Presets { get; } = new();
@@ -229,7 +231,9 @@ public partial class AdviceViewModel : ViewModelBase
             Advise();
 
         var config = _configLoader();
-        var clients = AiConsultation.BuildClients(config);
+
+        // Une clé renseignée ne suffit pas : chaque voix doit aussi être active.
+        var clients = AiConsultation.BuildClients(config, _stateStore.Load());
         if (clients.Count == 0)
         {
             AiStatus = "Clé API absente : renseigne au moins une voix (OpenCode, Gemini, Mistral " +
