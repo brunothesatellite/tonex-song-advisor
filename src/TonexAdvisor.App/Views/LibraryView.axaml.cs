@@ -1,5 +1,7 @@
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
+using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using TonexAdvisor.App.ViewModels;
@@ -10,23 +12,43 @@ public partial class LibraryView : UserControl
 {
     private LibraryViewModel? _viewModel;
 
+    private readonly DispatcherTimer _spinTimer = new DispatcherTimer
+    {
+        Interval = TimeSpan.FromMilliseconds(80),
+    };
+
+    private double _spinAngle;
+
     public LibraryView()
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
+
+        _spinTimer.Tick += OnSpinTick;
+        _spinTimer.Start();
     }
 
     /// <summary>
-    /// The indeterminate animation of a progress bar stops when its tab is unloaded and does not
-    /// always come back: toggling the property restarts it. The elapsed seconds around it are the
-    /// real sign of life anyway.
+    /// Rotates the spinners by hand. The indeterminate animation of a progress bar stops when its
+    /// tab is unloaded and never comes back; an angle driven by a timer cannot stall.
     /// </summary>
-    private void RestartSpinners()
+    private void OnSpinTick(object? sender, EventArgs e)
     {
-        foreach (var bar in this.GetVisualDescendants().OfType<ProgressBar>())
+        if (_viewModel?.Advice.IsAiBusy != true)
+            return;
+
+        _spinAngle = (_spinAngle + 15) % 360;
+
+        foreach (var spinner in this.GetVisualDescendants().OfType<Ellipse>()
+                     .Where(ellipse => Equals(ellipse.Tag, "spinner") && ellipse.IsVisible))
         {
-            bar.IsIndeterminate = false;
-            bar.IsIndeterminate = true;
+            if (spinner.RenderTransform is not RotateTransform rotate)
+            {
+                rotate = new RotateTransform();
+                spinner.RenderTransform = rotate;
+            }
+
+            rotate.Angle = _spinAngle;
         }
     }
 
@@ -63,11 +85,6 @@ public partial class LibraryView : UserControl
             Dispatcher.UIThread.Post(() =>
                 ToneModelsGrid.ScrollIntoView(model, ToneModelsGrid.Columns[0]));
         }
-        else if (e.PropertyName == nameof(LibraryViewModel.SelectedTabIndex)
-                 && _viewModel.SelectedTabIndex == 2)
-        {
-            // Retour sur « Conseils » : les animations des spinners reprennent.
-            RestartSpinners();
-        }
+
     }
 }

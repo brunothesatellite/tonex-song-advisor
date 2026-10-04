@@ -32,8 +32,9 @@ public sealed class AnswerLineViewModel
 
         return text
             .Replace("\r\n", "\n")
+            .Replace('\r', '\n')
             .Split('\n')
-            .Select(line => line.TrimEnd())
+            .Select(line => line.Trim())
             .Where(line => line.Length > 0)
             .Select(Line)
             .ToList();
@@ -41,17 +42,53 @@ public sealed class AnswerLineViewModel
 
     private static AnswerLineViewModel Line(string line)
     {
+        var text = Unwrap(line);
+
         foreach (var marker in Markers)
         {
-            if (line.StartsWith(marker, StringComparison.OrdinalIgnoreCase))
-                return new AnswerLineViewModel(marker, line[marker.Length..].TrimStart());
+            // Le libellé et son deux-points sont tolérés avec ou sans espace entre les deux :
+            // « BAFFLE : », « BAFFLE: » et « BAFFLE  : » sont le même repère.
+            var key = marker[..^1].TrimEnd();
+            if (!text.StartsWith(key, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var after = text[key.Length..].TrimStart(' ', '\t');
+            if (!after.StartsWith(':'))
+                continue;
+
+            return new AnswerLineViewModel(marker, after[1..].TrimStart(' ', '\t', '-'));
         }
 
         // « 1. » d'un verdict : numéroté, donc à colorier lui aussi.
-        var dot = line.IndexOf(". ", StringComparison.Ordinal);
-        if (dot is > 0 and < 4 && line.Take(dot).All(char.IsDigit))
-            return new AnswerLineViewModel(line[..(dot + 1)], line[(dot + 2)..]);
+        var dot = text.IndexOf(". ", StringComparison.Ordinal);
+        if (dot is > 0 and < 4 && text.Take(dot).All(char.IsDigit))
+            return new AnswerLineViewModel(text[..(dot + 1)], text[(dot + 2)..]);
 
-        return new AnswerLineViewModel("", line);
+        return new AnswerLineViewModel("", text);
+    }
+
+    /// <summary>
+    /// A marker hidden behind a bullet, a bold, an indent or a non-breaking space must still be
+    /// found: models wrap their labels in all of those.
+    /// </summary>
+    private static string Unwrap(string line)
+    {
+        // L'indentation ne doit pas cacher le libellé.
+        var text = line.TrimStart(' ', '\t', '\u00A0');
+
+        // Une puce de liste devant le libellé. L'astérisque ne compte que suivi d'un espace,
+        // pour ne pas confondre la puce avec le gras.
+        if (text.Length > 0 && ("-•–>".Contains(text[0]) || text.StartsWith("* ", StringComparison.Ordinal)))
+            text = text[1..].TrimStart(' ', '\t', '\u00A0');
+
+        // Le gras autour du libellé : « **BAFFLE** : ».
+        if (text.StartsWith("**", StringComparison.Ordinal))
+        {
+            var close = text.IndexOf("**", 2, StringComparison.Ordinal);
+            if (close > 0)
+                text = text[2..close] + text[(close + 2)..].TrimStart(' ', '\t', '\u00A0');
+        }
+
+        return text.Replace('\u00A0', ' ');
     }
 }
