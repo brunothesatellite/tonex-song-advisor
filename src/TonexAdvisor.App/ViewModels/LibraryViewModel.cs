@@ -94,6 +94,10 @@ public partial class LibraryViewModel : ViewModelBase
     {
         _stateStore = stateStore ?? new UserStateStore();
         Advice = new AdviceViewModel(this, aiConfig, _stateStore);
+
+        // Bascule à chaud (§11.4) : résumé, listes de filtres et détail se rebâtissent dans
+        // la langue choisie — rangées et filtres actifs restent exactement les mêmes.
+        Localizer.Instance.CultureChanged += RebuildLocalizedTexts;
     }
 
     /// <summary>Where filters are remembered between two runs.</summary>
@@ -264,20 +268,24 @@ public partial class LibraryViewModel : ViewModelBase
         OnlyFavorites = state.OnlyFavorites;
         SelectedTabIndex = state.SelectedTabIndex is >= 0 and <= 2 ? state.SelectedTabIndex : 0;
 
-        // Notifies the view: the grids restore the widths the user chose by hand, and the columns
-        // concerned leave the proportional units behind for good.
-        PresetColumnWidths = new Dictionary<string, double>(state.PresetColumnWidths);
-        ToneModelColumnWidths = new Dictionary<string, double>(state.ToneModelColumnWidths);
+        // Notifies the view: the grids restore the widths the user chose by hand — keys first
+        // translated to ids when they are the historical column headers of v1.2.1 (§8.2), the
+        // conversion reaching the file at the next save. The columns concerned leave the
+        // proportional units behind for good.
+        PresetColumnWidths = ColumnIds.Normalize(ColumnIds.Grid.Presets, state.PresetColumnWidths);
+        ToneModelColumnWidths = ColumnIds.Normalize(ColumnIds.Grid.ToneModels, state.ToneModelColumnWidths);
     }
 
     /// <summary>
     /// Keeps the widths the user chose by hand on the presets grid. Read-modify-write like every
-    /// other field: the settings screen writes the same file and must not lose them.
+    /// other field: the settings screen writes the same file and must not lose them. Keys are
+    /// normalized to ids on the way in (§8.2), so whatever the view sends reaches the file as
+    /// language-independent ids.
     /// </summary>
     public void SavePresetColumnWidths(IReadOnlyDictionary<string, double> widths)
     {
         var state = _stateStore.Load();
-        state.PresetColumnWidths = new Dictionary<string, double>(widths);
+        state.PresetColumnWidths = ColumnIds.Normalize(ColumnIds.Grid.Presets, widths);
         _stateStore.Save(state);
         PresetColumnWidths = state.PresetColumnWidths;
     }
@@ -286,7 +294,7 @@ public partial class LibraryViewModel : ViewModelBase
     public void SaveToneModelColumnWidths(IReadOnlyDictionary<string, double> widths)
     {
         var state = _stateStore.Load();
-        state.ToneModelColumnWidths = new Dictionary<string, double>(widths);
+        state.ToneModelColumnWidths = ColumnIds.Normalize(ColumnIds.Grid.ToneModels, widths);
         _stateStore.Save(state);
         ToneModelColumnWidths = state.ToneModelColumnWidths;
     }
@@ -315,7 +323,7 @@ public partial class LibraryViewModel : ViewModelBase
     {
         if (_index is null)
         {
-            Summary = "";
+            ComposeSummary();
             return;
         }
 
@@ -360,10 +368,27 @@ public partial class LibraryViewModel : ViewModelBase
         Presets = new ObservableCollection<PresetRowViewModel>(presets);
         ToneModels = new ObservableCollection<ToneModelRowViewModel>(toneModels);
 
+        ComposeSummary();
+    }
+
+    /// <summary>
+    /// Résumé et messages vides : recomposés à chaque filtre et à chaque bascule de langue
+    /// (§11.4) — compteurs, suffixe de filtre actif et phrases vides sont toutes localisées.
+    /// Les compteurs viennent des grilles publiées, qui portent exactement le filtre courant.
+    /// </summary>
+    private void ComposeSummary()
+    {
+        if (_index is null)
+        {
+            Summary = "";
+            EmptyMessage = Localizer.Instance["Message.AucuneBibliotheque"];
+            return;
+        }
+
         Summary = Localizer.Instance.Get(
                       "Message.Resume.Bibliotheque",
-                      Localizer.Instance.Plural(presets.Count, "Compteur.Presets"),
-                      Localizer.Instance.Plural(toneModels.Count, "Compteur.ToneModels")) +
+                      Localizer.Instance.Plural(Presets.Count, "Compteur.Presets"),
+                      Localizer.Instance.Plural(ToneModels.Count, "Compteur.ToneModels")) +
                   (HasActiveFilter ? Localizer.Instance["Biblio.Resume.FiltreActif"] : "");
 
         EmptyMessage = _presetRows.Count == 0
@@ -371,6 +396,66 @@ public partial class LibraryViewModel : ViewModelBase
             : Localizer.Instance["Biblio.Vide.AucunResultat"];
 
         OnPropertyChanged(nameof(HasPresets));
+    }
+
+    /// <summary>
+    /// Bascule à chaud (§11.4) : les listes de filtres sont reconstruites — le gabarit de la
+    /// sentinelle ne se revalide pas de lui-même (§11.6) —, le résumé et les messages vides
+    /// se recomposent, et le détail ouvert renaît dans la langue courante (SettingsNote,
+    /// notes de position, libellés de blocs). Les filtres, les sélections et les rangées ne
+    /// bougent pas.
+    /// </summary>
+    private void RebuildLocalizedTexts()
+    {
+        RebuildFilterLists();
+        ComposeSummary();
+        RebuildDetail();
+    }
+
+    /// <summary>
+    /// Reconstruit les trois listes de filtres : mêmes valeurs, cellules recréées — le
+    /// convertisseur de sentinelle se ré-exécute donc dans la nouvelle langue. La sélection
+    /// est capturée avant : la ComboBox remet sa valeur à zéro pendant le vidage.
+    /// </summary>
+    private void RebuildFilterLists()
+    {
+        if (_index is null)
+            return;
+
+        var category = SelectedCategory;
+        var genre = SelectedGenre;
+        var folder = SelectedFolder;
+
+        Fill(Categories, _presetRows.Select(row => row.Category));
+        Fill(Genres, _presetRows.Select(row => row.Genre));
+        Fill(Folders, _presetRows.Select(row => row.Folders)
+            .Concat(_toneModelRows.Select(row => row.Folders)));
+
+        SelectedCategory = category;
+        SelectedGenre = genre;
+        SelectedFolder = folder;
+    }
+
+    /// <summary>
+    /// Reconstruit le détail ouvert : ses chaînes composées datent de sa création (§11.4).
+    /// L'état d'ouverture du bloc matos est repris — seule la langue change.
+    /// </summary>
+    private void RebuildDetail()
+    {
+        if (_index is null)
+            return;
+
+        if (SelectedPreset is { } preset)
+        {
+            var showHardware = PresetDetail?.ShowHardware ?? false;
+            PresetDetail = PresetDetailViewModel.Create(preset.Record, preset.ToneModels, _index.Ranges);
+            PresetDetail.ShowHardware = showHardware;
+        }
+
+        if (SelectedToneModel is { } model)
+            ToneModelDetail = new ToneModelDetailViewModel(model.Record, _index.PresetsFor(model.Record.Key));
+
+        UpdateDetailContent();
     }
 
     private bool HasActiveFilter =>

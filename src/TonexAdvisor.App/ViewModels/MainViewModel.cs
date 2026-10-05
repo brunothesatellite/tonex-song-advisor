@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TonexAdvisor.App.Localization;
+using TonexAdvisor.App.Services;
 using TonexAdvisor.Core.Data;
 
 namespace TonexAdvisor.App.ViewModels;
@@ -20,17 +21,38 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
     private string _currentSection = SectionLibrary;
 
     [ObservableProperty]
-    private string _statusMessage = "Aucune bibliothèque chargée.";
-
-    [ObservableProperty]
     private bool _isBusy;
 
-    public MainViewModel()
+    /// <summary>
+    /// Dernier compositeur du message de statut : la bascule de langue le rejoue dans la
+    /// langue courante (§11.4). Les sites en dur de la v1.2.1 ne se composent pas encore —
+    /// leur texte migre en clés à la phase 10.
+    /// </summary>
+    private Func<string> _statusBuilder = InitialStatus;
+
+    private static string InitialStatus() => "Aucune bibliothèque chargée.";
+
+    [ObservableProperty]
+    private string _statusMessage = InitialStatus();
+
+    public MainViewModel(IUserStateStore? stateStore = null)
     {
-        Library = new LibraryViewModel();
-        Settings = new SettingsViewModel(this);
+        Library = new LibraryViewModel(null, stateStore);
+        Settings = new SettingsViewModel(this, stateStore);
         _currentPage = Library;
+
+        // Bascule à chaud (§11.4) : le statut affiché se rebâtit dans la langue choisie.
+        Localizer.Instance.CultureChanged += RebuildStatus;
     }
+
+    /// <summary>Fixe le statut et mémorise son compositeur pour la prochaine bascule (§11.4).</summary>
+    private void SetStatus(Func<string> build)
+    {
+        _statusBuilder = build;
+        StatusMessage = build();
+    }
+
+    private void RebuildStatus() => StatusMessage = _statusBuilder();
 
     public LibraryViewModel Library { get; }
 
@@ -83,7 +105,7 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
         var candidate = Settings.EffectiveDatabasePath ?? AppPaths.FindDefaultDatabase();
         if (string.IsNullOrWhiteSpace(candidate))
         {
-            StatusMessage = "Choisissez un fichier Library.db ou Library2.db.";
+            SetStatus(static () => "Choisissez un fichier Library.db ou Library2.db.");
             ShowSettings();
             return;
         }
@@ -99,7 +121,7 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
             return;
 
         IsBusy = true;
-        StatusMessage = $"Lecture de {System.IO.Path.GetFileName(path)}…";
+        SetStatus(() => $"Lecture de {System.IO.Path.GetFileName(path)}…");
 
         try
         {
@@ -112,24 +134,29 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
             Library.Attach(loaded.Index);
             Settings.Refresh();
 
-            var resume = Localizer.Instance.Get("Message.Resume.Chargement",
-                DatabaseLabel,
-                Localizer.Instance.Plural(loaded.Index.PresetCount, "Compteur.Presets"),
-                Localizer.Instance.Plural(loaded.Index.ToneModelCount, "Compteur.ToneModels"));
-            var suffix = HasKnobSettingsAvailable
-                ? ""
-                : loaded.Joined > 0
-                    ? " · " + Localizer.Instance.Get("Message.Resume.Jointe",
-                        Localizer.Instance.Plural(loaded.Joined, "Compteur.Presets"))
-                    : " · " + Localizer.Instance["Message.Resume.NonDispo"];
-            StatusMessage = resume + suffix;
+            // Le compositeur est conservé : une bascule de langue rejoue ce résumé dans la
+            // langue choisie, compteurs et suffixe compris (§11.4).
+            SetStatus(() =>
+            {
+                var resume = Localizer.Instance.Get("Message.Resume.Chargement",
+                    DatabaseLabel,
+                    Localizer.Instance.Plural(loaded.Index.PresetCount, "Compteur.Presets"),
+                    Localizer.Instance.Plural(loaded.Index.ToneModelCount, "Compteur.ToneModels"));
+                var suffix = HasKnobSettingsAvailable
+                    ? ""
+                    : loaded.Joined > 0
+                        ? " · " + Localizer.Instance.Get("Message.Resume.Jointe",
+                            Localizer.Instance.Plural(loaded.Joined, "Compteur.Presets"))
+                        : " · " + Localizer.Instance["Message.Resume.NonDispo"];
+                return resume + suffix;
+            });
 
             NotifyDatabaseChanged();
             ShowLibrary();
         }
         catch (Exception exception)
         {
-            StatusMessage = $"Échec : {exception.Message}";
+            SetStatus(() => $"Échec : {exception.Message}");
             Settings.ErrorMessage = exception.Message;
             Settings.ClearSummary();
             if (_currentDatabase is null)

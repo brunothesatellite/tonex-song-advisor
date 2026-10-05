@@ -29,6 +29,16 @@ public partial class VoiceChoiceViewModel : ViewModelBase
 
     public bool IsPaid => Model.IsPaid;
 
+    /// <summary>
+    /// Re-notifies the localized labels after a language switch (§11.4) : a data template
+    /// never revalidates on its own, the property notification is what repaints the line.
+    /// </summary>
+    public void NotifyLocalizedLabels()
+    {
+        OnPropertyChanged(nameof(Label));
+        OnPropertyChanged(nameof(Tag));
+    }
+
     [ObservableProperty]
     private bool _isChecked;
 

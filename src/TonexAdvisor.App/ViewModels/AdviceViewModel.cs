@@ -86,6 +86,47 @@ public partial class AdviceViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(HasAiStatus))]
     private string _aiStatus = "";
 
+    // ── Bascule à chaud (§11.4) ────────────────────────────────────────────
+    // Chaque titre d'avis garde son dernier compositeur : la culture change, le texte se
+    // rebâtit avec les mêmes arguments — sans jamais rejeter de requête IA pour autant.
+
+    private Func<string> _aiTitleBuilder = static () => "";
+
+    private Func<string> _aiStatusBuilder = static () => "";
+
+    private static string DefaultVoicesTitle() => Localizer.Instance["Conseil.Voix.Titre"];
+
+    private Func<string> _voicesTitleBuilder = DefaultVoicesTitle;
+
+    /// <summary>Fixe un titre d'avis et mémorise son compositeur (§11.4).</summary>
+    private void SetAiTitle(Func<string> build)
+    {
+        _aiTitleBuilder = build;
+        AiTitle = build();
+    }
+
+    /// <summary>Fixe le statut d'avis et mémorise son compositeur (§11.4).</summary>
+    private void SetAiStatus(Func<string> build)
+    {
+        _aiStatusBuilder = build;
+        AiStatus = build();
+    }
+
+    /// <summary>Fixe le titre des voix et mémorise son compositeur (§11.4).</summary>
+    private void SetVoicesTitle(Func<string> build)
+    {
+        _voicesTitleBuilder = build;
+        VoicesTitle = build();
+    }
+
+    /// <summary>Rejoue les trois compositeurs dans la langue courante à chaque bascule.</summary>
+    private void RebuildAiTitles()
+    {
+        VoicesTitle = _voicesTitleBuilder();
+        AiTitle = _aiTitleBuilder();
+        AiStatus = _aiStatusBuilder();
+    }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsAiEnabled), nameof(HasAiThinking), nameof(CanToggleAiThinking))]
     private bool _isAiBusy;
@@ -135,6 +176,10 @@ public partial class AdviceViewModel : ViewModelBase
 
         _ticker.Tick += (_, _) => Tick();
         _ticker.Start();
+
+        // Bascule à chaud (§11.4) : les titres d'avis affichés se rebâtissent dans la langue
+        // choisie — pas de nouvelle requête, seuls les libellés changent.
+        Localizer.Instance.CultureChanged += RebuildAiTitles;
     }
 
     /// <summary>
@@ -173,9 +218,9 @@ public partial class AdviceViewModel : ViewModelBase
 
     /// <summary>
     /// Title of the voices block: they propose when an arbitre will decide, they suggest when
-    /// nobody will.
+    /// nobody will. Rebuilt on every language switch from the stored composer (§11.4).
     /// </summary>
-    public string VoicesTitle { get; private set; } = Localizer.Instance["Conseil.Voix.Titre"];
+    public string VoicesTitle { get; private set; } = DefaultVoicesTitle();
 
     /// <summary>
     /// The referee's thinking streams live while it works — hidden unless the user asks for it —
@@ -207,8 +252,8 @@ public partial class AdviceViewModel : ViewModelBase
         Hint = DefaultHint;
         AiText = "";
         AiThinking = "";
-        AiStatus = "";
-        AiTitle = "";
+        SetAiStatus(static () => "");
+        SetAiTitle(static () => "");
         ArbitreElapsed = 0;
         Opinions.Clear();
         OnPropertyChanged(nameof(HasPresets));
@@ -271,8 +316,8 @@ public partial class AdviceViewModel : ViewModelBase
 
         AiText = "";
         AiThinking = "";
-        AiStatus = "";
-        AiTitle = "";
+        SetAiStatus(static () => "");
+        SetAiTitle(static () => "");
         ArbitreElapsed = 0;
         Opinions.Clear();
         OnPropertyChanged(nameof(HasOpinions));
@@ -280,7 +325,7 @@ public partial class AdviceViewModel : ViewModelBase
         var query = AdviceQuery.Create(Artist, Song, Style);
         if (query.IsBlank)
         {
-            AiStatus = Localizer.Instance["Conseil.Erreur.DecrireDabord"];
+            SetAiStatus(() => Localizer.Instance["Conseil.Erreur.DecrireDabord"]);
             return;
         }
 
@@ -295,13 +340,13 @@ public partial class AdviceViewModel : ViewModelBase
         var voices = AiConsultation.BuildVoices(config, state);
         var arbitre = AiConsultation.BuildArbitre(config);
 
-        VoicesTitle = arbitre is null
+        SetVoicesTitle(() => arbitre is null
             ? Localizer.Instance["Conseil.Voix.Suggestions"]
-            : Localizer.Instance["Conseil.Voix.Titre"];
+            : Localizer.Instance["Conseil.Voix.Titre"]);
 
         if (voices.Count == 0 && arbitre is null)
         {
-            AiStatus = Localizer.Instance["Conseil.Erreur.SansCle"];
+            SetAiStatus(() => Localizer.Instance["Conseil.Erreur.SansCle"]);
             return;
         }
 
@@ -348,8 +393,8 @@ public partial class AdviceViewModel : ViewModelBase
 
                 AiText = AnswerFormat.ForCulture(Localizer.Instance.Culture).ExtractVoice(AiText);
                 RebuildAiLines();
-                AiTitle = Localizer.Instance.Get("Conseil.Reponse.Suggestion", arbitre.Model);
-                AiStatus = Localizer.Instance.Get("Conseil.Avis.Statut", arbitre.Model);
+                SetAiTitle(() => Localizer.Instance.Get("Conseil.Reponse.Suggestion", arbitre.Model));
+                SetAiStatus(() => Localizer.Instance.Get("Conseil.Avis.Statut", arbitre.Model));
                 return;
             }
 
@@ -366,15 +411,15 @@ public partial class AdviceViewModel : ViewModelBase
 
             if (usable.Count == 0)
             {
-                AiStatus = Localizer.Instance.Get("Conseil.Avis.Indisponibles",
-                    string.Join(", ", opinions.Select(opinion => opinion.Provider)));
+                SetAiStatus(() => Localizer.Instance.Get("Conseil.Avis.Indisponibles",
+                    string.Join(", ", opinions.Select(opinion => opinion.Provider))));
                 return;
             }
 
             // Pas d'arbitre (clé OpenCode absente) : les voix restent des suggestions.
             if (arbitre is null)
             {
-                AiStatus = Localizer.Instance.Plural(usable.Count, "Conseil.Avis.SansArbitre");
+                SetAiStatus(() => Localizer.Instance.Plural(usable.Count, "Conseil.Avis.SansArbitre"));
                 return;
             }
 
@@ -407,20 +452,20 @@ public partial class AdviceViewModel : ViewModelBase
             // ne garde que son verdict, du marqueur à la fin du CONSEIL LIBRE.
             AiText = AnswerFormat.ForCulture(Localizer.Instance.Culture).ExtractVerdict(AiText);
             RebuildAiLines();
-            AiTitle = Localizer.Instance.Get("Conseil.Reponse.Verdict", arbitre.Model);
+            SetAiTitle(() => Localizer.Instance.Get("Conseil.Reponse.Verdict", arbitre.Model));
 
-            AiStatus = AiText.Length > 0
+            SetAiStatus(() => AiText.Length > 0
                 ? Localizer.Instance.Get("Conseil.Avis.Verdict.Sur", usable.Count,
                     string.Join(", ", usable.Select(opinion => opinion.Provider)))
-                : Localizer.Instance["Conseil.Avis.Verdict.Vide"];
+                : Localizer.Instance["Conseil.Avis.Verdict.Vide"]);
         }
         catch (OperationCanceledException)
         {
-            AiStatus = Localizer.Instance["Conseil.Erreur.Annule"];
+            SetAiStatus(() => Localizer.Instance["Conseil.Erreur.Annule"]);
         }
         catch (Exception exception)
         {
-            AiStatus = Localizer.Instance.Get("Conseil.Erreur.Suite", exception.Message);
+            SetAiStatus(() => Localizer.Instance.Get("Conseil.Erreur.Suite", exception.Message));
         }
         finally
         {

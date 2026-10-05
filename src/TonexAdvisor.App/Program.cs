@@ -1,7 +1,9 @@
 ﻿using Avalonia;
 using System;
 using System.Globalization;
+using System.IO;
 using TonexAdvisor.App.Localization;
+using TonexAdvisor.App.Services;
 
 namespace TonexAdvisor.App;
 
@@ -18,11 +20,32 @@ sealed class Program
             .StartWithClassicDesktopLifetime(args);
     }
 
-    // Cadrage des quatre cultures .NET (§11) depuis la langue d'interface, avant toute
-    // construction d'IU. Phase 1 : statu quo français — la détection (fr→FR sinon EN,
-    // mémorisée dans state.json) est branchée en phase 9.
+    // Détection puis cadrage (§11) : le choix mémorisé d'abord, la machine à défaut (« fr » →
+    // français, tout le reste → anglais), l'écriture ensuite pour que le prochain lancement
+    // parte du choix explicite. Avant toute construction d'IU, et les quatre cultures .NET
+    // avec — un thread arrière-plan (lecture BDD, appel IA) doit formater pareil (§11).
     private static void FrameCulture()
-        => Localizer.Instance.Culture = CultureInfo.GetCultureInfo("fr-FR");
+    {
+        var state = UserState.Load();
+        var language = UiLanguages.Resolve(state.UiLanguage, CultureInfo.CurrentUICulture);
+
+        if (!string.Equals(state.UiLanguage, language, StringComparison.Ordinal))
+        {
+            state.UiLanguage = language;
+
+            try
+            {
+                state.Save();
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                // Un dossier inaccessible n'empêche pas de démarrer : la langue détectée
+                // s'applique quand même et sera ré-écrite au premier changement explicite.
+            }
+        }
+
+        Localizer.Instance.Culture = UiLanguages.CultureOf(language);
+    }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()

@@ -48,15 +48,19 @@ public class PersistenceTests
 
         var first = new LibraryViewModel(null, store);
         first.Attach(SampleLibraries.Gen1);
+
+        // Historical v1.2.1 keys going in; ids come out — §8.2, and the file reaches them
+        // through the very same normalization the load applies.
         first.SavePresetColumnWidths(new Dictionary<string, double> { ["Nom"] = 200, ["Stomp"] = 175 });
         first.SaveToneModelColumnWidths(new Dictionary<string, double> { ["Ampli"] = 180 });
 
         var second = new LibraryViewModel(null, store);
         second.Attach(SampleLibraries.Gen1);
 
-        Assert.Equal(200, second.PresetColumnWidths["Nom"]);
-        Assert.Equal(175, second.PresetColumnWidths["Stomp"]);
-        Assert.Equal(180, second.ToneModelColumnWidths["Ampli"]);
+        Assert.Equal(200, second.PresetColumnWidths["name"]);
+        Assert.Equal(175, second.PresetColumnWidths["stomp"]);
+        Assert.Equal(180, second.ToneModelColumnWidths["amp"]);
+        Assert.False(second.PresetColumnWidths.ContainsKey("Nom"));
     }
 
     [LibraryFact]
@@ -77,13 +81,15 @@ public class PersistenceTests
 
         Assert.Equal("metal", second.SearchText);
         Assert.Equal(1, second.SelectedTabIndex);
-        Assert.Equal(200, second.PresetColumnWidths["Nom"]);
+        Assert.Equal(200, second.PresetColumnWidths["name"]);
     }
 
     [LibraryFact]
     public void RestoringColumnWidths_NotifiesTheViewOnce()
     {
         var store = new InMemoryUserStateStore();
+
+        // A v1.2.1 blob: widths keyed by the French headers of the day.
         store.Save(new UserState { PresetColumnWidths = new Dictionary<string, double> { ["Nom"] = 200 } });
 
         var viewModel = new LibraryViewModel(null, store);
@@ -96,8 +102,9 @@ public class PersistenceTests
 
         viewModel.Attach(SampleLibraries.Gen1);
 
-        // The grids listen for this very notification to apply the saved widths.
+        // The grids listen for this very notification to apply the saved widths — and the
+        // key they read is already the id, translated once, notified once (§8.2).
         Assert.Equal(1, notifications);
-        Assert.Equal(200, viewModel.PresetColumnWidths["Nom"]);
+        Assert.Equal(200, viewModel.PresetColumnWidths["name"]);
     }
 }

@@ -603,6 +603,18 @@
   <data name="Reglages.IA.Titre" xml:space="preserve">
     <value>Conseil IA</value>
   </data>
+  <data name="Reglages.Langue.En" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Reglages.Langue.Fr" xml:space="preserve">
+    <value>Français</value>
+  </data>
+  <data name="Reglages.Langue.Immediat" xml:space="preserve">
+    <value>Le changement est immédiat.</value>
+  </data>
+  <data name="Reglages.Langue.Titre" xml:space="preserve">
+    <value>LANGUE</value>
+  </data>
   <data name="Reglages.LectureSeule.Pastille" xml:space="preserve">
     <value>LECTURE SEULE</value>
   </data>

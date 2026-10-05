@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.App.ViewModels;
 
 namespace TonexAdvisor.App.Views;
@@ -101,36 +102,39 @@ public partial class LibraryView : UserControl
         }
         else if (e.PropertyName == nameof(LibraryViewModel.PresetColumnWidths))
         {
-            ApplyColumnWidths(PresetsGrid, _viewModel.PresetColumnWidths);
+            ApplyColumnWidths(PresetsGrid, _viewModel.PresetColumnWidths, ColumnIds.Grid.Presets);
         }
         else if (e.PropertyName == nameof(LibraryViewModel.ToneModelColumnWidths))
         {
-            ApplyColumnWidths(ToneModelsGrid, _viewModel.ToneModelColumnWidths);
+            ApplyColumnWidths(ToneModelsGrid, _viewModel.ToneModelColumnWidths, ColumnIds.Grid.ToneModels);
         }
     }
 
     /// <summary>
     /// Gives each column the width the user gave it, in pixels. A column in pixels is out of the
     /// shared space for good: the window can no longer take its width back, and the columns nobody
-    /// touched keep adapting through their <c>*</c>.
+    /// touched keep adapting through their <c>*</c>. Stored keys are ids (§8.2): the header they
+    /// are resolved against is the one the current language displays, historical French or
+    /// English keys from v1.2.1 translating through the very same path.
     /// </summary>
     private void ApplySavedColumnWidths()
     {
         if (_viewModel is null)
             return;
 
-        ApplyColumnWidths(PresetsGrid, _viewModel.PresetColumnWidths);
-        ApplyColumnWidths(ToneModelsGrid, _viewModel.ToneModelColumnWidths);
+        ApplyColumnWidths(PresetsGrid, _viewModel.PresetColumnWidths, ColumnIds.Grid.Presets);
+        ApplyColumnWidths(ToneModelsGrid, _viewModel.ToneModelColumnWidths, ColumnIds.Grid.ToneModels);
     }
 
-    private static void ApplyColumnWidths(DataGrid grid, IReadOnlyDictionary<string, double> widths)
+    private static void ApplyColumnWidths(DataGrid grid, IReadOnlyDictionary<string, double> widths, ColumnIds.Grid kind)
     {
-        foreach (var (header, pixels) in widths)
+        foreach (var (key, pixels) in widths)
         {
             // Below any sensible minimum: not a width a hand could have chosen.
             if (pixels < 40)
                 continue;
 
+            var header = ColumnIds.HeaderOf(kind, key);
             var column = grid.Columns.FirstOrDefault(candidate =>
                 string.Equals(candidate.Header?.ToString(), header, StringComparison.Ordinal));
 
@@ -212,6 +216,10 @@ public partial class LibraryView : UserControl
         if (!dragged.Width.IsAbsolute)
             dragged.Width = new DataGridLength(dragged.ActualWidth, DataGridLengthUnitType.Pixel);
 
+        var kind = ReferenceEquals(grid, PresetsGrid)
+            ? ColumnIds.Grid.Presets
+            : ColumnIds.Grid.ToneModels;
+
         var widths = new Dictionary<string, double>();
         foreach (var column in grid.Columns)
         {
@@ -220,12 +228,13 @@ public partial class LibraryView : UserControl
                 continue;
 
             // Every column already frozen stays frozen; the dragged one joins them at the width
-            // it just reached. The others keep their '*' and keep adapting.
+            // it just reached. The others keep their '*' and keep adapting. The key reaching the
+            // file is the stable id, never the header of the day (§8.2).
             if (column.Width.IsAbsolute || ReferenceEquals(column, dragged))
-                widths[header] = column.ActualWidth;
+                widths[ColumnIds.IdOf(kind, header) ?? header] = column.ActualWidth;
         }
 
-        if (ReferenceEquals(grid, PresetsGrid))
+        if (kind == ColumnIds.Grid.Presets)
             _viewModel.SavePresetColumnWidths(widths);
         else
             _viewModel.SaveToneModelColumnWidths(widths);

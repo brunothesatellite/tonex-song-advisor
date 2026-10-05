@@ -9,6 +9,10 @@
              x:Class="TonexAdvisor.App.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
 
+    <UserControl.Resources>
+        <loc:LanguageLabelConverter x:Key="LanguageLabel" />
+    </UserControl.Resources>
+
     <ScrollViewer Padding="18,14">
         <StackPanel Spacing="14" MaxWidth="880" HorizontalAlignment="Left">
 
@@ -17,6 +21,31 @@
                 <TextBlock Text="{loc:Loc Reglages.Bases.Intro}"
                            Classes="dim" />
             </StackPanel>
+
+            <!-- ── Langue de l'interface (§11) ─────────────────────────── -->
+            <Border Classes="card">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{loc:Loc Reglages.Langue.Titre}" Classes="faint" />
+                    <Grid ColumnDefinitions="240,*" ColumnSpacing="12">
+                        <ComboBox Grid.Column="0"
+                                  ItemsSource="{Binding LanguageCodes}"
+                                  SelectedItem="{Binding UiLanguage}"
+                                  HorizontalAlignment="Stretch">
+                            <!-- Le gabarit se ré-exécute à la bascule : les cellules sont
+                                 recréées par la VM, la valeur transportée reste le code. -->
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource LanguageLabel}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBlock Grid.Column="1"
+                                   Text="{loc:Loc Reglages.Langue.Immediat}"
+                                   Classes="faint" FontSize="11"
+                                   TextWrapping="Wrap" VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </Border>
 
             <!-- ── Path + actions ──────────────────────────────────────── -->
             <Border Classes="card">

@@ -48,6 +48,15 @@ public sealed class UserState
     /// <summary>0 presets, 1 tone models, 2 advice.</summary>
     public int SelectedTabIndex { get; set; }
 
+    // Langue -------------------------------------------------------------
+
+    /// <summary>
+    /// Interface language: « fr », « en », or null when nobody ever chose — the first launch
+    /// detects it from the system and writes it (§10, §11). An old file without the field
+    /// simply deserializes to null, which is exactly the « never chosen » case.
+    /// </summary>
+    public string? UiLanguage { get; set; }
+
     // Grilles ---------------------------------------------------------------
 
     /// <summary>

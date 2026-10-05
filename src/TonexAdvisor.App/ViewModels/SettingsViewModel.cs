@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TonexAdvisor.App.Config;
@@ -208,6 +209,10 @@ public partial class SettingsViewModel : ViewModelBase
         _useTonexLibrary = state.UseTonexLibrary;
         _selectedTonexPath = state.TonexDatabasePath;
 
+        // Jamais choisi = détection (§11) : Program.Main a persisté la sienne au démarrage,
+        // cette recopie couvre les cas hors Main (tests, relecture d'un fichier vierge).
+        _uiLanguage = UiLanguages.Resolve(state.UiLanguage, CultureInfo.CurrentUICulture);
+
         _apiKey = _config.ApiKey;
         _geminiKey = _config.CredentialFor("gemini").ApiKey;
         _mistralKey = _config.CredentialFor("mistral").ApiKey;
@@ -239,6 +244,82 @@ public partial class SettingsViewModel : ViewModelBase
 
         RefreshTonexLibraries();
         _ready = true;
+
+        // Bascule à chaud (§11.4) : aides composées, résumé, libellés de voix et cellules du
+        // sélecteur de modèle se recomposent dans la langue choisie.
+        Localizer.Instance.CultureChanged += RebuildLocalizedTexts;
+    }
+
+    // ── Langue de l'interface (§10, §11) ──────────────────────────────────
+
+    /// <summary>
+    /// Les deux codes proposés, dans l'ordre de la ComboBox — le libellé affiché passe par
+    /// <c>LanguageLabelConverter</c> : la valeur transportée reste le code « fr »/« en ».
+    /// </summary>
+    public IReadOnlyList<string> LanguageCodes => UiLanguages.Codes;
+
+    [ObservableProperty]
+    private string _uiLanguage = UiLanguages.French;
+
+    /// <summary>
+    /// Bascule immédiate (§11) : la culture de l'interface change sur le champ — les quatre
+    /// cultures .NET avec elle, via le setter du <see cref="Localizer"/> — puis le choix est
+    /// écrit dans <c>state.json</c>. Un choix explicite gagne sur la détection du premier
+    /// lancement, elle-même déjà persistée par <c>Program.Main</c>.
+    /// </summary>
+    partial void OnUiLanguageChanged(string value)
+    {
+        if (!UiLanguages.IsSupported(value))
+            return;
+
+        Localizer.Instance.Culture = UiLanguages.CultureOf(value);
+
+        var state = _stateStore.Load();
+        if (!string.Equals(state.UiLanguage, value, StringComparison.Ordinal))
+        {
+            state.UiLanguage = value;
+            _stateStore.Save(state);
+        }
+    }
+
+    /// <summary>
+    /// Bascule à chaud (§11.4) : les aides composées se relisent, le résumé de la base se
+    /// recompose, les lignes de voix sont re-notifiées et les cellules du sélecteur de
+    /// modèle recréées — un gabarit de données ne se revalide jamais de lui-même.
+    /// </summary>
+    private void RebuildLocalizedTexts()
+    {
+        OnPropertyChanged(nameof(TonexFolderHint));
+        OnPropertyChanged(nameof(ReadOnlyNotice));
+        OnPropertyChanged(nameof(FormatHint));
+        OnPropertyChanged(nameof(GeminiModelHint));
+        OnPropertyChanged(nameof(MistralModelHint));
+        OnPropertyChanged(nameof(GroqModelHint));
+
+        if (_host.CurrentDatabase is { } database)
+            RefreshSummaryLabels(database);
+
+        foreach (var choice in VoiceChoices)
+            choice.NotifyLocalizedLabels();
+
+        RefreshModelLabels();
+    }
+
+    /// <summary>
+    /// Recrée les cellules du sélecteur de modèle, sélection comprise : le gabarit affiche
+    /// l'identifiant et le libellé de palier, lequel est localisé (§8.4, §11.4). La valeur
+    /// revient telle quelle — mêmes instances, seule l'affichage change.
+    /// </summary>
+    private void RefreshModelLabels()
+    {
+        var selected = SelectedModel;
+        var models = AvailableModels.ToList();
+
+        AvailableModels.Clear();
+        foreach (var model in models)
+            AvailableModels.Add(model);
+
+        SelectedModel = selected;
     }
 
     public string ReadOnlyNotice => Localizer.Instance["Reglages.Notice.Garantie"];
@@ -459,6 +540,18 @@ public partial class SettingsViewModel : ViewModelBase
         // lui qui reprend quand on décoche la case. Recopier la base ouverte ici l'écraserait.
         if (!UseTonexLibrary)
             DatabasePath = database.Path;
+
+        RefreshSummaryLabels(database);
+        ErrorMessage = "";
+    }
+
+    /// <summary>
+    /// Les six libellés du résumé, recomposés après une ouverture et à chaque bascule de
+    /// langue (§11.4) — format, fichier et compteurs sont localisés ; hachage et tables,
+    /// neutres, passent par là pour simple cohérence.
+    /// </summary>
+    private void RefreshSummaryLabels(ToneXDatabase database)
+    {
         FormatLabel = database.Format switch
         {
             DatabaseFormat.V1 => Localizer.Instance["Reglages.Format.V1"],
@@ -476,7 +569,6 @@ public partial class SettingsViewModel : ViewModelBase
             : Localizer.Instance["Reglages.Ouvert.Reglages.Non"];
         HashLabel = database.Sha256[..16] + "…";
         TablesLabel = string.Join(", ", database.Tables);
-        ErrorMessage = "";
     }
 
     public void ClearSummary()

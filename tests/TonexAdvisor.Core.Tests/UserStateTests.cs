@@ -25,6 +25,7 @@ public class UserStateTests
                 UseTonexLibrary = true,
                 DatabasePath = @"D:\bibliotheques\Library.db",
                 TonexDatabasePath = @"C:\TONEX\Library2.db",
+                UiLanguage = "en",
             }.Save(file);
 
             var loaded = UserState.Load(file);
@@ -38,6 +39,7 @@ public class UserStateTests
             Assert.True(loaded.UseTonexLibrary);
             Assert.Equal(@"D:\bibliotheques\Library.db", loaded.DatabasePath);
             Assert.Equal(@"C:\TONEX\Library2.db", loaded.TonexDatabasePath);
+            Assert.Equal("en", loaded.UiLanguage);
         }
         finally
         {
@@ -108,13 +110,55 @@ public class UserStateTests
     {
         var original = new UserState
         {
+            UiLanguage = "en",
             PresetColumnWidths = new Dictionary<string, double> { ["Nom"] = 200 },
         };
 
         var copy = original.Clone();
         copy.PresetColumnWidths["Nom"] = 999;
+        copy.UiLanguage = "fr";
 
         Assert.Equal(200, original.PresetColumnWidths["Nom"]);
+        Assert.Equal("en", original.UiLanguage);
+    }
+
+    [Fact]
+    public void AV121FileWithoutTheLanguageField_DeserializesToNeverChosen()
+    {
+        var file = TempFile();
+        try
+        {
+            // Blob v1.2.1 : les douze champs de l'époque, aucun champ UiLanguage — §10.
+            File.WriteAllText(file, """
+                {
+                  "SearchText": "metal",
+                  "DisabledVoices": [],
+                  "UseTonexLibrary": false,
+                  "DatabasePath": "D:/bibliotheques/Library.db",
+                  "TonexDatabasePath": "",
+                  "Category": "HI-GAIN",
+                  "Genre": "Metal",
+                  "Folder": "",
+                  "OnlyFavorites": true,
+                  "SelectedTabIndex": 1,
+                  "PresetColumnWidths": { "Nom": 200 },
+                  "ToneModelColumnWidths": { "Stomp": 175 }
+                }
+                """);
+
+            var loaded = UserState.Load(file);
+
+            // Null = jamais choisi : la prochaine lecture détectera la langue du système.
+            Assert.Null(loaded.UiLanguage);
+            Assert.Equal("metal", loaded.SearchText);
+            Assert.Equal(1, loaded.SelectedTabIndex);
+            Assert.Equal(200, loaded.PresetColumnWidths["Nom"]);
+            Assert.Equal(175, loaded.ToneModelColumnWidths["Stomp"]);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
     }
 
     private static string TempFile()

@@ -97,6 +97,20 @@ public sealed class Localizer : INotifyPropertyChanged
     }
 
     /// <summary>
+    /// Valeur localisée d'une culture <b>explicite</b>, indépendante de la culture courante :
+    /// traduire une clé historique (§8.2) demande l'en-tête français <i>et</i> l'en-tête
+    /// anglais pendant que l'interface n'en affiche qu'un seul. Repli sur la clé elle-même,
+    /// jamais vide, jamais d'exception (§5) — la clé inconnue est déjà signalée en debug par
+    /// l'appel de validation côté table (voir <c>ColumnIds</c>).
+    /// </summary>
+    public string GetForCulture(string key, CultureInfo culture)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(culture);
+        return Strings.GetString(key, culture) ?? key;
+    }
+
+    /// <summary>
     /// Pluriel CLDR (§6) : lit <c>{baseKey}.one</c> ou <c>{baseKey}.other</c> selon la règle
     /// de la langue courante ; repli sur <c>.other</c> si le singulier manque.
     /// Ajouter une langue = ajouter sa règle dans <see cref="EstSingulier"/>.
