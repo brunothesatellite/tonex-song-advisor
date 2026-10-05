@@ -251,6 +251,7 @@ public partial class AdviceViewModel : ViewModelBase
         ErrorMessage = "";
         Hint = DefaultHint;
         AiText = "";
+        AiLines = Array.Empty<AnswerLineViewModel>();
         AiThinking = "";
         SetAiStatus(static () => "");
         SetAiTitle(static () => "");
@@ -314,7 +315,10 @@ public partial class AdviceViewModel : ViewModelBase
         if (IsAiBusy)
             return;
 
+        // L'ancien verdict part immédiatement : AiLines porte le texte rendu de l'arbitre, et
+        // il n'attend plus la réponse nouvelle pour disparaître (il était écrasé sur place).
         AiText = "";
+        AiLines = Array.Empty<AnswerLineViewModel>();
         AiThinking = "";
         SetAiStatus(static () => "");
         SetAiTitle(static () => "");
@@ -329,11 +333,11 @@ public partial class AdviceViewModel : ViewModelBase
             return;
         }
 
-        // Le classement local reste affiché, mais le contexte envoyé aux IA est le catalogue
-        // complet de la bibliothèque : c'est là qu'elles peuvent choisir ce que la correspondance
-        // locale ignore (« un son Slash » → « AFD100 »).
-        if (!HasPresets && Combination is null)
-            Advise();
+        // Le conseil local repart à chaque demande IA, avec la nouvelle requête : un « get
+        // advice » de plus, en millisecondes, pour que le classement local et le prompt des
+        // IA décrivent la même demande — plus de résultats de l'ancienne requête affichés
+        // pendant que les voix travaillent.
+        Advise();
 
         var config = _configLoader();
         var state = _stateStore.Load();

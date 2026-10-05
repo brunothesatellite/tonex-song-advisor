@@ -248,7 +248,7 @@
                                         <Button Grid.Column="0" Classes="accent"
                                                 Command="{Binding Advice.AdviseCommand}"
                                                 Content="{loc:Loc Conseil.Bouton.Conseiller}" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Advice.Hint}"
+                                        <SelectableTextBlock Grid.Column="1" Text="{Binding Advice.Hint}"
                                                    Classes="faint" FontSize="11"
                                                    TextWrapping="Wrap" VerticalAlignment="Center" />
                                     </Grid>
@@ -404,22 +404,23 @@
                                                                       IsVisible="{Binding HasText}">
                                                             <ItemsControl.ItemTemplate>
                                                                 <DataTemplate x:DataType="vm:AnswerLineViewModel">
-                                                                    <TextBlock TextWrapping="Wrap" FontSize="11">
+                                                                    <!-- SelectableTextBlock : lecture seule, mais la souris sélectionne et copie. -->
+                                                                    <SelectableTextBlock TextWrapping="Wrap" FontSize="11">
                                                                         <Run Text="{Binding Label}"
                                                                              Foreground="{StaticResource B.Accent}" />
                                                                         <Run Text="{Binding Body}" />
-                                                                    </TextBlock>
+                                                                    </SelectableTextBlock>
                                                                 </DataTemplate>
                                                             </ItemsControl.ItemTemplate>
                                                         </ItemsControl>
 
                                                         <!-- La reflexion : masquee tant qu on ne l a pas demandee. -->
-                                                        <TextBlock Text="{Binding Thinking}" Classes="faint"
+                                                        <SelectableTextBlock Text="{Binding Thinking}" Classes="faint"
                                                                    FontStyle="Italic" FontSize="11"
                                                                    TextWrapping="Wrap"
                                                                    IsVisible="{Binding HasThinking}" />
 
-                                                        <TextBlock Text="{Binding ErrorDetail}" Classes="faint"
+                                                        <SelectableTextBlock Text="{Binding ErrorDetail}" Classes="faint"
                                                                    FontSize="11" TextWrapping="Wrap"
                                                                    IsVisible="{Binding IsErrorExpanded}" />
                                                     </StackPanel>
@@ -428,7 +429,7 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
 
-                                    <TextBlock Text="{Binding Advice.AiThinking}" Classes="faint"
+                                    <SelectableTextBlock Text="{Binding Advice.AiThinking}" Classes="faint"
                                                FontStyle="Italic" FontSize="11" TextWrapping="Wrap"
                                                IsVisible="{Binding Advice.HasAiThinking}" />
 
@@ -464,11 +465,13 @@
                                                   IsVisible="{Binding Advice.HasAiLines}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:AnswerLineViewModel">
-                                                <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="21">
+                                                <!-- Lecture seule par nature : le verdict se sélectionne à la souris
+                                                     et se copie (Ctrl+C) pour être collé ailleurs. -->
+                                                <SelectableTextBlock TextWrapping="Wrap" FontSize="13" LineHeight="21">
                                                     <Run Text="{Binding Label}"
                                                          Foreground="{StaticResource B.Accent}" />
                                                     <Run Text="{Binding Body}" />
-                                                </TextBlock>
+                                                </SelectableTextBlock>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>

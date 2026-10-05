@@ -136,6 +136,36 @@ public class AdviceViewTests
     }
 
     [LibraryFact]
+    public void AskAi_RelaunchAfterChangingTheQuery_ClearsTheVerdictAndReRanksLocally()
+    {
+        var viewModel = new LibraryViewModel(() => new AppConfig(), new InMemoryUserStateStore());
+        viewModel.Attach(SampleLibraries.Gen1);
+
+        // Premier tour : classement local + verdict d'arbitre sur l'écran.
+        viewModel.Advice.Style = "metal";
+        viewModel.Advice.AdviseCommand.Execute(null);
+        Assert.True(viewModel.Advice.HasPresets);
+        viewModel.Advice.AiLines = AnswerLineViewModel.Split("BLOC : verdict d'une autre requête");
+        Assert.True(viewModel.Advice.HasAiLines);
+
+        // La requête change : artiste inconnu, le classement local ne doit plus rien rendre —
+        // preuve que le « get advice » local a tourné une nouvelle fois (il ne tournait que
+        // quand le panneau était vide).
+        viewModel.Advice.Style = "";
+        viewModel.Advice.Artist = "zzz personne inconnue";
+
+        // Aucune clé dans cette config : la requête s'arrête avant le réseau.
+        viewModel.Advice.AskAiCommand.Execute(null);
+
+        Assert.False(viewModel.Advice.HasAiLines, "the previous verdict must vanish at once");
+        Assert.Equal("", viewModel.Advice.AiText);
+        Assert.False(viewModel.Advice.HasPresets, "the local advice must re-rank the new query");
+        Assert.False(viewModel.Advice.HasCombination);
+        Assert.Contains("Clé API", viewModel.Advice.AiStatus, StringComparison.Ordinal);
+        Assert.False(viewModel.Advice.IsAiBusy);
+    }
+
+    [LibraryFact]
     public void Reset_ClearsTheAiAnswerToo()
     {
         var viewModel = new LibraryViewModel(() => new AppConfig(), new InMemoryUserStateStore());
@@ -145,9 +175,13 @@ public class AdviceViewTests
         viewModel.Advice.AdviseCommand.Execute(null);
         viewModel.Advice.AskAiCommand.Execute(null);
 
+        // Un verdict rendu reste affiché tant que Reset ne l'efface pas.
+        viewModel.Advice.AiLines = AnswerLineViewModel.Split("BLOC : verdict de la bibliothèque précédente");
+
         viewModel.Attach(SampleLibraries.Gen1);
 
         Assert.Equal("", viewModel.Advice.AiText);
+        Assert.False(viewModel.Advice.HasAiLines, "a new library must not keep the old verdict");
         Assert.Equal("", viewModel.Advice.AiThinking);
         Assert.Equal("", viewModel.Advice.AiStatus);
         Assert.True(viewModel.Advice.IsAiEnabled);
