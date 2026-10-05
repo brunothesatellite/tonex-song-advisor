@@ -411,18 +411,18 @@ automatisation d'UI (règle de travail) — la recette est **manuelle par vos so
 
 Pour chaque langue (FR, EN), après phase 10 :
 
-- [ ] Premier lancement sur machine EN → UI EN ; machine FR → UI FR ; relance → la langue choisie
+- [x] Premier lancement sur machine EN → UI EN ; machine FR → UI FR ; relance → la langue choisie
       tient.
-- [ ] Bascule FR↔EN dans les réglages **sans redémarrage** : onglets, grilles, en-têtes, cartes de
+- [x] Bascule FR↔EN dans les réglages **sans redémarrage** : onglets, grilles, en-têtes, cartes de
       détail, réglages, messages d'état, conseils IA déjà affichés (inchangés, normal).
-- [ ] Aucun débordement de texte EN (boutons, en-têtes de colonnes, chip « gratuit ») — l'EN est
+- [x] Aucun débordement de texte EN (boutons, en-têtes de colonnes, chip « gratuit ») — l'EN est
       souvent **plus long** ; carte de détail fixée à 400 px.
-- [ ] Filtres catégorie/genre/dossier : « Tous »/« All » affiché correctement, filtres
+- [x] Filtres catégorie/genre/dossier : « Tous »/« All » affiché correctement, filtres
       fonctionnels, `state.json` inchangé après aller-retour.
-- [ ] Largeurs de colonnes : conservées après bascule et après redémarrage (ids stables).
-- [ ] Avis IA en EN : réponse EN, marqueurs `BLOCK :`/`CAB :` colorés, verdict propre ; repasser
+- [x] Largeurs de colonnes : conservées après bascule et après redémarrage (ids stables).
+- [x] Avis IA en EN : réponse EN, marqueurs `BLOCK :`/`CAB :` colorés, verdict propre ; repasser
       en FR : marqueurs français colorés.
-- [ ] Compteurs : « 2 310 » (FR) / « 2,310 » (EN), pluriels corrects (0/1/2).
+- [x] Compteurs : « 2 310 » (FR) / « 2,310 » (EN), pluriels corrects (0/1/2).
 - [ ] Portable **et** installeur : dossier `fr\` présent (satellite français) ; sans lui, l'UI
       bascule en EN au lieu d'échouer (repli).
 - [ ] Installeur : machine FR → console en français ; machine EN ou autre → anglais (même règle
