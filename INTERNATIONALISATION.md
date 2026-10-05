@@ -369,7 +369,7 @@ que les garde-fous arrivent **avant** la grande migration, pour l'encadrer.
 | **4 — Vues de détail** ✅ | `PresetDetailView`, `ToneModelDetailView`, `PresetDetailViewModel` (dont `SettingsNote`) | **ATTEINT** : les 4 fichiers sortis de l'allowlist (13 + 12 + 15 + 2 → 0) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
 | **5 — Réglages (UI + VM)** ✅ | `SettingsView.axaml`, `SettingsViewModel` (le plus gros : 32 lignes accentuées), badges §8.4 | **ATTEINT** : les 4 fichiers sortis de l'allowlist (37 + 37 + 2 + 4 → 0) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
 | **6 — Avis IA (UI)** ✅ | `AdviceViewModel` (titres, spinner, états), `AiOpinionRowViewModel`, lignes de réponse | **ATTEINT** : les 2 fichiers de lignes sortis de l'allowlist (`AdviceCombinationRowViewModel` 4 → 0, `AdvicePresetRowViewModel` 3 → 0) et les 2 autres réduits à leurs seuls littéraux de protocole (`AdviceViewModel` 29 → 4, `AiOpinionRowViewModel` 4 → 2 — extraction `BLOC :`/`VERDICT :` reportée à la phase 7) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
-| **7 — Protocole IA (le plus délicat)** | `AnswerFormat` unique, invites Core paramétrées en langue (§8.1), marqueurs tolérants (§9), `AnswerLineViewModel` | Tests d'extraction/coloration FR **et** EN verts ; 16 tests français verts non modifiés |
+| **7 — Protocole IA (le plus délicat)** ✅ | `AnswerFormat` unique, invites Core paramétrées en langue (§8.1), marqueurs tolérants (§9), `AnswerLineViewModel` | **ATTEINT** : extraction/coloration FR **et** EN verts (**19 nouveaux tests** : `AnswerFormatTests` 17 dont 8 de coloration, `EnglishPromptTests` 2) ; les tests français de protocole **non modifiés et verts** ; build 0/0 ; **228/228 tests verts ×12** (§18) |
 | **8 — Passe nombres/dates/pluriels** | Les 33 sites de formatage, élimination de `(s)` | Plus aucun format en dur ; tests verts |
 | **9 — Langue : détection, choix, bascule** | `UiLanguage` + rétrocompat (§10), ComboBox réglages, recalcul à chaud (§11), largeurs de colonnes en ids (§8.2) | Tests persistance + compat + bascule verts |
 | **10 — EN complet + recette** | `Strings.resx` (neutre EN) et `Strings.fr.resx` remplis à 100 % (parité = 100 %), allowlist = **vide**, vérification satellite `fr\` dans le zip et l'installeur, recette manuelle des deux langues (§14) | Parité 100 %, scan sans allowlist, recette signée |
@@ -493,6 +493,7 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
 | 05/10/2026 | **Phase 4 — Vues de détail** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout), **12/12 exécutions consécutives vertes** ; sortie d'allowlist : `PresetDetailView.axaml` **13 → 0**, `ToneModelDetailView.axaml` **12 → 0**, `PresetDetailViewModel.cs` **15 → 0**, `ToneModelDetailViewModel.cs` **2 → 0** ; **27 clés `Detail.*`** ajoutées en paires ordonnées (**98 au total**, parité vérifiée) ; allowlist **34 fichiers / 290 littéraux** ; artefacts : `xmlns:loc` + `{loc:Loc}` (2 vues), `Localizer.Instance.Get/[]` (2 VM), constantes techniques `Sep`/`SepLarge`/`PrefixHwA`/`PrefixHwB` |
 | 05/10/2026 | **Phase 5 — Réglages (UI + VM)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout), **12/12 exécutions consécutives vertes** ; sortie d'allowlist : `SettingsView.axaml` **37 → 0**, `SettingsViewModel.cs` **37 → 0**, `SettingsView.axaml.cs` **2 → 0**, `OpenCodeModels.cs` **4 → 0** (badges §8.4) ; **76 clés** ajoutées en paires ordonnées (**174 au total**, parité vérifiée) ; allowlist **30 fichiers / 210 littéraux** ; artefacts : 43 sites `{loc:Loc}` (dont 6 boutons à texte élément), `Localizer.Instance.Get/[]` (VM + code-behind), `OpenCodeModel.TierLabel` → `Model.Tier.Free`/`.Paid`, clé d'invite `Invite.Ping` |
 | 05/10/2026 | **Phase 6 — Avis IA (UI)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout), **12/12 exécutions consécutives vertes sur le code final** (course de culture corrigée en cours de route, cf. notes) ; sortie d'allowlist : `AdviceCombinationRowViewModel.cs` **4 → 0**, `AdvicePresetRowViewModel.cs` **3 → 0** ; réduits aux seuls littéraux de protocole : `AdviceViewModel.cs` **29 → 4**, `AiOpinionRowViewModel.cs` **4 → 2** (extraction `BLOC :`/`VERDICT :` laissée à la phase 7) ; **29 clés `Conseil.*`** ajoutées en paires ordonnées (**203 au total**, parité vérifiée) ; allowlist **28 fichiers / 176 littéraux** ; artefacts : `Localizer.Instance.Get/[]` (4 VM), `Plural` branché sur `Conseil.Combination.Uses.one/.other` (graines phase 1), constante `GenreSentinelle`, `tests\TonexAdvisor.Core.Tests\AssemblyInfo.cs` (parallélisme xunit désactivé) |
+| 05/10/2026 | **Phase 7 — Protocole IA** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **228/228 tests verts** (209 + 19 nouveaux), **12/12 exécutions consécutives vertes sur le code final** ; sortie d'allowlist : `AnswerLineViewModel.cs` **6 → 0**, `AdviceViewModel.cs` **4 → 0**, `AiOpinionRowViewModel.cs` **2 → 0** ; entrée neuve `AnswerFormat.cs` **12** (table des 6 marqueurs FR/EN : les seuls littéraux du fichier) ; invites Core bilingues en code : `CataloguePrompt.cs` **23 → 34** et `ArbitrationPrompt.cs` **18 → 29** (les branches EN vivent sur des lignes françaises — comptées, miroir mécanique du scan) ; allowlist **26 fichiers / 198 littéraux** ; tests français de protocole **inchangés** ; artefacts : `src\TonexAdvisor.Core\Advice\AnswerFormat.cs` (3 couches §9 : invite = langue de la session, extraction + coloration = les deux), surcharge tolérante `AnswerCleaner.Extract(text, startMarkers, endMarkers)` (session d'abord + repli), invites `(..., CultureInfo? culture = null)` §8.1 (défaut = fr, tests Core inchangés), culture passée par l'App (`Localizer.Instance.Culture`), tests `AnswerFormatTests` + `EnglishPromptTests` |
 | 04/10/2026 | **Phase 2 — Garde-fous (parité + scan)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (204 + 5 nouveaux), **12/12 exécutions consécutives vertes** ; garde-fou G6 **prouvé par la sonde** : ajout d'une chaîne en dur (`SondeScanTemporaire.cs`) → test rouge « hors allowlist », sonde retirée → vert ; artefacts : `PariteResxTests` (3 tests : clés, non-vidité, emplacements `{0}`), `ScanLitterauxTests` (2 tests : compteur exact vs allowlist + entrées périmées), `tests\TonexAdvisor.Core.Tests\litteraux-allowlist.txt` (**34 fichiers / 344 littéraux**), `TestPaths.RepoRoot` (racine via `TonexAdvisor.sln`) |
 
 **Notes techniques de la phase 1** (constats mesurés, à connaître pour les phases 3 à 9) :
@@ -670,6 +671,32 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
   `en cours…` sortent des passes 3-4 de l'inventaire (ni accent ni mot-clé) — migrés quand
   même, en clés `Conseil.Erreur.RequeteVide`, `Conseil.Avis.Interrompu`, `Conseil.EnCours`.
 
+**Notes techniques de la phase 7** (pour les phases 8 à 10) :
+- **`AnswerFormat` est la seule source des marqueurs** (§9) : les six noms (`Bloc`, `Baffle`,
+  `Reglages`, `Alternative`, `ConseilLibre`, `Verdict`) pour l'invite (langue de la session),
+  `VoiceStarts`/`VerdictStarts`/`EndMarkers` pour l'extraction (marqueurs de la session
+  d'abord, autre langue en repli), `AllMarkers` pour la coloration — qui peint **toujours les
+  deux jeux**, quelle que soit la session : la coloration n'a pas de culture. Terminologie EN
+  de §9 : `BLOC → BLOCK`, `BAFFLE → CAB`, `RÉGLAGES → SETTINGS`, `CONSEIL LIBRE → FREE
+  ADVICE`, `VERDICT/ALTERNATIVE` identiques.
+- **Invites Core : paramètre culture, défaut fr** — `CataloguePrompt.Build/DescribeCatalogue/
+  AppendRules` et `ArbitrationPrompt.Build` prennent `CultureInfo? culture = null` (§8.1 : pas
+  de `Localizer` dans Core ; règle `fr`→FR sinon EN, identique à §11). Le défaut `null` = fr :
+  les tests Core français n'ont pas bougé ; l'App passe `Localizer.Instance.Culture` (prêt
+  pour la bascule de la phase 9). Le gabarit de sortie est rendu depuis `AnswerFormat` :
+  `« {format.Verdict} : »` produit en fr exactement l'ancien littéral.
+- **Comptes qui montent** : les invites gagnent des littéraux (23 → 34, 18 → 29) parce que les
+  branches EN vivent sur des lignes françaises (`format.Verdict` déclenche `VERDICT`, `«`
+  déclenche…). Comptes honnêtes, miroir mécanique du scan ; le sort des invites en code FR/EN
+  sera tranché en phase 10 (au même titre que le tableau en code de l'installeur, §11).
+- **Graines `Marqueur.Bloc`/`Marqueur.Verdict`** des resx (phase 1) : plus la source de la
+  coloration — `AnswerFormat.AllMarkers` a remplacé la table en dur d'`AnswerLineViewModel`
+  (6 littéraux sortis). Les clés restent (consommées par `LocalizerTests`, parité) ; la phase
+  10 décidera de les retirer ou non.
+- **Hors périmètre 7** : `LibraryAdvisor` (25) et `StyleVocabulary` (7) ne portent ni invite
+  ni marqueur d'extraction — l'algo du Conseil local n'a pas été touché (règle du cahier des
+  charges) ; leur sort se joue dans les passes 8 à 10.
+
 **Méthode d'inventaire (phase 0)** — 4 passes de scan :
 1. XAML : tous les littéraux d'attributs texte, **sans filtre de langue** (126 lignes) ;
 2. C# : lignes francophones (accents + mots-clés) → 397 candidats bruts ;
@@ -687,7 +714,6 @@ Contrôles automatiques passés : chaque ligne du brut est couverte dans le cura
 
 ---
 
-*Plan validé ; phases 0 à 6 réalisées sur instruction. Prochaine étape : **phase 7**
-(protocole IA : `AnswerFormat` unique, invites Core paramétrées en langue §8.1,
-marqueurs tolérants §9, `AnswerLineViewModel`, §12), à lancer sur instruction.
-Phase 6 non committée (dernier commit : `0ea7e73`, phases 0-5).*
+*Plan validé ; phases 0 à 7 réalisées sur instruction. Prochaine étape : **phase 8**
+(passe nombres/dates/pluriels, élimination du `(s)`, §12), à lancer sur instruction.
+Phase 7 non committée (dernier commit : `8ee1e06`, phase 6).*

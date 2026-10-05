@@ -114,7 +114,8 @@ public partial class AiOpinionRowViewModel : ViewModelBase
         // Un modèle raisonneur écrit son travail dans sa réponse : brouillons, vérifications,
         // comptages. On ne garde que le bloc de réponse, du marqueur de format à la fin du
         // CONSEIL LIBRE.
-        Text = HasError ? "" : AnswerCleaner.Extract(opinion.Text, "BLOC :", "CONSEIL LIBRE");
+        var format = AnswerFormat.ForCulture(Localizer.Instance.Culture);
+        Text = HasError ? "" : format.ExtractVoice(opinion.Text);
         ErrorDetail = opinion.Error ?? "";
         IsErrorExpanded = false;
         IsThinkingExpanded = false;

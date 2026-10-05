@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using TonexAdvisor.Core.Data;
@@ -45,31 +46,40 @@ public static class CataloguePrompt
 
     private static readonly Regex SignalChainNoise = new(@"^\d+ Signal Chain$", RegexOptions.Compiled);
 
-    /// <summary>French prompt for one voice.</summary>
-    public static string Build(AdviceQuery query, LibraryIndex index)
+    /// <summary>Prompt for one voice, in the language the session speaks (§8.1).</summary>
+    public static string Build(AdviceQuery query, LibraryIndex index, CultureInfo? culture = null)
     {
         ArgumentNullException.ThrowIfNull(query);
         ArgumentNullException.ThrowIfNull(index);
 
+        var english = AnswerFormat.IsEnglish(culture);
         var builder = new StringBuilder(46_000);
 
-        builder.AppendLine("Tu es un conseiller guitare (rock/metal) qui connaît les bibliothèques TONEX.");
-        builder.AppendLine("Réponds en français, en 8 à 12 phrases, ton direct et concret.");
-        builder.AppendLine("Va droit au but : ni préambule, ni analyse de la demande.");
-        builder.AppendLine(
-            "Écris uniquement les lignes du format ci-dessous : ni brouillon, ni vérification de ton " +
-            "propre format, ni décompte de phrases, ni commentaire sur ce que tu t'apprêtes à répondre.");
+        builder.AppendLine(english
+            ? "You are a rock/metal guitar advisor who knows the TONEX libraries."
+            : "Tu es un conseiller guitare (rock/metal) qui connaît les bibliothèques TONEX.");
+        builder.AppendLine(english
+            ? "Answer in English, in 8 to 12 sentences, direct and concrete."
+            : "Réponds en français, en 8 à 12 phrases, ton direct et concret.");
+        builder.AppendLine(english
+            ? "Get straight to the point: no preamble, no analysis of the request."
+            : "Va droit au but : ni préambule, ni analyse de la demande.");
+        builder.AppendLine(english
+            ? "Write only the lines of the format below: no draft, no checking of your own " +
+              "format, no sentence counting, no commentary on what you are about to answer."
+            : "Écris uniquement les lignes du format ci-dessous : ni brouillon, ni vérification de ton " +
+              "propre format, ni décompte de phrases, ni commentaire sur ce que tu t'apprêtes à répondre.");
         builder.AppendLine();
 
-        builder.Append("La demande :");
-        AppendField(builder, "artiste", query.Artist);
-        AppendField(builder, "chanson", query.Song);
-        AppendField(builder, "style", query.Style);
+        builder.Append(english ? "The request:" : "La demande :");
+        AppendField(builder, english ? "artist" : "artiste", query.Artist, english);
+        AppendField(builder, english ? "song" : "chanson", query.Song, english);
+        AppendField(builder, "style", query.Style, english);
         builder.AppendLine();
 
         builder.AppendLine();
-        builder.Append(DescribeCatalogue(index));
-        AppendRules(builder);
+        builder.Append(DescribeCatalogue(index, culture));
+        AppendRules(builder, culture);
 
         return builder.ToString();
     }
@@ -78,20 +88,27 @@ public static class CataloguePrompt
     /// The catalogue itself — the captured blocks and the cabinets, names only, most used first.
     /// Shared with the arbitration so every voice works on the same material.
     /// </summary>
-    public static string DescribeCatalogue(LibraryIndex index)
+    public static string DescribeCatalogue(LibraryIndex index, CultureInfo? culture = null)
     {
         ArgumentNullException.ThrowIfNull(index);
 
+        var english = AnswerFormat.IsEnglish(culture);
         var builder = new StringBuilder(18_000);
 
-        builder.AppendLine("Blocs capturés disponibles — stomp + ampli indissociables :");
-        builder.AppendLine("Chaque ligne = un ampli, avec les stomp capturés avec lui. Un bloc = un ampli + au plus un de ses stomp.");
+        builder.AppendLine(english
+            ? "Captured blocks — stomp + amp, inseparable:"
+            : "Blocs capturés disponibles — stomp + ampli indissociables :");
+        builder.AppendLine(english
+            ? "Each line = an amp, with the stomps captured with it. A block = an amp plus at most one of its stomps."
+            : "Chaque ligne = un ampli, avec les stomp capturés avec lui. Un bloc = un ampli + au plus un de ses stomp.");
 
-        foreach (var line in RankAmps(index).Take(MaxAmps))
+        foreach (var line in RankAmps(index, english).Take(MaxAmps))
             builder.AppendLine(line);
 
         builder.AppendLine();
-        builder.AppendLine("Baffles disponibles — interchangeables :");
+        builder.AppendLine(english
+            ? "Cabinets available — interchangeable:"
+            : "Baffles disponibles — interchangeables :");
 
         foreach (var cabinet in RankCabs(index).Take(MaxCabs))
             builder.AppendLine(cabinet);
@@ -101,7 +118,7 @@ public static class CataloguePrompt
     }
 
     /// <summary>Amplifiers with their captured stomps, most used first.</summary>
-    private static IEnumerable<string> RankAmps(LibraryIndex index)
+    private static IEnumerable<string> RankAmps(LibraryIndex index, bool english)
         => index.ToneModels
             .Where(model => model.AmpName.Length > 0 && !IsNoise(model.AmpName))
             .GroupBy(model => Tokenizer.Normalize(model.AmpName))
@@ -117,7 +134,7 @@ public static class CataloguePrompt
                 var name = group.First().AmpName;
                 var line = stomps.Count > 0
                     ? $"{name} : {string.Join(" | ", stomps)}"
-                    : $"{name} : (sans stomp)";
+                    : $"{name} : {(english ? "(no stomp)" : "(sans stomp)")}";
 
                 return (Line: line, Usage: group.Sum(model => index.PresetsFor(model.Key).Count));
             })
@@ -150,27 +167,50 @@ public static class CataloguePrompt
     }
 
     /// <summary>The constraint every answer has to respect, and the format it must answer in.</summary>
-    public static void AppendRules(StringBuilder builder)
+    public static void AppendRules(StringBuilder builder, CultureInfo? culture = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.AppendLine("Règles :");
-        builder.AppendLine(
-            "- Un bloc = un ampli de la liste + au plus un des stomp capturés avec lui. Ne mélange " +
-            "jamais un stomp d'un autre ampli : ils ont été capturés ensemble.");
-        builder.AppendLine("- Le baffle est libre : choisis celui qui sert le mieux le style, dans la liste.");
-        builder.AppendLine("- Réponds exactement dans ce format, en reprenant les noms tels quels :");
-        builder.AppendLine("  BLOC : <stomp> -> <ampli>, ou <ampli> s'il n'y a pas de stomp");
-        builder.AppendLine("  BAFFLE : <nom du baffle choisi>");
-        builder.AppendLine("  RÉGLAGES : 2 à 3 réglages concrets (gain, EQ, réverb/delay)");
-        builder.AppendLine("  ALTERNATIVE : <un autre bloc>");
-        builder.AppendLine(
-            "  CONSEIL LIBRE : ce que tu utiliserais toi, sans aucune contrainte de bibliothèque — " +
-            "le matériel réel du morceau ou du style si tu le connais (ampli, baffle, pédales, " +
-            "accordage), et les réglages typiques qui vont avec.");
-        builder.AppendLine(
-            "- N'invente aucun nom absent des listes ci-dessus : cette contrainte ne vaut que pour " +
-            "BLOC, BAFFLE et ALTERNATIVE. CONSEIL LIBRE, lui, est ouvert à tout ton savoir.");
+        var english = AnswerFormat.IsEnglish(culture);
+        var format = AnswerFormat.ForCulture(culture);
+
+        builder.AppendLine(english ? "Rules:" : "Règles :");
+        builder.AppendLine(english
+            ? "- A block = one amp from the list plus at most one of the stomps captured with it. " +
+              "Never mix a stomp of another amp: they were captured together."
+            : "- Un bloc = un ampli de la liste + au plus un des stomp capturés avec lui. Ne mélange " +
+              "jamais un stomp d'un autre ampli : ils ont été capturés ensemble.");
+        builder.AppendLine(english
+            ? "- The cabinet is free: pick the one that serves the style best, from the list."
+            : "- Le baffle est libre : choisis celui qui sert le mieux le style, dans la liste.");
+        builder.AppendLine(english
+            ? "- Answer exactly in this format, keeping the names as they are:"
+            : "- Réponds exactement dans ce format, en reprenant les noms tels quels :");
+        builder.AppendLine(english
+            ? $"  {format.Bloc} : <stomp> -> <amp>, or <amp> when there is no stomp"
+            : $"  {format.Bloc} : <stomp> -> <ampli>, ou <ampli> s'il n'y a pas de stomp");
+        builder.AppendLine(english
+            ? $"  {format.Baffle} : <name of the chosen cabinet>"
+            : $"  {format.Baffle} : <nom du baffle choisi>");
+        builder.AppendLine(english
+            ? $"  {format.Reglages} : 2 to 3 concrete settings (gain, EQ, reverb/delay)"
+            : $"  {format.Reglages} : 2 à 3 réglages concrets (gain, EQ, réverb/delay)");
+        builder.AppendLine(english
+            ? $"  {format.Alternative} : <another block>"
+            : $"  {format.Alternative} : <un autre bloc>");
+        builder.AppendLine(english
+            ? $"  {format.ConseilLibre} : what you would use yourself, with no library constraint — " +
+              "the real gear of the track or the style if you know it (amp, cabinet, pedals, " +
+              "tuning), and the typical settings that go with it."
+            : $"  {format.ConseilLibre} : ce que tu utiliserais toi, sans aucune contrainte de bibliothèque — " +
+              "le matériel réel du morceau ou du style si tu le connais (ampli, baffle, pédales, " +
+              "accordage), et les réglages typiques qui vont avec.");
+        builder.AppendLine(english
+            ? "- Invent no name absent from the lists above: this constraint covers only " +
+              $"{format.Bloc}, {format.Baffle} and {format.Alternative}. {format.ConseilLibre}, however, " +
+              "is open to everything you know."
+            : "- N'invente aucun nom absent des listes ci-dessus : cette contrainte ne vaut que pour " +
+              $"{format.Bloc}, {format.Baffle} et {format.Alternative}. {format.ConseilLibre}, lui, est ouvert à tout ton savoir.");
     }
 
     /// <summary>
@@ -189,12 +229,12 @@ public static class CataloguePrompt
             : model.AmpName;
     }
 
-    private static void AppendField(StringBuilder builder, string label, string value)
+    private static void AppendField(StringBuilder builder, string label, string value, bool english)
     {
         if (string.IsNullOrWhiteSpace(value))
             return;
 
         builder.Append(builder.Length > 0 && builder[^1] is not '\n' ? ", " : " ");
-        builder.Append($"{label} « {value} »");
+        builder.Append(english ? $"{label} \"{value}\"" : $"{label} « {value} »");
     }
 }

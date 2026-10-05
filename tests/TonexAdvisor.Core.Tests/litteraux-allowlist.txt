@@ -5,14 +5,12 @@ src\TonexAdvisor.App\Services\OpenAiCompatClient.cs;1
 src\TonexAdvisor.App\Services\OpenCodeClient.cs;4
 src\TonexAdvisor.App\Services\UserState.cs;1
 src\TonexAdvisor.App\ViewLocator.cs;1
-src\TonexAdvisor.App\ViewModels\AdviceViewModel.cs;4
-src\TonexAdvisor.App\ViewModels\AiOpinionRowViewModel.cs;2
-src\TonexAdvisor.App\ViewModels\AnswerLineViewModel.cs;6
 src\TonexAdvisor.App\ViewModels\LibraryViewModel.cs;1
 src\TonexAdvisor.App\ViewModels\MainViewModel.cs;11
 src\TonexAdvisor.App\ViewModels\PresetRowViewModel.cs;1
-src\TonexAdvisor.Core\Advice\ArbitrationPrompt.cs;18
-src\TonexAdvisor.Core\Advice\CataloguePrompt.cs;23
+src\TonexAdvisor.Core\Advice\AnswerFormat.cs;12
+src\TonexAdvisor.Core\Advice\ArbitrationPrompt.cs;29
+src\TonexAdvisor.Core\Advice\CataloguePrompt.cs;34
 src\TonexAdvisor.Core\Advice\LibraryAdvisor.cs;25
 src\TonexAdvisor.Core\Advice\StyleVocabulary.cs;7
 src\TonexAdvisor.Core\Data\ReadOnlyConnection.cs;5

@@ -305,7 +305,7 @@ public partial class AdviceViewModel : ViewModelBase
             return;
         }
 
-        var prompt = CataloguePrompt.Build(query, _owner.Index!);
+        var prompt = CataloguePrompt.Build(query, _owner.Index!, Localizer.Instance.Culture);
 
         _aiCts?.Cancel();
         _aiCts = new CancellationTokenSource();
@@ -346,7 +346,7 @@ public partial class AdviceViewModel : ViewModelBase
                 if (AiText.Length == 0 && alone.Length > 0)
                     AiText = alone;
 
-                AiText = AnswerCleaner.Extract(AiText, "BLOC :", "CONSEIL LIBRE");
+                AiText = AnswerFormat.ForCulture(Localizer.Instance.Culture).ExtractVoice(AiText);
                 RebuildAiLines();
                 AiTitle = Localizer.Instance.Get("Conseil.Reponse.Suggestion", arbitre.Model);
                 AiStatus = Localizer.Instance.Get("Conseil.Avis.Statut", arbitre.Model);
@@ -382,7 +382,8 @@ public partial class AdviceViewModel : ViewModelBase
             var arbitration = ArbitrationPrompt.Build(
                 query,
                 usable.Select(opinion => new Opinion(opinion.Provider, opinion.Text)).ToList(),
-                _owner.Index!);
+                _owner.Index!,
+                Localizer.Instance.Culture);
 
             IsArbitreWorking = true;
             var text = await arbitre.Client.AskStreamAsync(
@@ -404,7 +405,7 @@ public partial class AdviceViewModel : ViewModelBase
 
             // L'arbitre écrit son travail (évaluation des avis, brouillons) dans sa sortie : on
             // ne garde que son verdict, du marqueur à la fin du CONSEIL LIBRE.
-            AiText = AnswerCleaner.Extract(AiText, "VERDICT :", "CONSEIL LIBRE");
+            AiText = AnswerFormat.ForCulture(Localizer.Instance.Culture).ExtractVerdict(AiText);
             RebuildAiLines();
             AiTitle = Localizer.Instance.Get("Conseil.Reponse.Verdict", arbitre.Model);
 

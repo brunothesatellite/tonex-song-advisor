@@ -25,6 +25,25 @@ public static class AnswerCleaner
         ArgumentException.ThrowIfNullOrWhiteSpace(startMarker);
         ArgumentException.ThrowIfNullOrWhiteSpace(endMarker);
 
+        return Extract(text, (IReadOnlyList<string>)[startMarker], (IReadOnlyList<string>)[endMarker]);
+    }
+
+    /// <summary>
+    /// Keeps the answer block, tolerating every candidate marker: a line opening the block
+    /// matches if it starts with <b>any</b> of <paramref name="startMarkers"/>, and the free
+    /// advice paragraph closes it with any of <paramref name="endMarkers"/>. Both languages of
+    /// the format are searched in one pass, whichever session asked for the answer.
+    /// </summary>
+    public static string Extract(
+        string? text,
+        IReadOnlyList<string> startMarkers,
+        IReadOnlyList<string> endMarkers)
+    {
+        ArgumentNullException.ThrowIfNull(startMarkers);
+        ArgumentNullException.ThrowIfNull(endMarkers);
+        EnsureMarkers(startMarkers, nameof(startMarkers));
+        EnsureMarkers(endMarkers, nameof(endMarkers));
+
         if (string.IsNullOrWhiteSpace(text))
             return "";
 
@@ -34,7 +53,7 @@ public static class AnswerCleaner
         var start = -1;
         for (var i = 0; i < lines.Length; i++)
         {
-            if (lines[i].TrimStart().StartsWith(startMarker, StringComparison.OrdinalIgnoreCase))
+            if (Opens(lines[i], startMarkers))
                 start = i;
         }
 
@@ -47,7 +66,7 @@ public static class AnswerCleaner
 
         for (var i = start; i < lines.Length; i++)
         {
-            if (lines[i].TrimStart().StartsWith(endMarker, StringComparison.OrdinalIgnoreCase))
+            if (Opens(lines[i], endMarkers))
             {
                 seenEndMarker = true;
                 continue;
@@ -64,6 +83,28 @@ public static class AnswerCleaner
 
         // Une réponse coupée en plein milieu par la limite de tokens se remarque d'un coup d'œil.
         return MarkIfTruncated(answer);
+    }
+
+    /// <summary>True when the line opens with any of the markers, case-insensitively.</summary>
+    private static bool Opens(string line, IReadOnlyList<string> markers)
+    {
+        var trimmed = line.TrimStart();
+        foreach (var marker in markers)
+        {
+            if (trimmed.StartsWith(marker, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static void EnsureMarkers(IReadOnlyList<string> markers, string parameterName)
+    {
+        if (markers.Count == 0)
+            throw new ArgumentException("At least one marker is required.", parameterName);
+
+        foreach (var marker in markers)
+            ArgumentException.ThrowIfNullOrWhiteSpace(marker, parameterName);
     }
 
     /// <summary>Adds a visible ellipsis to an answer the model never finished writing.</summary>

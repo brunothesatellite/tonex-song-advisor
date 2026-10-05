@@ -1,16 +1,17 @@
+using TonexAdvisor.Core.Advice;
+
 namespace TonexAdvisor.App.ViewModels;
 
 /// <summary>
-/// One line of an answer, split so the format markers can be coloured: <c>BLOC :</c>,
-/// <c>BAFFLE :</c>, <c>RÉGLAGES :</c>, <c>ALTERNATIVE :</c>, <c>CONSEIL LIBRE :</c>,
-/// <c>VERDICT :</c> and the numbered proposals of a verdict.
+/// One line of an answer, split so the format markers can be coloured: <c>BLOC :</c>/<c>BLOCK :</c>,
+/// <c>BAFFLE :</c>/<c>CAB :</c>, <c>RÉGLAGES :</c>/<c>SETTINGS :</c>, <c>ALTERNATIVE :</c>,
+/// <c>CONSEIL LIBRE :</c>/<c>FREE ADVICE :</c>, <c>VERDICT :</c> and the numbered proposals of a
+/// verdict. Both languages are painted whatever the session speaks: a stray English marker must
+/// not lose its colour in a French answer, nor the reverse.
 /// </summary>
 public sealed class AnswerLineViewModel
 {
-    private static readonly string[] Markers =
-    [
-        "BLOC :", "BAFFLE :", "RÉGLAGES :", "ALTERNATIVE :", "CONSEIL LIBRE :", "VERDICT :",
-    ];
+    private static readonly string[] Markers = [.. AnswerFormat.AllMarkers];
 
     public AnswerLineViewModel(string label, string body)
     {
