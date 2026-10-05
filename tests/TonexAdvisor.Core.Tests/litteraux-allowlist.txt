@@ -1,5 +1,4 @@
 src\TonexAdvisor.App\Config\AppConfig.cs;1
-src\TonexAdvisor.App\Config\OpenCodeModels.cs;4
 src\TonexAdvisor.App\Localization\Localizer.cs;3
 src\TonexAdvisor.App\Services\AiConsultation.cs;3
 src\TonexAdvisor.App\Services\OpenAiCompatClient.cs;1
@@ -14,9 +13,6 @@ src\TonexAdvisor.App\ViewModels\AnswerLineViewModel.cs;6
 src\TonexAdvisor.App\ViewModels\LibraryViewModel.cs;1
 src\TonexAdvisor.App\ViewModels\MainViewModel.cs;11
 src\TonexAdvisor.App\ViewModels\PresetRowViewModel.cs;1
-src\TonexAdvisor.App\ViewModels\SettingsViewModel.cs;37
-src\TonexAdvisor.App\Views\SettingsView.axaml;37
-src\TonexAdvisor.App\Views\SettingsView.axaml.cs;2
 src\TonexAdvisor.Core\Advice\ArbitrationPrompt.cs;18
 src\TonexAdvisor.Core\Advice\CataloguePrompt.cs;23
 src\TonexAdvisor.Core\Advice\LibraryAdvisor.cs;25

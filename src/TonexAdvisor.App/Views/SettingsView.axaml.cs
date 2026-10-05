@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.App.ViewModels;
 
 namespace TonexAdvisor.App.Views;
@@ -27,11 +28,11 @@ public partial class SettingsView : UserControl
 
         var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Choisir une bibliothèque TONEX",
+            Title = Localizer.Instance["Reglages.Fichier.Choisir"],
             AllowMultiple = false,
             FileTypeFilter = new[]
             {
-                new FilePickerFileType("Bibliothèques TONEX")
+                new FilePickerFileType(Localizer.Instance["Reglages.Fichier.Type"])
                 {
                     Patterns = new[] { "*.db" },
                     MimeTypes = new[] { "application/vnd.sqlite3", "application/octet-stream" },

@@ -296,6 +296,9 @@
   <data name="Filtre.Tous" xml:space="preserve">
     <value>All</value>
   </data>
+  <data name="Invite.Ping" xml:space="preserve">
+    <value>Reply with the single word OK.</value>
+  </data>
   <data name="Marqueur.Bloc" xml:space="preserve">
     <value>BLOCK :</value>
   </data>
@@ -310,5 +313,230 @@
   </data>
   <data name="Message.Resume.Bibliotheque" xml:space="preserve">
     <value>{0:N0} preset(s) · {1:N0} tone model(s)</value>
+  </data>
+  <data name="Model.Tier.Free" xml:space="preserve">
+    <value>free</value>
+  </data>
+  <data name="Model.Tier.Paid" xml:space="preserve">
+    <value>paid</value>
+  </data>
+  <data name="Reglages.Avis.CleManquante" xml:space="preserve">
+    <value>Fill in at least one challenger key (Gemini, Mistral or Groq).</value>
+  </data>
+  <data name="Reglages.Avis.Cles.Titre" xml:space="preserve">
+    <value>GEMINI / MISTRAL / GROQ KEYS (OPTIONAL)</value>
+  </data>
+  <data name="Reglages.Avis.ClesNote" xml:space="preserve">
+    <value>No key is versioned: they live in the same file outside the repository. A missing key = a silent voice, and the advice still stands without it.</value>
+  </data>
+  <data name="Reglages.Avis.Intro" xml:space="preserve">
+    <value>Fill in the keys you want: each voice gives its opinion and may contradict the reference, then an arbiter ranks the 3 best proposals.</value>
+  </data>
+  <data name="Reglages.Avis.Test.Erreur" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Reglages.Avis.Test.Modeles" xml:space="preserve">
+    <value>  ·  models: {0}</value>
+  </data>
+  <data name="Reglages.Avis.Test.NonRenseigne" xml:space="preserve">
+    <value>{0}: not set</value>
+  </data>
+  <data name="Reglages.Avis.Test.OK" xml:space="preserve">
+    <value>{0}: OK « {1} »</value>
+  </data>
+  <data name="Reglages.Avis.Test.Vide" xml:space="preserve">
+    <value>{0}: connected, empty reply</value>
+  </data>
+  <data name="Reglages.Avis.Titre" xml:space="preserve">
+    <value>Crossed reviews</value>
+  </data>
+  <data name="Reglages.Avis.Voix.Intro" xml:space="preserve">
+    <value>These models give their opinion alongside the free voices, then the arbiter decides. One model can be both a voice and the arbiter.</value>
+  </data>
+  <data name="Reglages.Avis.Voix.Titre" xml:space="preserve">
+    <value>OPENCODE VOICES - ONE OR MORE MODELS</value>
+  </data>
+  <data name="Reglages.Avis.VoixDisparues" xml:space="preserve">
+    <value>{0} ticked voice(s) are no longer available: {1}. They were unticked — nothing was ticked in their place.</value>
+  </data>
+  <data name="Reglages.Bases.Aucune" xml:space="preserve">
+    <value>No database found in {0}.</value>
+  </data>
+  <data name="Reglages.Bases.Carte.Choisir" xml:space="preserve">
+    <value>Choose a database from the TONEX folder</value>
+  </data>
+  <data name="Reglages.Bases.Carte.Placeholder" xml:space="preserve">
+    <value>C:\…\TONEX\Library.db or Library2.db</value>
+  </data>
+  <data name="Reglages.Bases.Carte.Titre" xml:space="preserve">
+    <value>TONEX LIBRARY</value>
+  </data>
+  <data name="Reglages.Bases.Carte.Utiliser" xml:space="preserve">
+    <value>Use a database from the TONEX folder</value>
+  </data>
+  <data name="Reglages.Bases.Intro" xml:space="preserve">
+    <value>The application reads your libraries; it never writes to them.</value>
+  </data>
+  <data name="Reglages.Bases.Titre" xml:space="preserve">
+    <value>TONEX Databases</value>
+  </data>
+  <data name="Reglages.Bases.Trouvees" xml:space="preserve">
+    <value>{0} database(s) found in {1} — if the database is generation 2 and a V1 sits next to it, its settings are joined automatically.</value>
+  </data>
+  <data name="Reglages.Bouton.Enregistrer" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Reglages.Bouton.MiseAJour" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Reglages.Bouton.Ouvrir" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Reglages.Bouton.Parcourir" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Reglages.Bouton.TesterConnexion" xml:space="preserve">
+    <value>Test the connection</value>
+  </data>
+  <data name="Reglages.Bouton.TesterVoix" xml:space="preserve">
+    <value>Test the voices</value>
+  </data>
+  <data name="Reglages.Compteurs" xml:space="preserve">
+    <value>{0:N0} presets · {1:N0} tone models</value>
+  </data>
+  <data name="Reglages.Differences.Titre" xml:space="preserve">
+    <value>DIFFERENCES BETWEEN GENERATIONS</value>
+  </data>
+  <data name="Reglages.Erreur.CheminVide" xml:space="preserve">
+    <value>Enter the path of a Library.db or Library2.db file.</value>
+  </data>
+  <data name="Reglages.Fichier.Choisir" xml:space="preserve">
+    <value>Choose a TONEX library</value>
+  </data>
+  <data name="Reglages.Fichier.Info" xml:space="preserve">
+    <value>{0:0.0} MB · written {1:dd/MM/yyyy HH:mm}</value>
+  </data>
+  <data name="Reglages.Fichier.Type" xml:space="preserve">
+    <value>TONEX libraries</value>
+  </data>
+  <data name="Reglages.Format.Inconnu" xml:space="preserve">
+    <value>Unrecognised format</value>
+  </data>
+  <data name="Reglages.Format.V1" xml:space="preserve">
+    <value>V1 — Library.db (full settings)</value>
+  </data>
+  <data name="Reglages.Format.V2" xml:space="preserve">
+    <value>V2 — Library2.db (metadata only)</value>
+  </data>
+  <data name="Reglages.IA.Arbitre.Placeholder" xml:space="preserve">
+    <value>Choose a model</value>
+  </data>
+  <data name="Reglages.IA.Arbitre.Titre" xml:space="preserve">
+    <value>ARBITER MODEL (free and paid)</value>
+  </data>
+  <data name="Reglages.IA.Chargement" xml:space="preserve">
+    <value>Loading models…</value>
+  </data>
+  <data name="Reglages.IA.Cle.Placeholder" xml:space="preserve">
+    <value>oc_sk_…</value>
+  </data>
+  <data name="Reglages.IA.Cle.Titre" xml:space="preserve">
+    <value>OPENCODE API KEY</value>
+  </data>
+  <data name="Reglages.IA.CleManquante" xml:space="preserve">
+    <value>Enter the OpenCode API key first.</value>
+  </data>
+  <data name="Reglages.IA.Enregistre" xml:space="preserve">
+    <value>Saved to {0}</value>
+  </data>
+  <data name="Reglages.IA.Intro" xml:space="preserve">
+    <value>The advice relies on the OpenCode Go API: the list of models, free and paid alike, comes from your key.</value>
+  </data>
+  <data name="Reglages.IA.ModeleRetire" xml:space="preserve">
+    <value>Model « {0} » is no longer available: « {1} » was selected instead.</value>
+  </data>
+  <data name="Reglages.IA.ModelesTrouves" xml:space="preserve">
+    <value>{0} models found, {1} of them free.</value>
+  </data>
+  <data name="Reglages.IA.Tarif" xml:space="preserve">
+    <value>The OpenCode Go "Free" tier is time-limited; the "Personal" free tier is not reachable from a third-party application (403). The model choice is yours.</value>
+  </data>
+  <data name="Reglages.IA.Test.Lancement" xml:space="preserve">
+    <value>Testing with {0}…</value>
+  </data>
+  <data name="Reglages.IA.Test.OK" xml:space="preserve">
+    <value>Connection OK with {0}: « {1} »</value>
+  </data>
+  <data name="Reglages.IA.Test.Vide" xml:space="preserve">
+    <value>Connected with {0}, but the reply is empty.</value>
+  </data>
+  <data name="Reglages.IA.Titre" xml:space="preserve">
+    <value>AI Advice</value>
+  </data>
+  <data name="Reglages.LectureSeule.Pastille" xml:space="preserve">
+    <value>READ-ONLY</value>
+  </data>
+  <data name="Reglages.LectureSeule.Titre" xml:space="preserve">
+    <value>Technical guarantee</value>
+  </data>
+  <data name="Reglages.Notice.Format" xml:space="preserve">
+    <value>Library.db (V1) holds the 344 settings columns of every preset. Library2.db (V2) holds none: TONEX removed the numeric values.</value>
+  </data>
+  <data name="Reglages.Notice.Garantie" xml:space="preserve">
+    <value>Opened strictly read-only: Mode=ReadOnly, PRAGMA query_only=ON and instruction control. The file's SHA-256 hash is recorded at open time and re-verified, proving the library was not modified.</value>
+  </data>
+  <data name="Reglages.Ouvert.Contenu" xml:space="preserve">
+    <value>Content</value>
+  </data>
+  <data name="Reglages.Ouvert.Fichier" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Reglages.Ouvert.Format" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Reglages.Ouvert.Reglages" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Reglages.Ouvert.Reglages.Non" xml:space="preserve">
+    <value>Unavailable — generation 2 stores no settings</value>
+  </data>
+  <data name="Reglages.Ouvert.Reglages.Oui" xml:space="preserve">
+    <value>Available — numeric settings usable</value>
+  </data>
+  <data name="Reglages.Ouvert.Sha" xml:space="preserve">
+    <value>SHA-256</value>
+  </data>
+  <data name="Reglages.Ouvert.Tables" xml:space="preserve">
+    <value>Tables</value>
+  </data>
+  <data name="Reglages.Ouvert.Titre" xml:space="preserve">
+    <value>WHAT WAS OPENED</value>
+  </data>
+  <data name="Reglages.Presse.Gemini" xml:space="preserve">
+    <value>Gemini</value>
+  </data>
+  <data name="Reglages.Presse.Gemini.Lien" xml:space="preserve">
+    <value>aistudio.google.com/apikey</value>
+  </data>
+  <data name="Reglages.Presse.Gemini.Placeholder" xml:space="preserve">
+    <value>AIza...</value>
+  </data>
+  <data name="Reglages.Presse.Groq" xml:space="preserve">
+    <value>Groq</value>
+  </data>
+  <data name="Reglages.Presse.Groq.Lien" xml:space="preserve">
+    <value>console.groq.com/keys</value>
+  </data>
+  <data name="Reglages.Presse.Groq.Placeholder" xml:space="preserve">
+    <value>gsk_...</value>
+  </data>
+  <data name="Reglages.Presse.Mistral" xml:space="preserve">
+    <value>Mistral</value>
+  </data>
+  <data name="Reglages.Presse.Mistral.Lien" xml:space="preserve">
+    <value>console.mistral.ai/api-keys</value>
+  </data>
+  <data name="Reglages.Presse.ModeleDefaut" xml:space="preserve">
+    <value>model (default: {0})</value>
   </data>
 </root>

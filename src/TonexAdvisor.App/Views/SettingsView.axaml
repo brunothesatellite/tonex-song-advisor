@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TonexAdvisor.App.ViewModels"
+             xmlns:loc="using:TonexAdvisor.App.Localization"
              xmlns:config="using:TonexAdvisor.App.Config"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -12,26 +13,26 @@
         <StackPanel Spacing="14" MaxWidth="880" HorizontalAlignment="Left">
 
             <StackPanel Spacing="3">
-                <TextBlock Text="Bases TONEX" Classes="h1" />
-                <TextBlock Text="L'application lit vos bibliothèques ; elle n'y écrit jamais."
+                <TextBlock Text="{loc:Loc Reglages.Bases.Titre}" Classes="h1" />
+                <TextBlock Text="{loc:Loc Reglages.Bases.Intro}"
                            Classes="dim" />
             </StackPanel>
 
             <!-- ── Path + actions ──────────────────────────────────────── -->
             <Border Classes="card">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="BIBLIOTHÈQUE TONEX" Classes="faint" />
+                    <TextBlock Text="{loc:Loc Reglages.Bases.Carte.Titre}" Classes="faint" />
 
                     <!-- Choix 2 : les bases du dossier officiel. -->
                     <StackPanel Spacing="6">
                         <CheckBox IsChecked="{Binding UseTonexLibrary}"
                                   IsEnabled="{Binding CanUseTonex}"
-                                  Content="Utiliser une base du dossier TONEX" />
+                                  Content="{loc:Loc Reglages.Bases.Carte.Utiliser}" />
                         <ComboBox ItemsSource="{Binding TonexLibraries}"
                                   SelectedItem="{Binding SelectedTonexLibrary}"
                                   IsEnabled="{Binding IsTonexEnabled}"
                                   HorizontalAlignment="Stretch"
-                                  PlaceholderText="Choisir une base du dossier TONEX" />
+                                  PlaceholderText="{loc:Loc Reglages.Bases.Carte.Choisir}" />
                         <TextBlock Text="{Binding TonexFolderHint}" Classes="faint"
                                    FontSize="11" TextWrapping="Wrap" />
                     </StackPanel>
@@ -42,10 +43,12 @@
                           IsEnabled="{Binding IsManualEnabled}">
                         <TextBox Grid.Column="0"
                                  Text="{Binding DatabasePath}"
-                                 PlaceholderText="C:\…\TONEX\Library.db ou Library2.db" />
-                        <Button Grid.Column="1" Click="OnBrowseClick">Parcourir…</Button>
+                                 PlaceholderText="{loc:Loc Reglages.Bases.Carte.Placeholder}" />
+                        <Button Grid.Column="1" Click="OnBrowseClick"
+                                Content="{loc:Loc Reglages.Bouton.Parcourir}" />
                         <Button Grid.Column="2" Classes="accent"
-                                Command="{Binding LoadCommand}">Ouvrir</Button>
+                                Command="{Binding LoadCommand}"
+                                Content="{loc:Loc Reglages.Bouton.Ouvrir}" />
                     </Grid>
 
                     <Border Classes="chip-static warn"
@@ -62,9 +65,9 @@
                 <StackPanel Spacing="6">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <Border Classes="chip-static on">
-                            <TextBlock Text="LECTURE SEULE" Classes="faint" />
+                            <TextBlock Text="{loc:Loc Reglages.LectureSeule.Pastille}" Classes="faint" />
                         </Border>
-                        <TextBlock Text="Garantie technique" Classes="h2" VerticalAlignment="Center" />
+                        <TextBlock Text="{loc:Loc Reglages.LectureSeule.Titre}" Classes="h2" VerticalAlignment="Center" />
                     </StackPanel>
                     <TextBlock Text="{Binding ReadOnlyNotice}" Classes="dim" TextWrapping="Wrap" />
                 </StackPanel>
@@ -72,25 +75,25 @@
 
             <!-- ── AI : OpenCode Go ─────────────────────────────────────── -->
             <StackPanel Spacing="3">
-                <TextBlock Text="Conseil IA" Classes="h1" />
-                <TextBlock Text="Le conseil s'appuie sur l'API OpenCode Go : la liste des modèles, gratuits comme payants, vient de votre clé."
+                <TextBlock Text="{loc:Loc Reglages.IA.Titre}" Classes="h1" />
+                <TextBlock Text="{loc:Loc Reglages.IA.Intro}"
                            Classes="dim" TextWrapping="Wrap" />
             </StackPanel>
 
             <Border Classes="card">
                 <StackPanel Spacing="9">
-                    <TextBlock Text="CLÉ API OPENCODE" Classes="faint" />
+                    <TextBlock Text="{loc:Loc Reglages.IA.Cle.Titre}" Classes="faint" />
                     <TextBox Text="{Binding ApiKey}"
                              PasswordChar="*"
-                             PlaceholderText="oc_sk_…" />
+                             PlaceholderText="{loc:Loc Reglages.IA.Cle.Placeholder}" />
 
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                         <StackPanel Grid.Column="0" Spacing="3">
-                            <TextBlock Text="MODÈLE ARBITRE (gratuits et payants)" Classes="faint" />
+                            <TextBlock Text="{loc:Loc Reglages.IA.Arbitre.Titre}" Classes="faint" />
                             <ComboBox ItemsSource="{Binding AvailableModels}"
                                       SelectedItem="{Binding SelectedModel}"
                                       HorizontalAlignment="Stretch"
-                                      PlaceholderText="Choisir un modèle">
+                                      PlaceholderText="{loc:Loc Reglages.IA.Arbitre.Placeholder}">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate x:DataType="config:OpenCodeModel">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
@@ -106,7 +109,8 @@
                         </StackPanel>
                         <Button Grid.Column="1" VerticalAlignment="Bottom"
                                 Command="{Binding RefreshModelsCommand}"
-                                IsEnabled="{Binding CanRefreshModels}">Mise à jour</Button>
+                                IsEnabled="{Binding CanRefreshModels}"
+                                Content="{loc:Loc Reglages.Bouton.MiseAJour}" />
                     </Grid>
 
                     <Border Classes="chip-static" Padding="10,7" HorizontalAlignment="Stretch"
@@ -116,10 +120,12 @@
 
                     <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
                         <Button Grid.Column="0" Classes="accent"
-                                Command="{Binding SaveAiCommand}">Enregistrer</Button>
+                                Command="{Binding SaveAiCommand}"
+                                Content="{loc:Loc Reglages.Bouton.Enregistrer}" />
                         <Button Grid.Column="1"
                                 Command="{Binding TestAiCommand}"
-                                IsEnabled="{Binding !IsTestingAi}">Tester la connexion</Button>
+                                IsEnabled="{Binding !IsTestingAi}"
+                                Content="{loc:Loc Reglages.Bouton.TesterConnexion}" />
                     </Grid>
 
                     <Border Classes="chip-static" Padding="10,7" HorizontalAlignment="Stretch"
@@ -131,15 +137,15 @@
                         <TextBlock Text="{Binding ConfigPath}" Classes="faint" FontSize="11"
                                    TextWrapping="Wrap" />
                         <TextBlock Classes="faint" FontSize="11" TextWrapping="Wrap"
-                               Text="Le tarif « Free » d'OpenCode Go est limité dans le temps ; le free tier « Personnel » n'est pas accessible depuis une application tierce (403). Le choix du modèle vous appartient." />
+                               Text="{loc:Loc Reglages.IA.Tarif}" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
             <!-- Avis croises : voix challengeres (facultatif) -->
             <StackPanel Spacing="3">
-                <TextBlock Text="Avis croisés" Classes="h1" />
-                <TextBlock Text="Renseignez les clés que vous souhaitez : chaque voix donne son avis et peut contredire la référence, puis un arbitre classe les 3 meilleures propositions."
+                <TextBlock Text="{loc:Loc Reglages.Avis.Titre}" Classes="h1" />
+                <TextBlock Text="{loc:Loc Reglages.Avis.Intro}"
                            Classes="dim" TextWrapping="Wrap" />
             </StackPanel>
 
@@ -147,9 +153,9 @@
                 <StackPanel Spacing="9">
                     <Border Classes="card">
                         <StackPanel Spacing="8">
-                            <TextBlock Text="VOIX OPENCODE - 1 OU PLUSIEURS MODELES" Classes="faint" />
+                            <TextBlock Text="{loc:Loc Reglages.Avis.Voix.Titre}" Classes="faint" />
                             <TextBlock Classes="dim" FontSize="11" TextWrapping="Wrap"
-                                       Text="Ces modeles donnent leur avis en meme temps que les voix gratuites, puis l'arbitre tranche. Un modele peut etre a la fois voix et arbitre." />
+                                       Text="{loc:Loc Reglages.Avis.Voix.Intro}" />
 
                             <ItemsControl ItemsSource="{Binding VoiceChoices}">
                                 <ItemsControl.ItemTemplate>
@@ -174,16 +180,16 @@
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Text="CLÉS GEMINI / MISTRAL / GROQ (FACULTATIVES)" Classes="faint" />
+                    <TextBlock Text="{loc:Loc Reglages.Avis.Cles.Titre}" Classes="faint" />
 
                     <StackPanel Spacing="3">
                         <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
-                            <CheckBox Grid.Column="0" IsChecked="{Binding GeminiActive}" Content="Gemini"
+                            <CheckBox Grid.Column="0" IsChecked="{Binding GeminiActive}" Content="{loc:Loc Reglages.Presse.Gemini}"
                                   VerticalAlignment="Center" />
                             <TextBox Grid.Column="1" Text="{Binding GeminiKey}" PasswordChar="*"
-                                     PlaceholderText="AIza..." />
+                                     PlaceholderText="{loc:Loc Reglages.Presse.Gemini.Placeholder}" />
                             <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
-                                       VerticalAlignment="Center" Text="aistudio.google.com/apikey" />
+                                       VerticalAlignment="Center" Text="{loc:Loc Reglages.Presse.Gemini.Lien}" />
                         </Grid>
                         <Grid ColumnDefinitions="110,*" ColumnSpacing="8">
                             <TextBlock Grid.Column="0" Classes="faint" FontSize="11"
@@ -195,12 +201,12 @@
 
                     <StackPanel Spacing="3">
                         <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
-                            <CheckBox Grid.Column="0" IsChecked="{Binding MistralActive}" Content="Mistral"
+                            <CheckBox Grid.Column="0" IsChecked="{Binding MistralActive}" Content="{loc:Loc Reglages.Presse.Mistral}"
                                    VerticalAlignment="Center" />
                             <TextBox Grid.Column="1" Text="{Binding MistralKey}" PasswordChar="*"
                                      PlaceholderText="..." />
                             <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
-                                       VerticalAlignment="Center" Text="console.mistral.ai/api-keys" />
+                                       VerticalAlignment="Center" Text="{loc:Loc Reglages.Presse.Mistral.Lien}" />
                         </Grid>
                         <Grid ColumnDefinitions="110,*" ColumnSpacing="8">
                             <TextBlock Grid.Column="0" Classes="faint" FontSize="11"
@@ -212,12 +218,12 @@
 
                     <StackPanel Spacing="3">
                         <Grid ColumnDefinitions="110,*,Auto" ColumnSpacing="8">
-                            <CheckBox Grid.Column="0" IsChecked="{Binding GroqActive}" Content="Groq"
+                            <CheckBox Grid.Column="0" IsChecked="{Binding GroqActive}" Content="{loc:Loc Reglages.Presse.Groq}"
                                 VerticalAlignment="Center" />
                             <TextBox Grid.Column="1" Text="{Binding GroqKey}" PasswordChar="*"
-                                     PlaceholderText="gsk_..." />
+                                     PlaceholderText="{loc:Loc Reglages.Presse.Groq.Placeholder}" />
                             <TextBlock Grid.Column="2" Classes="faint" FontSize="11"
-                                       VerticalAlignment="Center" Text="console.groq.com/keys" />
+                                       VerticalAlignment="Center" Text="{loc:Loc Reglages.Presse.Groq.Lien}" />
                         </Grid>
                         <Grid ColumnDefinitions="110,*" ColumnSpacing="8">
                             <TextBlock Grid.Column="0" Classes="faint" FontSize="11"
@@ -229,7 +235,8 @@
 
                     <Button Classes="accent" HorizontalAlignment="Left"
                             Command="{Binding TestProvidersCommand}"
-                            IsEnabled="{Binding !IsTestingAi}">Tester les voix</Button>
+                            IsEnabled="{Binding !IsTestingAi}"
+                            Content="{loc:Loc Reglages.Bouton.TesterVoix}" />
 
                     <Border Classes="chip-static" Padding="10,7" HorizontalAlignment="Stretch"
                             IsVisible="{Binding HasProviderStatus}">
@@ -237,36 +244,36 @@
                     </Border>
 
                     <TextBlock Classes="faint" FontSize="11" TextWrapping="Wrap"
-                               Text="Aucune clé n'est versionnée : elles sont stockées dans le même fichier hors dépôt. Une clé absente = une voix silencieuse, et le conseil reste valable sans elle." />
+                               Text="{loc:Loc Reglages.Avis.ClesNote}" />
                 </StackPanel>
             </Border>
 
             <!-- ── What was opened ─────────────────────────────────────── -->
             <Border Classes="card">
                 <StackPanel Spacing="10">
-                    <TextBlock Text="CONTENU OUVERT" Classes="faint" />
+                    <TextBlock Text="{loc:Loc Reglages.Ouvert.Titre}" Classes="faint" />
 
                     <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
                           ColumnSpacing="12" RowSpacing="7">
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Format" Classes="dim" />
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Reglages.Ouvert.Format}" Classes="dim" />
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding FormatLabel}" />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Fichier" Classes="dim" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Reglages.Ouvert.Fichier}" Classes="dim" />
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding FileLabel}"
                                    TextWrapping="Wrap" />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Contenu" Classes="dim" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Reglages.Ouvert.Contenu}" Classes="dim" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CountsLabel}" />
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Réglages" Classes="dim" />
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Reglages.Ouvert.Reglages}" Classes="dim" />
                         <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SettingsLabel}"
                                    TextWrapping="Wrap" />
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="SHA-256" Classes="dim" />
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Reglages.Ouvert.Sha}" Classes="dim" />
                         <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding HashLabel}" />
 
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Tables" Classes="dim" />
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="{loc:Loc Reglages.Ouvert.Tables}" Classes="dim" />
                         <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding TablesLabel}"
                                    Classes="faint" TextWrapping="Wrap" />
                     </Grid>
@@ -276,7 +283,7 @@
             <!-- ── Version differences ─────────────────────────────────── -->
             <Border Classes="card">
                 <StackPanel Spacing="6">
-                    <TextBlock Text="DIFFÉRENCES ENTRE GÉNÉRATIONS" Classes="faint" />
+                    <TextBlock Text="{loc:Loc Reglages.Differences.Titre}" Classes="faint" />
                     <TextBlock Text="{Binding FormatHint}" Classes="dim" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>

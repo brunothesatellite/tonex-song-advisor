@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TonexAdvisor.App.Config;
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.App.Services;
 using TonexAdvisor.Core.Data;
 
@@ -57,8 +58,11 @@ public partial class SettingsViewModel : ViewModelBase
     public bool IsTonexEnabled => UseTonexLibrary;
 
     public string TonexFolderHint => TonexLibraries.Count == 0
-        ? $"Aucune base trouvée dans {TonexFolder}."
-        : $"{TonexLibraries.Count} base(s) trouvée(s) dans {TonexFolder} — si la base est en génération 2 et qu'une V1 est à côté, ses réglages sont joints automatiquement.";
+        ? Localizer.Instance.Get("Reglages.Bases.Aucune", TonexFolder)
+        : Localizer.Instance.Get(
+            "Reglages.Bases.Trouvees",
+            TonexLibraries.Count,
+            TonexFolder);
 
     /// <summary>La base à ouvrir au démarrage : le choix mémorisé, s'il y en a un.</summary>
     public string? EffectiveDatabasePath =>
@@ -165,11 +169,11 @@ public partial class SettingsViewModel : ViewModelBase
 
     public string GroqDefaultModel => AiProviders.Find("groq")!.DefaultModel;
 
-    public string GeminiModelHint => $"modèle (défaut : {GeminiDefaultModel})";
+    public string GeminiModelHint => Localizer.Instance.Get("Reglages.Presse.ModeleDefaut", GeminiDefaultModel);
 
-    public string MistralModelHint => $"modèle (défaut : {MistralDefaultModel})";
+    public string MistralModelHint => Localizer.Instance.Get("Reglages.Presse.ModeleDefaut", MistralDefaultModel);
 
-    public string GroqModelHint => $"modèle (défaut : {GroqDefaultModel})";
+    public string GroqModelHint => Localizer.Instance.Get("Reglages.Presse.ModeleDefaut", GroqDefaultModel);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasProviderStatus))]
@@ -237,14 +241,9 @@ public partial class SettingsViewModel : ViewModelBase
         _ready = true;
     }
 
-    public string ReadOnlyNotice =>
-        "Ouverture strictement en lecture seule : Mode=ReadOnly, PRAGMA query_only=ON et contrôle " +
-        "des instructions. Le hachage SHA-256 du fichier est relevé à l'ouverture puis revérifié, " +
-        "ce qui prouve que la bibliothèque n'a pas été modifiée.";
+    public string ReadOnlyNotice => Localizer.Instance["Reglages.Notice.Garantie"];
 
-    public string FormatHint =>
-        "Library.db (V1) contient les 344 colonnes de réglages de chaque preset. " +
-        "Library2.db (V2) n'en contient aucune : TONEX y a retiré les valeurs numériques.";
+    public string FormatHint => Localizer.Instance["Reglages.Notice.Format"];
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -253,7 +252,7 @@ public partial class SettingsViewModel : ViewModelBase
 
         if (string.IsNullOrWhiteSpace(DatabasePath))
         {
-            ErrorMessage = "Indiquez le chemin d'un fichier Library.db ou Library2.db.";
+            ErrorMessage = Localizer.Instance["Reglages.Erreur.CheminVide"];
             return;
         }
 
@@ -307,7 +306,7 @@ public partial class SettingsViewModel : ViewModelBase
         var keyChanged = !string.Equals(ApiKey.Trim(), _config.ApiKey, StringComparison.Ordinal);
 
         PersistAi();
-        AiStatusMessage = $"Enregistré dans {AppConfig.DefaultPath}";
+        AiStatusMessage = Localizer.Instance.Get("Reglages.IA.Enregistre", AppConfig.DefaultPath);
 
         // Une clé qui change ouvre d'autres modèles : on relit la liste.
         if (keyChanged)
@@ -328,22 +327,22 @@ public partial class SettingsViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(ApiKey))
         {
-            AiStatusMessage = "Renseignez d'abord la clé API OpenCode.";
+            AiStatusMessage = Localizer.Instance["Reglages.IA.CleManquante"];
             return;
         }
 
         var config = PersistAi();
         var label = config.Model;
         IsTestingAi = true;
-        AiStatusMessage = $"Test avec {label}…";
+        AiStatusMessage = Localizer.Instance.Get("Reglages.IA.Test.Lancement", label);
 
         try
         {
             var client = new OpenCodeClient(config);
             var answer = await client.PingAsync(config.Model).ConfigureAwait(true);
             AiStatusMessage = answer.Trim().Length == 0
-                ? $"Connecté avec {label}, mais la réponse est vide."
-                : $"Connexion OK avec {label} : « {Flatten(answer, 120)} »";
+                ? Localizer.Instance.Get("Reglages.IA.Test.Vide", label)
+                : Localizer.Instance.Get("Reglages.IA.Test.OK", label, Flatten(answer, 120));
         }
         catch (Exception exception)
         {
@@ -367,7 +366,7 @@ public partial class SettingsViewModel : ViewModelBase
         if (AiProviders.Challengers.All(provider =>
                 string.IsNullOrWhiteSpace(config.CredentialFor(provider.Id).ApiKey)))
         {
-            ProviderStatus = "Renseigne au moins une clé challenger (Gemini, Mistral ou Groq).";
+            ProviderStatus = Localizer.Instance["Reglages.Avis.CleManquante"];
             return;
         }
 
@@ -381,7 +380,7 @@ public partial class SettingsViewModel : ViewModelBase
                 var credential = config.CredentialFor(provider.Id);
                 if (string.IsNullOrWhiteSpace(credential.ApiKey))
                 {
-                    results.Add($"{provider.Label} : non renseigné");
+                    results.Add(Localizer.Instance.Get("Reglages.Avis.Test.NonRenseigne", provider.Label));
                     continue;
                 }
 
@@ -393,22 +392,25 @@ public partial class SettingsViewModel : ViewModelBase
                 {
                     var client = new OpenAiCompatClient(provider.Label, provider.EndPoint, credential.ApiKey);
                     var answer = await client
-                        .AskStreamAsync(model, "Réponds uniquement par le mot OK.", 800, _ => { })
+                        .AskStreamAsync(model, Localizer.Instance["Invite.Ping"], 800, _ => { })
                         .ConfigureAwait(true);
 
                     results.Add(answer.Trim().Length == 0
-                        ? $"{provider.Label} : connecté, réponse vide"
-                        : $"{provider.Label} : OK « {Flatten(answer, 60)} »");
+                        ? Localizer.Instance.Get("Reglages.Avis.Test.Vide", provider.Label)
+                        : Localizer.Instance.Get("Reglages.Avis.Test.OK", provider.Label, Flatten(answer, 60)));
                 }
                 catch (Exception exception)
                 {
-                    var detail = $"{provider.Label} : {Flatten(exception.Message, 260)}";
+                    var detail = Localizer.Instance.Get(
+                        "Reglages.Avis.Test.Erreur",
+                        provider.Label,
+                        Flatten(exception.Message, 260));
 
                     // Un modèle retiré est la panne la plus courante : on montre ceux qui sont
                     // réellement ouverts à cette clé, sans que l'utilisateur ait à deviner.
                     var available = await TryListModelsAsync(provider, credential).ConfigureAwait(true);
                     if (available.Length > 0)
-                        detail += $"  ·  modèles : {available}";
+                        detail += Localizer.Instance.Get("Reglages.Avis.Test.Modeles", available);
 
                     results.Add(detail);
                 }
@@ -459,17 +461,17 @@ public partial class SettingsViewModel : ViewModelBase
             DatabasePath = database.Path;
         FormatLabel = database.Format switch
         {
-            DatabaseFormat.V1 => "V1 — Library.db (réglages complets)",
-            DatabaseFormat.V2 => "V2 — Library2.db (métadonnées uniquement)",
-            _ => "Format non reconnu",
+            DatabaseFormat.V1 => Localizer.Instance["Reglages.Format.V1"],
+            DatabaseFormat.V2 => Localizer.Instance["Reglages.Format.V2"],
+            _ => Localizer.Instance["Reglages.Format.Inconnu"],
         };
 
         var info = new FileInfo(database.Path);
-        FileLabel = $"{info.Length / 1_048_576d:0.0} Mo · écrit le {info.LastWriteTime:dd/MM/yyyy HH:mm}";
-        CountsLabel = $"{database.Count("Presets"):N0} presets · {database.Count("ToneModels"):N0} tone models";
+        FileLabel = Localizer.Instance.Get("Reglages.Fichier.Info", info.Length / 1_048_576d, info.LastWriteTime);
+        CountsLabel = Localizer.Instance.Get("Reglages.Compteurs", database.Count("Presets"), database.Count("ToneModels"));
         SettingsLabel = database.HasKnobSettings
-            ? "Disponibles — réglages numériques exploitables"
-            : "Indisponibles — la génération 2 ne stocke aucun réglage";
+            ? Localizer.Instance["Reglages.Ouvert.Reglages.Oui"]
+            : Localizer.Instance["Reglages.Ouvert.Reglages.Non"];
         HashLabel = database.Sha256[..16] + "…";
         TablesLabel = string.Join(", ", database.Tables);
         ErrorMessage = "";
@@ -620,8 +622,7 @@ public partial class SettingsViewModel : ViewModelBase
 
         VoiceModelsStatus = gone.Count == 0
             ? ""
-            : $"{gone.Count} voix cochée(s) ne sont plus disponibles : " +
-              $"{string.Join(", ", gone)}. Elles ont été décochées — rien n'a été coché à leur place.";
+            : Localizer.Instance.Get("Reglages.Avis.VoixDisparues", gone.Count, string.Join(", ", gone));
     }
 
     private void SaveVoices()
@@ -663,12 +664,12 @@ public partial class SettingsViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(ApiKey))
         {
-            ModelStatus = "Renseignez d'abord la clé API OpenCode.";
+            ModelStatus = Localizer.Instance["Reglages.IA.CleManquante"];
             return;
         }
 
         IsRefreshingModels = true;
-        ModelStatus = "Lecture des modèles…";
+        ModelStatus = Localizer.Instance["Reglages.IA.Chargement"];
 
         try
         {
@@ -722,13 +723,13 @@ public partial class SettingsViewModel : ViewModelBase
         {
             var fallback = OpenCodeModels.Fallback(AvailableModels);
             ModelStatus = SelectedModel is null
-                ? $"{AvailableModels.Count} modèles trouvés, dont {AvailableModels.Count(model => model.IsFree)} gratuits."
-                : $"Le modèle « {SelectedModel.Id} » n'est plus disponible : « {fallback.Id} » est sélectionné à sa place.";
+                ? Localizer.Instance.Get("Reglages.IA.ModelesTrouves", AvailableModels.Count, AvailableModels.Count(model => model.IsFree))
+                : Localizer.Instance.Get("Reglages.IA.ModeleRetire", SelectedModel.Id, fallback.Id);
             SelectedModel = fallback;
         }
         else
         {
-            ModelStatus = $"{AvailableModels.Count} modèles trouvés, dont {AvailableModels.Count(model => model.IsFree)} gratuits.";
+            ModelStatus = Localizer.Instance.Get("Reglages.IA.ModelesTrouves", AvailableModels.Count, AvailableModels.Count(model => model.IsFree));
             SelectedModel = selected;
         }
 

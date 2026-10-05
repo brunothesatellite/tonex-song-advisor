@@ -105,9 +105,9 @@ parade dans le plan.
 
 7. **Badges gratuit/payant.** Le **coloriage est déjà sûr** : il passe par
    `Classes.free`/`Classes.paid` liés aux booléens `IsFree`/`IsPaid`
-   (`SettingsView.axaml:100-101,160`), pas par le texte. Seul le **libellé**
-   (`OpenCodeModels.cs:8` `$"{Id}  ·  gratuit"`) est à traduire ; la propriété
-   `Tag => "gratuit"` (`:11`) est à auditer (voir §8.4).
+   (`SettingsView.axaml:100-101,160`), pas par le texte. Le **libellé** et `Tag`
+   passent par `Model.Tier.Free` / `Model.Tier.Paid` **depuis la phase 5**
+   (audit §8.4 soldé : le texte n'est jamais une donnée de style).
 
 Bonus : les messages `Échec : {exception.Message}` (`MainViewModel.cs:128`) contiennent des
 messages **du runtime .NET**, qui suivent `CurrentUICulture` automatiquement (ICU) — en EN,
@@ -367,7 +367,7 @@ que les garde-fous arrivent **avant** la grande migration, pour l'encadrer.
 | **2 — Garde-fous** ✅ | Test de **parité FR/EN** (clés, non-vides, `{0}` identiques) ; test **scan de littéraux** (XAML + C#) avec **allowlist par fichier** (fichiers pas encore migrés) | **ATTEINT** : deux tests verts (5 au total) ; chaîne en dur ajoutée → **attrapée** (sonde, §18) |
 | **3 — Fenêtre principale + bibliothèque** ✅ | `MainWindow.axaml`, `LibraryView.axaml`, `LibraryViewModel` (y compris sentinelle §8.3, résumés `:N0`, pluriels) | **ATTEINT** : `MainWindow` (11) et `LibraryView` (53) sortis de l'allowlist, `LibraryViewModel` 5 → 1 (sentinelle seule) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
 | **4 — Vues de détail** ✅ | `PresetDetailView`, `ToneModelDetailView`, `PresetDetailViewModel` (dont `SettingsNote`) | **ATTEINT** : les 4 fichiers sortis de l'allowlist (13 + 12 + 15 + 2 → 0) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
-| **5 — Réglages (UI + VM)** | `SettingsView.axaml`, `SettingsViewModel` (le plus gros : 32 lignes accentuées), badges §8.4 | idem |
+| **5 — Réglages (UI + VM)** ✅ | `SettingsView.axaml`, `SettingsViewModel` (le plus gros : 32 lignes accentuées), badges §8.4 | **ATTEINT** : les 4 fichiers sortis de l'allowlist (37 + 37 + 2 + 4 → 0) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
 | **6 — Avis IA (UI)** | `AdviceViewModel` (titres, spinner, états), `AiOpinionRowViewModel`, lignes de réponse | idem |
 | **7 — Protocole IA (le plus délicat)** | `AnswerFormat` unique, invites Core paramétrées en langue (§8.1), marqueurs tolérants (§9), `AnswerLineViewModel` | Tests d'extraction/coloration FR **et** EN verts ; 16 tests français verts non modifiés |
 | **8 — Passe nombres/dates/pluriels** | Les 33 sites de formatage, élimination de `(s)` | Plus aucun format en dur ; tests verts |
@@ -491,6 +491,7 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
 | 04/10/2026 | **Phase 1 — Socle (`Strings.resx` + `Localizer`)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **204/204 tests verts** (195 inchangés + 9 nouveaux socle), **12/12 exécutions consécutives vertes sur le code final** (36/36 pendant la stabilisation, cf. notes dispatcher ci-dessous) ; artefacts : `src\TonexAdvisor.App\Localization\{Strings.resx, Strings.fr.resx, Localizer.cs, LocExtension.cs}`, cadrage culture `Program.FrameCulture` (fr statu quo), `<NeutralResourcesLanguage>en</NeutralResourcesLanguage>`, tests `TestCulture` (ModuleInitializer fr-FR), `CultureGuard`, `LocalisationCollection`, `LocalizerTests` (7), `LocExtensionTests` (2) |
 | 04/10/2026 | **Phase 3 — Fenêtre principale + bibliothèque** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout : 204 socle/garde-fous + 5 de phase 2), **12/12 exécutions consécutives vertes** ; sortie d'allowlist : `MainWindow.axaml` **11 → 0**, `LibraryView.axaml` **53 → 0**, `LibraryViewModel.cs` **5 → 1** (sentinelle §8.3 seule) ; **59 clés FR/EN** ajoutées en paires ordonnées (**71 au total**, parité vérifiée) ; sentinelle : valeur `AnyFilter` intacte + affichage localisé (`FilterLabelConverter`, 3 ComboBox, §8.3) ; artefacts : `xmlns:loc` + `{loc:Loc}` (2 XAML), `Localizer.Instance.Get/[]` (VM), `src\TonexAdvisor.App\Localization\FilterLabelConverter.cs`, allowlist régénérée **38 fichiers / 332 littéraux** |
 | 05/10/2026 | **Phase 4 — Vues de détail** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout), **12/12 exécutions consécutives vertes** ; sortie d'allowlist : `PresetDetailView.axaml` **13 → 0**, `ToneModelDetailView.axaml` **12 → 0**, `PresetDetailViewModel.cs` **15 → 0**, `ToneModelDetailViewModel.cs` **2 → 0** ; **27 clés `Detail.*`** ajoutées en paires ordonnées (**98 au total**, parité vérifiée) ; allowlist **34 fichiers / 290 littéraux** ; artefacts : `xmlns:loc` + `{loc:Loc}` (2 vues), `Localizer.Instance.Get/[]` (2 VM), constantes techniques `Sep`/`SepLarge`/`PrefixHwA`/`PrefixHwB` |
+| 05/10/2026 | **Phase 5 — Réglages (UI + VM)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout), **12/12 exécutions consécutives vertes** ; sortie d'allowlist : `SettingsView.axaml` **37 → 0**, `SettingsViewModel.cs` **37 → 0**, `SettingsView.axaml.cs` **2 → 0**, `OpenCodeModels.cs` **4 → 0** (badges §8.4) ; **76 clés** ajoutées en paires ordonnées (**174 au total**, parité vérifiée) ; allowlist **30 fichiers / 210 littéraux** ; artefacts : 43 sites `{loc:Loc}` (dont 6 boutons à texte élément), `Localizer.Instance.Get/[]` (VM + code-behind), `OpenCodeModel.TierLabel` → `Model.Tier.Free`/`.Paid`, clé d'invite `Invite.Ping` |
 | 04/10/2026 | **Phase 2 — Garde-fous (parité + scan)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (204 + 5 nouveaux), **12/12 exécutions consécutives vertes** ; garde-fou G6 **prouvé par la sonde** : ajout d'une chaîne en dur (`SondeScanTemporaire.cs`) → test rouge « hors allowlist », sonde retirée → vert ; artefacts : `PariteResxTests` (3 tests : clés, non-vidité, emplacements `{0}`), `ScanLitterauxTests` (2 tests : compteur exact vs allowlist + entrées périmées), `tests\TonexAdvisor.Core.Tests\litteraux-allowlist.txt` (**34 fichiers / 344 littéraux**), `TestPaths.RepoRoot` (racine via `TonexAdvisor.sln`) |
 
 **Notes techniques de la phase 1** (constats mesurés, à connaître pour les phases 3 à 9) :
@@ -607,6 +608,35 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
   chaque paire est devenue **une clé unique** avec l'espace interne préservé verbatim
   (extraction G4 inchangée pour le FR).
 
+**Notes techniques de la phase 5** (pour les phases 6 à 10) :
+- **Piège des clés « françaises »** : en C#, une ligne portant une clé dont le **nom** contient
+  un mot du dictionnaire (`Modele` → `mod[eè]le`, `Voix`, `Aucune`, `Chargement` → `charg`,
+  `Cles` → `cl[ée]s`) est elle-même détectée comme française et la référence de clé devient un
+  littéraux compté. Deux sorties : garder la clé **sur la même ligne que `Localizer.`**
+  (ligne exclue par la règle) — c'est le cas de `Reglages.IA.ModelesTrouves`,
+  `Reglages.Avis.VoixDisparues`, `Reglages.Bases.Aucune` — ou choisir un nom de clé sans
+  mot déclencheur. Les clés `modeles`/`voix` en XAML sont indifférentes (la valeur `{loc:…}`
+  commence par `{` et n'est jamais comptée).
+- **Noms de tables techniques sur une ligne d'affichage** : `"Presets"` / `"ToneModels"` sont
+  français (le texte `presets` est sur la même ligne du `CountsLabel`) — traités comme
+  `HWParamA_` en phase 4 : appel `Localizer.Get` **en une seule ligne** incluant les noms de
+  tables (exclusion `Localizer.`), plutôt que de migrer des identifiants de tables.
+- **Non compté ≠ non affiché** (lacunes du dictionnaire `frRe`) : `Test avec {label}…`,
+  `Format non reconnu` et le séparateur `{label} : {message}` échappaient au scan (ni accent ni
+  mot-clé) mais sont du texte français visible en EN — **migrés quand même**. La phase 10 devra
+  relire au-delà du scan (la sentinelle utile est la recette manuelle §14).
+- **`Invite.Ping`** : l'invite « Réponds uniquement par le mot OK. » est sur une ligne
+  française ; migrée en phase 5 avec une clé dédiée sous l'espace `Invite.` — la phase 7
+  (invites Core paramétrées en langue, §8.1) pourra la reclasser sans changer d'appelant.
+- **§8.4 soldé** : coloriage confirmé sur `IsFree`/`IsPaid` (jamais sur le texte) ;
+  `Label`/`Tag` passent par `TierLabel` → `Model.Tier.Free`/`.Paid`, getters recalculés à
+  chaque lecture. L'abonnement `CultureChanged` des libellés composés reste à câbler en
+  phase 9 (§11) : `OpenCodeModel` est un `record` sans INPC, la bascule devra reconstruire
+  les listes de modèles.
+- **Marques et URL en clés d'identité** : `Gemini`, `AIza...`, `console.groq.com/keys`,
+  `oc_sk_…`, `SHA-256` deviennent des clés à valeurs identiques FR/EN — le scan exige une
+  clé (lettres dans l'attribut), le contenu est neutre.
+
 **Méthode d'inventaire (phase 0)** — 4 passes de scan :
 1. XAML : tous les littéraux d'attributs texte, **sans filtre de langue** (126 lignes) ;
 2. C# : lignes francophones (accents + mots-clés) → 397 candidats bruts ;
@@ -624,7 +654,7 @@ Contrôles automatiques passés : chaque ligne du brut est couverte dans le cura
 
 ---
 
-*Plan validé ; phases 0 à 4 réalisées sur instruction. Prochaine étape : **phase 5**
-(réglages UI + VM : `SettingsView.axaml`, `SettingsViewModel`, badges §8.4 — le plus gros
-fichier du lot, 32 lignes accentuées, §12), à lancer sur instruction.
-Aucun commit effectué.*
+*Plan validé ; phases 0 à 5 réalisées sur instruction. Prochaine étape : **phase 6**
+(avis IA (UI) : `AdviceViewModel` — titres, spinner, états —, `AiOpinionRowViewModel`,
+lignes de réponse, §12), à lancer sur instruction.
+Phase 5 non committée (dernier commit : `e58be66`, phases 0-4).*

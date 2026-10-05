@@ -1,3 +1,5 @@
+using TonexAdvisor.App.Localization;
+
 namespace TonexAdvisor.App.Config;
 
 /// <summary>A model offered by OpenCode Go, free or paid.</summary>
@@ -5,12 +7,20 @@ namespace TonexAdvisor.App.Config;
 /// <param name="IsFree">True for the « Free » tier.</param>
 public sealed record OpenCodeModel(string Id, bool IsFree)
 {
-    public string Label => IsFree ? $"{Id}  ·  gratuit" : $"{Id}  ·  payant";
+    public string Label => $"{Id}  ·  {TierLabel}";
 
     /// <summary>« gratuit » ou « payant », ce que la liste colore.</summary>
-    public string Tag => IsFree ? "gratuit" : "payant";
+    public string Tag => TierLabel;
 
     public bool IsPaid => !IsFree;
+
+    /// <summary>
+    /// Libellé de palier localisé (§8.4) : recalculé à chaque lecture — la coloration,
+    /// elle, repose sur <see cref="IsFree"/> / <see cref="IsPaid"/>, jamais sur le texte.
+    /// </summary>
+    private string TierLabel => IsFree
+        ? Localizer.Instance["Model.Tier.Free"]
+        : Localizer.Instance["Model.Tier.Paid"];
 
     /// <summary>What the drop-down shows.</summary>
     public override string ToString() => Label;
