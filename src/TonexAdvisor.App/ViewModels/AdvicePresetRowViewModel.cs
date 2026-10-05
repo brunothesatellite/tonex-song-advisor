@@ -37,7 +37,7 @@ public sealed class AdvicePresetRowViewModel
             .Distinct(StringComparer.OrdinalIgnoreCase));
 
         Score = (int)Math.Round(scored.Score);
-        ScoreLabel = $"{Score} %";
+        ScoreLabel = Localizer.Instance.Get("Conseil.Score.Pourcent", Score);
 
         var songLabel = Song.Length > 0 ? Localizer.Instance.Get("Conseil.Presets.Song", Song) : "";
         Meta = string.Join(" · ", new[] { Category, Genre, Amp, Cab, songLabel }

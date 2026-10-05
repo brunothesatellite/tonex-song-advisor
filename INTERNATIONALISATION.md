@@ -370,7 +370,7 @@ que les garde-fous arrivent **avant** la grande migration, pour l'encadrer.
 | **5 — Réglages (UI + VM)** ✅ | `SettingsView.axaml`, `SettingsViewModel` (le plus gros : 32 lignes accentuées), badges §8.4 | **ATTEINT** : les 4 fichiers sortis de l'allowlist (37 + 37 + 2 + 4 → 0) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
 | **6 — Avis IA (UI)** ✅ | `AdviceViewModel` (titres, spinner, états), `AiOpinionRowViewModel`, lignes de réponse | **ATTEINT** : les 2 fichiers de lignes sortis de l'allowlist (`AdviceCombinationRowViewModel` 4 → 0, `AdvicePresetRowViewModel` 3 → 0) et les 2 autres réduits à leurs seuls littéraux de protocole (`AdviceViewModel` 29 → 4, `AiOpinionRowViewModel` 4 → 2 — extraction `BLOC :`/`VERDICT :` reportée à la phase 7) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
 | **7 — Protocole IA (le plus délicat)** ✅ | `AnswerFormat` unique, invites Core paramétrées en langue (§8.1), marqueurs tolérants (§9), `AnswerLineViewModel` | **ATTEINT** : extraction/coloration FR **et** EN verts (**19 nouveaux tests** : `AnswerFormatTests` 17 dont 8 de coloration, `EnglishPromptTests` 2) ; les tests français de protocole **non modifiés et verts** ; build 0/0 ; **228/228 tests verts ×12** (§18) |
-| **8 — Passe nombres/dates/pluriels** | Les 33 sites de formatage, élimination de `(s)` | Plus aucun format en dur ; tests verts |
+| **8 — Passe nombres/dates/pluriels** ✅ | Les 33 sites de formatage, élimination de `(s)` | **ATTEINT** : plus aucun format en dur (dates `dd/MM/yyyy` → `g` de culture, `Mo`/`MB` par règle de culture §11), les 7 sites culture-sensibles de l'inventaire (§2) traités ; les 7 `(s)` des resx éliminés (6 clés en paires `.one/.other`, 1 en colle `{0} · {1}` + compteurs) ; 9 clés neuves ; build 0/0 ; **232/232 tests verts ×12** (§18) |
 | **9 — Langue : détection, choix, bascule** | `UiLanguage` + rétrocompat (§10), ComboBox réglages, recalcul à chaud (§11), largeurs de colonnes en ids (§8.2) | Tests persistance + compat + bascule verts |
 | **10 — EN complet + recette** | `Strings.resx` (neutre EN) et `Strings.fr.resx` remplis à 100 % (parité = 100 %), allowlist = **vide**, vérification satellite `fr\` dans le zip et l'installeur, recette manuelle des deux langues (§14) | Parité 100 %, scan sans allowlist, recette signée |
 | **11 — Installeur FR/EN** | `tools/Setup` : ~12 chaînes en **table FR/EN en code**, choisie par culture OS avec la même règle que §11 (`fr`→FR, sinon EN) — un tableau en code et non des ressources parce que `PublishSingleFile=true` exclut les assemblies satellites ; description des raccourcis localisée à l'installation | Test de couverture (aucune chaîne sans EN ni FR), sortie console dans la langue de l'OS, `build-release.ps1` inchangé |
@@ -494,6 +494,7 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
 | 05/10/2026 | **Phase 5 — Réglages (UI + VM)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout), **12/12 exécutions consécutives vertes** ; sortie d'allowlist : `SettingsView.axaml` **37 → 0**, `SettingsViewModel.cs` **37 → 0**, `SettingsView.axaml.cs` **2 → 0**, `OpenCodeModels.cs` **4 → 0** (badges §8.4) ; **76 clés** ajoutées en paires ordonnées (**174 au total**, parité vérifiée) ; allowlist **30 fichiers / 210 littéraux** ; artefacts : 43 sites `{loc:Loc}` (dont 6 boutons à texte élément), `Localizer.Instance.Get/[]` (VM + code-behind), `OpenCodeModel.TierLabel` → `Model.Tier.Free`/`.Paid`, clé d'invite `Invite.Ping` |
 | 05/10/2026 | **Phase 6 — Avis IA (UI)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout), **12/12 exécutions consécutives vertes sur le code final** (course de culture corrigée en cours de route, cf. notes) ; sortie d'allowlist : `AdviceCombinationRowViewModel.cs` **4 → 0**, `AdvicePresetRowViewModel.cs` **3 → 0** ; réduits aux seuls littéraux de protocole : `AdviceViewModel.cs` **29 → 4**, `AiOpinionRowViewModel.cs` **4 → 2** (extraction `BLOC :`/`VERDICT :` laissée à la phase 7) ; **29 clés `Conseil.*`** ajoutées en paires ordonnées (**203 au total**, parité vérifiée) ; allowlist **28 fichiers / 176 littéraux** ; artefacts : `Localizer.Instance.Get/[]` (4 VM), `Plural` branché sur `Conseil.Combination.Uses.one/.other` (graines phase 1), constante `GenreSentinelle`, `tests\TonexAdvisor.Core.Tests\AssemblyInfo.cs` (parallélisme xunit désactivé) |
 | 05/10/2026 | **Phase 7 — Protocole IA** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **228/228 tests verts** (209 + 19 nouveaux), **12/12 exécutions consécutives vertes sur le code final** ; sortie d'allowlist : `AnswerLineViewModel.cs` **6 → 0**, `AdviceViewModel.cs` **4 → 0**, `AiOpinionRowViewModel.cs` **2 → 0** ; entrée neuve `AnswerFormat.cs` **12** (table des 6 marqueurs FR/EN : les seuls littéraux du fichier) ; invites Core bilingues en code : `CataloguePrompt.cs` **23 → 34** et `ArbitrationPrompt.cs` **18 → 29** (les branches EN vivent sur des lignes françaises — comptées, miroir mécanique du scan) ; allowlist **26 fichiers / 198 littéraux** ; tests français de protocole **inchangés** ; artefacts : `src\TonexAdvisor.Core\Advice\AnswerFormat.cs` (3 couches §9 : invite = langue de la session, extraction + coloration = les deux), surcharge tolérante `AnswerCleaner.Extract(text, startMarkers, endMarkers)` (session d'abord + repli), invites `(..., CultureInfo? culture = null)` §8.1 (défaut = fr, tests Core inchangés), culture passée par l'App (`Localizer.Instance.Culture`), tests `AnswerFormatTests` + `EnglishPromptTests` |
+| 05/10/2026 | **Phase 8 — Nombres/dates/pluriels** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **232/232 tests verts** (228 + 4 nouveaux `PluralisationTests`), **12/12 exécutions consécutives vertes sur le code final** ; dates : `Reglages.Fichier.Info` `{1:dd/MM/yyyy HH:mm}` → `{1:g}` (date courte + heure de la culture ; rendu fr identique) et `LibraryFile.ModifiedLabel` → `ToString("g", CultureInfo.CurrentCulture)` ; unité `Mo`/`MB` par règle de culture §11 (`LibraryFile.SizeUnit`, pas de `Localizer` dans Core) ; pluriels : les **7 `(s)` des resx éliminés** — 6 clés en paires `.one/.other` (`Conseil.Avis.SansArbitre`, `Conseil.Indice.Combinaison`, `Conseil.Indice.PresetSeul`, `Detail.BlocsActifs`, `Reglages.Avis.VoixDisparues`, `Reglages.Bases.Trouvees`), `Message.Resume.Bibliotheque` et `Reglages.Compteurs` réduites à la colle `{0} · {1}` ; **9 clés neuves en paires ordonnées** (`Compteur.Presets`/`Compteur.ToneModels` `.one/.other`, `Message.Resume.Chargement`/`.Jointe`/`.NonDispo`, `Conseil.Score.Pourcent`, `Voix.Duree`) → **218 clés au total**, parité vérifiée ; `Plural(n, baseKey, params args)` étendu pour les clés à `{1}` ; sites migrés : ligne de statut `MainViewModel` (allowlist **11 → 7**, total **26 fichiers / 194 littéraux**), `CountsLabel`, `TonexFolderHint`, `VoiceModelsStatus`, `Summary`, `ActiveBlockLine` (passé en `int`), `ScoreLabel` ×2, `ElapsedLabel` ; tests mis à jour **consciemment** : `LocalizerTests.Formatage_…` recomposé via `Plural` (son objet — le `:N0` de culture — intact), `VoiceAndModelTests` à l'accord singulier ; reste en `(s)` : `LibraryAdvisor:133` (raisons Core, phase 10) |
 | 04/10/2026 | **Phase 2 — Garde-fous (parité + scan)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (204 + 5 nouveaux), **12/12 exécutions consécutives vertes** ; garde-fou G6 **prouvé par la sonde** : ajout d'une chaîne en dur (`SondeScanTemporaire.cs`) → test rouge « hors allowlist », sonde retirée → vert ; artefacts : `PariteResxTests` (3 tests : clés, non-vidité, emplacements `{0}`), `ScanLitterauxTests` (2 tests : compteur exact vs allowlist + entrées périmées), `tests\TonexAdvisor.Core.Tests\litteraux-allowlist.txt` (**34 fichiers / 344 littéraux**), `TestPaths.RepoRoot` (racine via `TonexAdvisor.sln`) |
 
 **Notes techniques de la phase 1** (constats mesurés, à connaître pour les phases 3 à 9) :
@@ -530,7 +531,8 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
   prête, culture `fr` : 0 et 1 au singulier ; `en` : 1 seul).
 - **§6 (sites de formatage)** : 7 sites culture-sensibles tracés dans l'inventaire
   (`culture N0` ×4, dates ×2, `Mo/MB` ×1) ; le reste des 33 appels mesurés (§2) n'a pas
-  d'impact de culture — conversion site par site en phase 8.
+  d'impact de culture — conversion site par site en phase 8. ✅ Vendu en phase 8 (7/7 traités,
+  plus aucun format en dur hors données invariantes §7).
 - **§8.4 (audit `OpenCodeModels.Tag`)** : `Tag` = « gratuit »/« payant », affiché tel quel dans
   `SettingsView.axaml:99,162` (`{Binding Tag}`) ; `Label` = `{Id} · gratuit|payant` composite.
   Déjà inventoriés (`audit Tag`, `composite (Id + libellé)`) → clés traitées en phase 5.
@@ -581,6 +583,8 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
   culture du `Localizer`), le suffixe `  —  filtre actif` a sa propre clé
   (`Biblio.Resume.FiltreActif`, espaces et cadratin préservés). **`(s)` inchangé** : leur
   élimination par pluriels CLDR relève de la **phase 8** (§5) — pas de reformulation ici.
+  ✅ Vendu en phase 8 : `Message.Resume.Bibliotheque` est devenue la colle `{0} · {1}` servie
+  par les compteurs `Compteur.Presets`/`Compteur.ToneModels` (vraies formes `one`/`other`).
 - **Chaînes composées du VM** : `Summary`/`EmptyMessage` sont posés à la construction et au
   filtrage ; le **recalcul à chaud** reste la charge de la phase 9 (§11, entrées 2 et 6).
 - **Boutons à texte élément** : `<Button>Texte</Button>` n'est pas compté par la regex
@@ -697,6 +701,40 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
   ni marqueur d'extraction — l'algo du Conseil local n'a pas été touché (règle du cahier des
   charges) ; leur sort se joue dans les passes 8 à 10.
 
+**Notes techniques de la phase 8** (pour les phases 9 à 10) :
+- **`Plural` multi-arguments** : signature étendue en `Plural(int n, string baseKey, params
+  object?[] args)` — `{0}` porte toujours `n`, `args` comble `{1}`… (ex. `Reglages.Bases.Trouvees`
+  : compte **et** chemin). Les appels existants (2 arguments) sont inchangés.
+- **Clés à deux nombres = colle + compteurs** : `Message.Resume.Bibliotheque` et
+  `Reglages.Compteurs` combinent deux compteurs indépendants — impossible en une paire
+  `.one/.other`. Leur valeur est réduite à la colle `{0} · {1}` (séparateur neutre, identique
+  FR/EN) et chaque nombre vient de `Compteur.Presets.one/.other` / `Compteur.ToneModels.one/.other`
+  (`{0:N0} preset` : le `N0` suit la culture du `Localizer` via `string.Format(_culture, …)`).
+  La même colle porte la nouvelle ligne de statut : `Message.Resume.Chargement`
+  (`{0} · {1} · {2}` = base, presets, tone models) + suffixes `Message.Resume.Jointe`
+  (`{0}` = compteur pluriel) et `Message.Resume.NonDispo`.
+- **Dates en `g`, jamais en motif** : `{1:g}` (date courte + heure courte de la culture) remplace
+  `dd/MM/yyyy HH:mm` dans `Reglages.Fichier.Info` — en fr, l'afficheur est exactement l'ancien
+  rendu (`05/10/2026 14:30`) ; en en-US il devient culture-conforme au lieu de l'ordre français.
+  `LibraryFile.ModifiedLabel` (Core) fait de même : `ToString("g", CultureInfo.CurrentCulture)`.
+- **Unité de taille = règle §11 en Core** : `LibraryFile.SizeUnit` (« Mo » si culture `fr`,
+  « MB » sinon) reprend le mécanisme des invites de phase 7 — règle en code, pas de `Localizer`
+  dans Core. La clé `Reglages.Fichier.Info` garde, elle, son `Mo`/`MB` par fichier de langue.
+- **Clé posée sur la ligne `Localizer.`** : une clé seule sur sa ligne compte quand sa ligne
+  matche `frRe` (`Message.Resume.Chargement` → « charg », `…Jointe` → « joint », `…VoixDisparues`
+  → « voix », `database.Count("Presets")` → « presets »). Réflexe des phases 4/6 : premier
+  argument sur la même ligne (`Get("clé",` / `Plural(…, "clé",`) — sinon l'allowlist fausse.
+  Contrôle : scan sans écart, `MainViewModel` 11 → 7 (4 littéraux de statut migrés, 0 ajout),
+  `SettingsViewModel` reste hors allowlist.
+- **Mises à jour conscientes de tests** : `VoiceAndModelTests` assertait « ne sont plus
+  disponibles » — le `(s)` forçait le pluriel même à 1 voix ; l'accord réel est désormais
+  « n'est plus disponible » (singulier fr : 0 et 1). `LocalizerTests.
+  Formatage_des_nombres_suit_la_culture` recompose `Message.Resume.Bibliotheque` via `Plural`
+  : son objet (le `:N0` calé sur la culture) est intact, seul l'affichage a changé.
+- **Reste en `(s)`** : `LibraryAdvisor:133` (« Utilisé par {used} preset(s) ») — raison du
+  Conseil construite en Core, hors périmètre 8 comme les 25 littéraux de `LibraryAdvisor` :
+  traitée à la phase 10 (allowlist vide).
+
 **Méthode d'inventaire (phase 0)** — 4 passes de scan :
 1. XAML : tous les littéraux d'attributs texte, **sans filtre de langue** (126 lignes) ;
 2. C# : lignes francophones (accents + mots-clés) → 397 candidats bruts ;
@@ -714,6 +752,6 @@ Contrôles automatiques passés : chaque ligne du brut est couverte dans le cura
 
 ---
 
-*Plan validé ; phases 0 à 7 réalisées sur instruction. Prochaine étape : **phase 8**
-(passe nombres/dates/pluriels, élimination du `(s)`, §12), à lancer sur instruction.
-Phase 7 non committée (dernier commit : `8ee1e06`, phase 6).*
+*Plan validé ; phases 0 à 8 réalisées sur instruction. Prochaine étape : **phase 9**
+(détection, choix et bascule de langue, §10-§11), à lancer sur instruction.
+Phase 8 non committée (dernier commit : `260962e`, phase 7).*

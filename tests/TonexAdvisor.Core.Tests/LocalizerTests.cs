@@ -68,15 +68,20 @@ public class LocalizerTests
         var fr = CultureInfo.GetCultureInfo("fr-FR");
         var en = CultureInfo.GetCultureInfo("en-US");
 
-        var message = Localizer.Instance.Get("Message.Resume.Bibliotheque", 2310, 15);
+        static string Resume() => Localizer.Instance.Get(
+            "Message.Resume.Bibliotheque",
+            Localizer.Instance.Plural(2310, "Compteur.Presets"),
+            Localizer.Instance.Plural(15, "Compteur.ToneModels"));
+
+        var message = Resume();
         Assert.Equal(
-            $"{2310.ToString("N0", fr)} preset(s) · {15.ToString("N0", fr)} tone model(s)",
+            $"{2310.ToString("N0", fr)} presets · {15.ToString("N0", fr)} tone models",
             message);
 
         Localizer.Instance.Culture = en;
-        message = Localizer.Instance.Get("Message.Resume.Bibliotheque", 2310, 15);
+        message = Resume();
         Assert.Equal(
-            $"{2310.ToString("N0", en)} preset(s) · {15.ToString("N0", en)} tone model(s)",
+            $"{2310.ToString("N0", en)} presets · {15.ToString("N0", en)} tone models",
             message);
     }
 

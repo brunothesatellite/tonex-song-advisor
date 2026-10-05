@@ -100,8 +100,10 @@ public sealed class Localizer : INotifyPropertyChanged
     /// Pluriel CLDR (§6) : lit <c>{baseKey}.one</c> ou <c>{baseKey}.other</c> selon la règle
     /// de la langue courante ; repli sur <c>.other</c> si le singulier manque.
     /// Ajouter une langue = ajouter sa règle dans <see cref="EstSingulier"/>.
+    /// <c>{0}</c> porte toujours <c>n</c> ; les éventuels <c>args</c> complètent la phrase
+    /// (<c>{1}</c>, <c>{2}</c>…), pour les clés à plus d'un argument (« 1 base trouvée dans … »).
     /// </summary>
-    public string Plural(int n, string baseKey)
+    public string Plural(int n, string baseKey, params object?[] args)
     {
         ArgumentNullException.ThrowIfNull(baseKey);
         var other = Strings.GetString(baseKey + ".other", _culture);
@@ -112,7 +114,8 @@ public sealed class Localizer : INotifyPropertyChanged
         if (value is not null)
         {
             // Mise au plat immédiate : l'appelant reçoit la phrase prête à afficher.
-            return string.Format(_culture, value, n);
+            object?[] arguments = [n, .. args];
+            return string.Format(_culture, value, arguments);
         }
 
 #if DEBUG

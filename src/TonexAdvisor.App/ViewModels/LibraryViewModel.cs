@@ -360,7 +360,10 @@ public partial class LibraryViewModel : ViewModelBase
         Presets = new ObservableCollection<PresetRowViewModel>(presets);
         ToneModels = new ObservableCollection<ToneModelRowViewModel>(toneModels);
 
-        Summary = Localizer.Instance.Get("Message.Resume.Bibliotheque", presets.Count, toneModels.Count) +
+        Summary = Localizer.Instance.Get(
+                      "Message.Resume.Bibliotheque",
+                      Localizer.Instance.Plural(presets.Count, "Compteur.Presets"),
+                      Localizer.Instance.Plural(toneModels.Count, "Compteur.ToneModels")) +
                   (HasActiveFilter ? Localizer.Instance["Biblio.Resume.FiltreActif"] : "");
 
         EmptyMessage = _presetRows.Count == 0

@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace TonexAdvisor.Core.Data;
 
 /// <param name="Path">Full path of the database file.</param>
@@ -7,9 +9,15 @@ namespace TonexAdvisor.Core.Data;
 /// <param name="Modified">Last write time.</param>
 public sealed record LibraryFile(string Path, string Name, string Generation, long Length, DateTime Modified)
 {
-    public string SizeLabel => $"{Length / 1_048_576d:0.0} Mo";
+    /// <summary>Binary megabytes: « Mo » under the French culture rule, « MB » anywhere else.</summary>
+    private static string SizeUnit => CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "fr"
+        ? "Mo"
+        : "MB";
 
-    public string ModifiedLabel => Modified.ToString("dd/MM/yyyy HH:mm");
+    public string SizeLabel => $"{Length / 1_048_576d:0.0} {SizeUnit}";
+
+    /// <summary>Short date + short time of the current culture — never a baked pattern.</summary>
+    public string ModifiedLabel => Modified.ToString("g", CultureInfo.CurrentCulture);
 
     /// <summary>One readable line per library, so the list says what it is opening.</summary>
     public string Label => $"{Name}  ·  {Generation}  ·  {SizeLabel}  ·  {ModifiedLabel}";

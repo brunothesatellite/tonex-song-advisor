@@ -18,7 +18,7 @@ public sealed class AdviceCombinationRowViewModel
         Cab = scored.Cab;
 
         Score = (int)Math.Round(scored.Score);
-        ScoreLabel = $"{Score} %";
+        ScoreLabel = Localizer.Instance.Get("Conseil.Score.Pourcent", Score);
 
         // Stomp and amplifier come from one and the same capture: they are drawn as a single
         // chain step so nobody reads them as two independent picks.

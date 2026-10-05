@@ -87,12 +87,10 @@ public sealed partial class PresetDetailViewModel : ViewModelBase
         ? string.Join(SepLarge, Preset.ActiveChain.Select(block => block.Id.ToString(System.Globalization.CultureInfo.InvariantCulture)))
         : "—";
 
-    public string ActiveBlockCount => HasChain
-        ? Preset.ActiveChain.Count().ToString(System.Globalization.CultureInfo.InvariantCulture)
-        : "—";
+    public int ActiveBlockCount => HasChain ? Preset.ActiveChain.Count() : 0;
 
     public string ActiveBlockLine => HasChain
-        ? Localizer.Instance.Get("Detail.BlocsActifs", ActiveBlockCount)
+        ? Localizer.Instance.Plural(ActiveBlockCount, "Detail.BlocsActifs")
         : "";
 
     /// <summary>Explains a missing detail panel rather than showing an empty one.</summary>

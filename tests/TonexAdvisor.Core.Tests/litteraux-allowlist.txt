@@ -6,7 +6,7 @@ src\TonexAdvisor.App\Services\OpenCodeClient.cs;4
 src\TonexAdvisor.App\Services\UserState.cs;1
 src\TonexAdvisor.App\ViewLocator.cs;1
 src\TonexAdvisor.App\ViewModels\LibraryViewModel.cs;1
-src\TonexAdvisor.App\ViewModels\MainViewModel.cs;11
+src\TonexAdvisor.App\ViewModels\MainViewModel.cs;7
 src\TonexAdvisor.App\ViewModels\PresetRowViewModel.cs;1
 src\TonexAdvisor.Core\Advice\AnswerFormat.cs;12
 src\TonexAdvisor.Core\Advice\ArbitrationPrompt.cs;29

@@ -59,9 +59,9 @@ public partial class SettingsViewModel : ViewModelBase
 
     public string TonexFolderHint => TonexLibraries.Count == 0
         ? Localizer.Instance.Get("Reglages.Bases.Aucune", TonexFolder)
-        : Localizer.Instance.Get(
-            "Reglages.Bases.Trouvees",
+        : Localizer.Instance.Plural(
             TonexLibraries.Count,
+            "Reglages.Bases.Trouvees",
             TonexFolder);
 
     /// <summary>La base à ouvrir au démarrage : le choix mémorisé, s'il y en a un.</summary>
@@ -468,7 +468,9 @@ public partial class SettingsViewModel : ViewModelBase
 
         var info = new FileInfo(database.Path);
         FileLabel = Localizer.Instance.Get("Reglages.Fichier.Info", info.Length / 1_048_576d, info.LastWriteTime);
-        CountsLabel = Localizer.Instance.Get("Reglages.Compteurs", database.Count("Presets"), database.Count("ToneModels"));
+        CountsLabel = Localizer.Instance.Get("Reglages.Compteurs",
+            Localizer.Instance.Plural((int)database.Count("Presets"), "Compteur.Presets"),
+            Localizer.Instance.Plural((int)database.Count("ToneModels"), "Compteur.ToneModels"));
         SettingsLabel = database.HasKnobSettings
             ? Localizer.Instance["Reglages.Ouvert.Reglages.Oui"]
             : Localizer.Instance["Reglages.Ouvert.Reglages.Non"];
@@ -622,7 +624,8 @@ public partial class SettingsViewModel : ViewModelBase
 
         VoiceModelsStatus = gone.Count == 0
             ? ""
-            : Localizer.Instance.Get("Reglages.Avis.VoixDisparues", gone.Count, string.Join(", ", gone));
+            : Localizer.Instance.Plural(gone.Count, "Reglages.Avis.VoixDisparues",
+                string.Join(", ", gone));
     }
 
     private void SaveVoices()

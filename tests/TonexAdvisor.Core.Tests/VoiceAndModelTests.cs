@@ -188,7 +188,7 @@ public class VoiceAndModelTests
             await viewModel.RefreshModelsCommand.ExecuteAsync(null);
 
             Assert.Contains("kimi-k2.6", viewModel.VoiceModelsStatus, StringComparison.Ordinal);
-            Assert.Contains("ne sont plus disponibles", viewModel.VoiceModelsStatus, StringComparison.Ordinal);
+            Assert.Contains("n'est plus disponible", viewModel.VoiceModelsStatus, StringComparison.Ordinal);
 
             // Rien n'a été coché à sa place : seule la voix encore présente reste active.
             var ticked = viewModel.VoiceChoices.Where(choice => choice.IsChecked).ToList();

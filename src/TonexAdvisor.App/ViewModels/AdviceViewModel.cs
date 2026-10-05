@@ -374,7 +374,7 @@ public partial class AdviceViewModel : ViewModelBase
             // Pas d'arbitre (clé OpenCode absente) : les voix restent des suggestions.
             if (arbitre is null)
             {
-                AiStatus = Localizer.Instance.Get("Conseil.Avis.SansArbitre", usable.Count);
+                AiStatus = Localizer.Instance.Plural(usable.Count, "Conseil.Avis.SansArbitre");
                 return;
             }
 
@@ -497,7 +497,7 @@ public partial class AdviceViewModel : ViewModelBase
             return Localizer.Instance["Conseil.Indice.AucunPreset"];
 
         return combinations > 0
-            ? Localizer.Instance.Get("Conseil.Indice.Combinaison", presets)
-            : Localizer.Instance.Get("Conseil.Indice.PresetSeul", presets);
+            ? Localizer.Instance.Plural(presets, "Conseil.Indice.Combinaison")
+            : Localizer.Instance.Plural(presets, "Conseil.Indice.PresetSeul");
     }
 }

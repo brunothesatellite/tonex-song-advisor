@@ -32,7 +32,7 @@ public partial class AiOpinionRowViewModel : ViewModelBase
     private int _elapsed;
 
     /// <summary>Shown while the voice works.</summary>
-    public string ElapsedLabel => IsPending ? $"{Elapsed} s" : "";
+    public string ElapsedLabel => IsPending ? Localizer.Instance.Get("Voix.Duree", Elapsed) : "";
 
     [ObservableProperty]
     private string _provider = "";

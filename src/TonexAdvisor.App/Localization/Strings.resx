@@ -116,6 +116,18 @@
   <data name="Biblio.Vide.AucunResultat" xml:space="preserve">
     <value>No result for these filters.</value>
   </data>
+  <data name="Compteur.Presets.one" xml:space="preserve">
+    <value>{0:N0} preset</value>
+  </data>
+  <data name="Compteur.Presets.other" xml:space="preserve">
+    <value>{0:N0} presets</value>
+  </data>
+  <data name="Compteur.ToneModels.one" xml:space="preserve">
+    <value>{0:N0} tone model</value>
+  </data>
+  <data name="Compteur.ToneModels.other" xml:space="preserve">
+    <value>{0:N0} tone models</value>
+  </data>
   <data name="Conseil.Arbitre.Ecoule" xml:space="preserve">
     <value>{0} s</value>
   </data>
@@ -134,8 +146,11 @@
   <data name="Conseil.Avis.Interrompu" xml:space="preserve">
     <value>Interrupted</value>
   </data>
-  <data name="Conseil.Avis.SansArbitre" xml:space="preserve">
-    <value>{0} suggestion(s) — no arbiter: the OpenCode key is not set.</value>
+  <data name="Conseil.Avis.SansArbitre.one" xml:space="preserve">
+    <value>{0} suggestion — no arbiter: the OpenCode key is not set.</value>
+  </data>
+  <data name="Conseil.Avis.SansArbitre.other" xml:space="preserve">
+    <value>{0} suggestions — no arbiter: the OpenCode key is not set.</value>
   </data>
   <data name="Conseil.Avis.Statut" xml:space="preserve">
     <value>AI advice — {0}</value>
@@ -209,14 +224,20 @@
   <data name="Conseil.Indice.AucunPreset" xml:space="preserve">
     <value>No preset matches, but an amp combination is worth a look.</value>
   </data>
-  <data name="Conseil.Indice.Combinaison" xml:space="preserve">
-    <value>{0} preset(s) ranked and a captured block (stomp + amp) with its cabinet to try first.</value>
+  <data name="Conseil.Indice.Combinaison.one" xml:space="preserve">
+    <value>{0} preset ranked and a captured block (stomp + amp) with its cabinet to try first.</value>
+  </data>
+  <data name="Conseil.Indice.Combinaison.other" xml:space="preserve">
+    <value>{0} presets ranked and a captured block (stomp + amp) with its cabinet to try first.</value>
   </data>
   <data name="Conseil.Indice.Defaut" xml:space="preserve">
     <value>Describe the song: an artist, a title, or simply the mood you're after (« metal », « blues », « clean funk »).</value>
   </data>
-  <data name="Conseil.Indice.PresetSeul" xml:space="preserve">
-    <value>{0} preset(s) ranked: the first is the closest to your request.</value>
+  <data name="Conseil.Indice.PresetSeul.one" xml:space="preserve">
+    <value>{0} preset ranked: the first is the closest to your request.</value>
+  </data>
+  <data name="Conseil.Indice.PresetSeul.other" xml:space="preserve">
+    <value>{0} presets ranked: the first is the closest to your request.</value>
   </data>
   <data name="Conseil.Indice.Vide" xml:space="preserve">
     <value>Nothing in this library matches this search. Try a shorter keyword, or look up that title in the Presets tab first.</value>
@@ -251,6 +272,9 @@
   <data name="Conseil.Requete.Style" xml:space="preserve">
     <value>STYLE / MOOD</value>
   </data>
+  <data name="Conseil.Score.Pourcent" xml:space="preserve">
+    <value>{0}%</value>
+  </data>
   <data name="Conseil.Tooltip.VoirErreur" xml:space="preserve">
     <value>Show the error detail</value>
   </data>
@@ -266,8 +290,11 @@
   <data name="Conseil.Voix.Titre" xml:space="preserve">
     <value>VOICE OPINIONS</value>
   </data>
-  <data name="Detail.BlocsActifs" xml:space="preserve">
-    <value>{0} active block(s) in the chain</value>
+  <data name="Detail.BlocsActifs.one" xml:space="preserve">
+    <value>{0} active block in the chain</value>
+  </data>
+  <data name="Detail.BlocsActifs.other" xml:space="preserve">
+    <value>{0} active blocks in the chain</value>
   </data>
   <data name="Detail.Chain.Blocs" xml:space="preserve">
     <value>BLOCK CHAIN</value>
@@ -399,7 +426,16 @@
     <value>Error: {0}</value>
   </data>
   <data name="Message.Resume.Bibliotheque" xml:space="preserve">
-    <value>{0:N0} preset(s) · {1:N0} tone model(s)</value>
+    <value>{0} · {1}</value>
+  </data>
+  <data name="Message.Resume.Chargement" xml:space="preserve">
+    <value>{0} · {1} · {2}</value>
+  </data>
+  <data name="Message.Resume.Jointe" xml:space="preserve">
+    <value>V1 settings joined to {0}</value>
+  </data>
+  <data name="Message.Resume.NonDispo" xml:space="preserve">
+    <value>settings not available (V2)</value>
   </data>
   <data name="Model.Tier.Free" xml:space="preserve">
     <value>free</value>
@@ -443,8 +479,11 @@
   <data name="Reglages.Avis.Voix.Titre" xml:space="preserve">
     <value>OPENCODE VOICES - ONE OR MORE MODELS</value>
   </data>
-  <data name="Reglages.Avis.VoixDisparues" xml:space="preserve">
-    <value>{0} ticked voice(s) are no longer available: {1}. They were unticked — nothing was ticked in their place.</value>
+  <data name="Reglages.Avis.VoixDisparues.one" xml:space="preserve">
+    <value>{0} ticked voice is no longer available: {1}. It was unticked — nothing was ticked in its place.</value>
+  </data>
+  <data name="Reglages.Avis.VoixDisparues.other" xml:space="preserve">
+    <value>{0} ticked voices are no longer available: {1}. They were unticked — nothing was ticked in their place.</value>
   </data>
   <data name="Reglages.Bases.Aucune" xml:space="preserve">
     <value>No database found in {0}.</value>
@@ -467,8 +506,11 @@
   <data name="Reglages.Bases.Titre" xml:space="preserve">
     <value>TONEX Databases</value>
   </data>
-  <data name="Reglages.Bases.Trouvees" xml:space="preserve">
-    <value>{0} database(s) found in {1} — if the database is generation 2 and a V1 sits next to it, its settings are joined automatically.</value>
+  <data name="Reglages.Bases.Trouvees.one" xml:space="preserve">
+    <value>{0} database found in {1} — if the database is generation 2 and a V1 sits next to it, its settings are joined automatically.</value>
+  </data>
+  <data name="Reglages.Bases.Trouvees.other" xml:space="preserve">
+    <value>{0} databases found in {1} — if the database is generation 2 and a V1 sits next to it, its settings are joined automatically.</value>
   </data>
   <data name="Reglages.Bouton.Enregistrer" xml:space="preserve">
     <value>Save</value>
@@ -489,7 +531,7 @@
     <value>Test the voices</value>
   </data>
   <data name="Reglages.Compteurs" xml:space="preserve">
-    <value>{0:N0} presets · {1:N0} tone models</value>
+    <value>{0} · {1}</value>
   </data>
   <data name="Reglages.Differences.Titre" xml:space="preserve">
     <value>DIFFERENCES BETWEEN GENERATIONS</value>
@@ -501,7 +543,7 @@
     <value>Choose a TONEX library</value>
   </data>
   <data name="Reglages.Fichier.Info" xml:space="preserve">
-    <value>{0:0.0} MB · written {1:dd/MM/yyyy HH:mm}</value>
+    <value>{0:0.0} MB · written {1:g}</value>
   </data>
   <data name="Reglages.Fichier.Type" xml:space="preserve">
     <value>TONEX libraries</value>
@@ -625,5 +667,8 @@
   </data>
   <data name="Reglages.Presse.ModeleDefaut" xml:space="preserve">
     <value>model (default: {0})</value>
+  </data>
+  <data name="Voix.Duree" xml:space="preserve">
+    <value>{0} s</value>
   </data>
 </root>

@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.Core.Data;
 
 namespace TonexAdvisor.App.ViewModels;
@@ -111,14 +112,17 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
             Library.Attach(loaded.Index);
             Settings.Refresh();
 
-            StatusMessage =
-                $"{DatabaseLabel} · {loaded.Index.PresetCount:N0} presets · " +
-                $"{loaded.Index.ToneModelCount:N0} tone models" +
-                (HasKnobSettingsAvailable
-                    ? ""
-                    : loaded.Joined > 0
-                        ? $" · réglages V1 joints à {loaded.Joined:N0} presets"
-                        : " · réglages non disponibles (V2)");
+            var resume = Localizer.Instance.Get("Message.Resume.Chargement",
+                DatabaseLabel,
+                Localizer.Instance.Plural(loaded.Index.PresetCount, "Compteur.Presets"),
+                Localizer.Instance.Plural(loaded.Index.ToneModelCount, "Compteur.ToneModels"));
+            var suffix = HasKnobSettingsAvailable
+                ? ""
+                : loaded.Joined > 0
+                    ? " · " + Localizer.Instance.Get("Message.Resume.Jointe",
+                        Localizer.Instance.Plural(loaded.Joined, "Compteur.Presets"))
+                    : " · " + Localizer.Instance["Message.Resume.NonDispo"];
+            StatusMessage = resume + suffix;
 
             NotifyDatabaseChanged();
             ShowLibrary();
