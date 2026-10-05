@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TonexAdvisor.App.ViewModels"
+             xmlns:loc="using:TonexAdvisor.App.Localization"
              xmlns:controls="using:TonexAdvisor.App.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -24,16 +25,16 @@
             <!-- ── Metadata ───────────────────────────────────────────── -->
             <Border Classes="card" Padding="12,10">
                 <Grid ColumnDefinitions="96,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="5">
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Auteur" Classes="faint" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Detail.Meta.Auteur}" Classes="faint" />
                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding UserName}" TextWrapping="Wrap" />
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Dossiers" Classes="faint" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Detail.Meta.Dossiers}" Classes="faint" />
                     <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Folders}" TextWrapping="Wrap" />
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Ajouté le" Classes="faint" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Detail.Meta.AjouteLe}" Classes="faint" />
                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DateAdded}" />
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Instrument" Classes="faint" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Detail.Meta.Instrument}" Classes="faint" />
                     <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Instrument}" TextWrapping="Wrap" />
                 </Grid>
             </Border>
@@ -77,10 +78,10 @@
             <!-- ── Chain (generation 2) ───────────────────────────────── -->
             <Border Classes="card" IsVisible="{Binding HasChain}" Padding="12,10">
                 <StackPanel Spacing="5">
-                    <TextBlock Text="CHAÎNE DE BLOCS" Classes="faint" />
+                    <TextBlock Text="{loc:Loc Detail.Chain.Blocs}" Classes="faint" />
                     <TextBlock Text="{Binding ChainSummary}" Classes="dim" TextWrapping="Wrap" />
                     <TextBlock Text="{Binding ActiveBlockLine}" Classes="faint" />
-                    <TextBlock Text="Identifiants de blocs TONEX : la correspondance exacte avec les modules n'est pas documentée."
+                    <TextBlock Text="{loc:Loc Detail.Chain.Identifiants}"
                                Classes="faint" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
@@ -99,7 +100,7 @@
 
             <!-- ── Signal path ────────────────────────────────────────── -->
             <StackPanel Spacing="8" IsVisible="{Binding HasSettings}">
-                <TextBlock Text="CHAÎNE DU PRESET" Classes="faint" Margin="4,4,0,0" />
+                <TextBlock Text="{loc:Loc Detail.Chain.Preset}" Classes="faint" Margin="4,4,0,0" />
 
                 <ItemsControl ItemsSource="{Binding Sections}">
                     <ItemsControl.ItemTemplate>
@@ -152,13 +153,13 @@
                                                             <Border Classes="chip-static on"
                                                                     IsVisible="{Binding IsSwitchOn}"
                                                                     VerticalAlignment="Center">
-                                                                <TextBlock Text="ACTIF" Classes="faint" />
+                                                                <TextBlock Text="{loc:Loc Detail.Knob.Actif}" Classes="faint" />
                                                             </Border>
 
                                                             <Border Classes="chip-static off"
                                                                     IsVisible="{Binding IsSwitchOff}"
                                                                     VerticalAlignment="Center">
-                                                                <TextBlock Text="BYPASS" Classes="faint" />
+                                                                <TextBlock Text="{loc:Loc Detail.Knob.Bypass}" Classes="faint" />
                                                             </Border>
                                                         </Grid>
 
@@ -234,12 +235,12 @@
                                                             <Border Classes="chip-static on"
                                                                     IsVisible="{Binding IsSwitchOn}"
                                                                     VerticalAlignment="Center">
-                                                                <TextBlock Text="ACTIF" Classes="faint" />
+                                                                <TextBlock Text="{loc:Loc Detail.Knob.Actif}" Classes="faint" />
                                                             </Border>
                                                             <Border Classes="chip-static off"
                                                                     IsVisible="{Binding IsSwitchOff}"
                                                                     VerticalAlignment="Center">
-                                                                <TextBlock Text="BYPASS" Classes="faint" />
+                                                                <TextBlock Text="{loc:Loc Detail.Knob.Bypass}" Classes="faint" />
                                                             </Border>
                                                         </Grid>
                                                         <StackPanel Orientation="Horizontal"
@@ -294,12 +295,12 @@
                                                             <Border Classes="chip-static on"
                                                                     IsVisible="{Binding IsSwitchOn}"
                                                                     VerticalAlignment="Center">
-                                                                <TextBlock Text="ACTIF" Classes="faint" />
+                                                                <TextBlock Text="{loc:Loc Detail.Knob.Actif}" Classes="faint" />
                                                             </Border>
                                                             <Border Classes="chip-static off"
                                                                     IsVisible="{Binding IsSwitchOff}"
                                                                     VerticalAlignment="Center">
-                                                                <TextBlock Text="BYPASS" Classes="faint" />
+                                                                <TextBlock Text="{loc:Loc Detail.Knob.Bypass}" Classes="faint" />
                                                             </Border>
                                                         </Grid>
                                                         <StackPanel Orientation="Horizontal"

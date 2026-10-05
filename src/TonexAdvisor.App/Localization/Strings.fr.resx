@@ -180,6 +180,87 @@
   <data name="Conseil.Tooltip.VoirThinking" xml:space="preserve">
     <value>Afficher la sortie complète du modèle</value>
   </data>
+  <data name="Detail.BlocsActifs" xml:space="preserve">
+    <value>{0} bloc(s) actif(s) sur la chaîne</value>
+  </data>
+  <data name="Detail.Chain.Blocs" xml:space="preserve">
+    <value>CHAÎNE DE BLOCS</value>
+  </data>
+  <data name="Detail.Chain.Identifiants" xml:space="preserve">
+    <value>Identifiants de blocs TONEX : la correspondance exacte avec les modules n'est pas documentée.</value>
+  </data>
+  <data name="Detail.Chain.Preset" xml:space="preserve">
+    <value>CHAÎNE DU PRESET</value>
+  </data>
+  <data name="Detail.Chanson.Guillemets" xml:space="preserve">
+    <value>« {0} »</value>
+  </data>
+  <data name="Detail.Col.Ampli" xml:space="preserve">
+    <value>Ampli</value>
+  </data>
+  <data name="Detail.Col.Baffle" xml:space="preserve">
+    <value>Baffle</value>
+  </data>
+  <data name="Detail.Col.Sortie" xml:space="preserve">
+    <value>Sortie</value>
+  </data>
+  <data name="Detail.Col.Stomp" xml:space="preserve">
+    <value>Stomp</value>
+  </data>
+  <data name="Detail.Hardware.Afficher" xml:space="preserve">
+    <value>Afficher les réglages matériels ({0} blocs)</value>
+  </data>
+  <data name="Detail.Hardware.Masquer" xml:space="preserve">
+    <value>Masquer les réglages matériels</value>
+  </data>
+  <data name="Detail.Knob.Actif" xml:space="preserve">
+    <value>ACTIF</value>
+  </data>
+  <data name="Detail.Knob.Bypass" xml:space="preserve">
+    <value>BYPASS</value>
+  </data>
+  <data name="Detail.Meta.AjouteLe" xml:space="preserve">
+    <value>Ajouté le</value>
+  </data>
+  <data name="Detail.Meta.Auteur" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="Detail.Meta.Collection" xml:space="preserve">
+    <value>Collection</value>
+  </data>
+  <data name="Detail.Meta.Dossiers" xml:space="preserve">
+    <value>Dossiers</value>
+  </data>
+  <data name="Detail.Meta.Instrument" xml:space="preserve">
+    <value>Instrument</value>
+  </data>
+  <data name="Detail.Meta.Skin" xml:space="preserve">
+    <value>Skin / visuel</value>
+  </data>
+  <data name="Detail.Position.Post" xml:space="preserve">
+    <value>POST</value>
+  </data>
+  <data name="Detail.Position.Pre" xml:space="preserve">
+    <value>PRÉ</value>
+  </data>
+  <data name="Detail.Settings.Origine" xml:space="preserve">
+    <value>Réglages lus dans {0} : la génération 2 ne stocke pas ces valeurs, elles sont chiffrées dans les fichiers .txp d'IK.</value>
+  </data>
+  <data name="Detail.Settings.Vide" xml:space="preserve">
+    <value>Bibliothèque de génération 2 : TONEX n'y stocke aucun réglage numérique. Seuls le preset, le tone model, le baffle et l'ordre des blocs sont connus.</value>
+  </data>
+  <data name="Detail.ToneModel.AucunPreset" xml:space="preserve">
+    <value>Aucun preset n'utilise ce tone model.</value>
+  </data>
+  <data name="Detail.ToneModel.Chaine" xml:space="preserve">
+    <value>CHAÎNE CAPTURÉE</value>
+  </data>
+  <data name="Detail.ToneModel.Description" xml:space="preserve">
+    <value>DESCRIPTION</value>
+  </data>
+  <data name="Detail.ToneModel.UtilisePar" xml:space="preserve">
+    <value>UTILISÉ PAR</value>
+  </data>
   <data name="Fenetre.Badge.Tx" xml:space="preserve">
     <value>TX</value>
   </data>

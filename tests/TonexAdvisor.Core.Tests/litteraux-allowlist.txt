@@ -13,14 +13,10 @@ src\TonexAdvisor.App\ViewModels\AiOpinionRowViewModel.cs;4
 src\TonexAdvisor.App\ViewModels\AnswerLineViewModel.cs;6
 src\TonexAdvisor.App\ViewModels\LibraryViewModel.cs;1
 src\TonexAdvisor.App\ViewModels\MainViewModel.cs;11
-src\TonexAdvisor.App\ViewModels\PresetDetailViewModel.cs;15
 src\TonexAdvisor.App\ViewModels\PresetRowViewModel.cs;1
 src\TonexAdvisor.App\ViewModels\SettingsViewModel.cs;37
-src\TonexAdvisor.App\ViewModels\ToneModelDetailViewModel.cs;2
-src\TonexAdvisor.App\Views\PresetDetailView.axaml;13
 src\TonexAdvisor.App\Views\SettingsView.axaml;37
 src\TonexAdvisor.App\Views\SettingsView.axaml.cs;2
-src\TonexAdvisor.App\Views\ToneModelDetailView.axaml;12
 src\TonexAdvisor.Core\Advice\ArbitrationPrompt.cs;18
 src\TonexAdvisor.Core\Advice\CataloguePrompt.cs;23
 src\TonexAdvisor.Core\Advice\LibraryAdvisor.cs;25

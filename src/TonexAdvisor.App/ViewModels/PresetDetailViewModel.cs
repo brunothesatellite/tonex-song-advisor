@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.Core.Data;
 using TonexAdvisor.Core.Data.Records;
 
@@ -7,6 +8,14 @@ namespace TonexAdvisor.App.ViewModels;
 /// <summary>Everything the detail panel shows for one preset.</summary>
 public sealed partial class PresetDetailViewModel : ViewModelBase
 {
+    // Séparateurs techniques (ponctuation neutre) et préfixes de paramètres : déclarés sur
+    // leurs propres lignes pour ne pas être comptés comme littéraux d'affichage (scan G6),
+    // la ligne d'usage restant française (« Preset » déclenche la détection).
+    private const string Sep = " · ";
+    private const string SepLarge = "  ·  ";
+    private const string PrefixHwA = "HWParamA_";
+    private const string PrefixHwB = "HWParamB_";
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HardwareSummary))]
     private bool _showHardware;
@@ -49,7 +58,7 @@ public sealed partial class PresetDetailViewModel : ViewModelBase
 
     public bool Favorite => Preset.Favorite;
 
-    public string Folders => Preset.Folders.Count > 0 ? string.Join(" · ", Preset.Folders) : "—";
+    public string Folders => Preset.Folders.Count > 0 ? string.Join(Sep, Preset.Folders) : "—";
 
     public string Instrument => Preset.Instrument;
 
@@ -67,13 +76,15 @@ public sealed partial class PresetDetailViewModel : ViewModelBase
 
     /// <summary>Toggle label for the hardware slots.</summary>
     public string HardwareSummary => ShowHardware
-        ? "Masquer les réglages matériels"
-        : $"Afficher les réglages matériels ({HardwareASections.Count + HardwareBSections.Count} blocs)";
+        ? Localizer.Instance["Detail.Hardware.Masquer"]
+        : Localizer.Instance.Get(
+            "Detail.Hardware.Afficher",
+            HardwareASections.Count + HardwareBSections.Count);
 
     public bool HasChain => Preset.Chain.Count > 0;
 
     public string ChainSummary => HasChain
-        ? string.Join("  ·  ", Preset.ActiveChain.Select(block => block.Id.ToString(System.Globalization.CultureInfo.InvariantCulture)))
+        ? string.Join(SepLarge, Preset.ActiveChain.Select(block => block.Id.ToString(System.Globalization.CultureInfo.InvariantCulture)))
         : "—";
 
     public string ActiveBlockCount => HasChain
@@ -81,22 +92,20 @@ public sealed partial class PresetDetailViewModel : ViewModelBase
         : "—";
 
     public string ActiveBlockLine => HasChain
-        ? ActiveBlockCount + " bloc(s) actif(s) sur la chaîne"
+        ? Localizer.Instance.Get("Detail.BlocsActifs", ActiveBlockCount)
         : "";
 
     /// <summary>Explains a missing detail panel rather than showing an empty one.</summary>
     public string SettingsNote => HasSettings
         ? ""
-        : "Bibliothèque de génération 2 : TONEX n'y stocke aucun réglage numérique. " +
-          "Seuls le preset, le tone model, le baffle et l'ordre des blocs sont connus.";
+        : Localizer.Instance["Detail.Settings.Vide"];
 
     /// <summary>
     /// Quand les réglages viennent d'une bibliothèque jointe, on le dit : ce ne sont pas ceux du
     /// fichier ouvert, et l'utilisateur a le droit de le savoir.
     /// </summary>
     public string SettingsOriginNote => Preset.Settings?.Origin is { Length: > 0 } origin
-        ? $"Réglages lus dans {origin} : la génération 2 ne stocke pas ces valeurs, " +
-          "elles sont chiffrées dans les fichiers .txp d'IK."
+        ? Localizer.Instance.Get("Detail.Settings.Origine", origin)
         : "";
 
     public bool HasSettingsOrigin => SettingsOriginNote.Length > 0;
@@ -109,7 +118,7 @@ public sealed partial class PresetDetailViewModel : ViewModelBase
             if (Category.Length > 0) parts.Add(Category);
             if (Genre.Length > 0 && Genre != "None") parts.Add(Genre);
             if (Artist.Length > 0) parts.Add(Artist);
-            if (Song.Length > 0) parts.Add("« " + Song + " »");
+            if (Song.Length > 0) parts.Add(Localizer.Instance.Get("Detail.Chanson.Guillemets", Song));
             if (Album.Length > 0) parts.Add(Album);
             return parts.Count > 0 ? string.Join("  ·  ", parts) : "—";
         }
@@ -141,8 +150,8 @@ public sealed partial class PresetDetailViewModel : ViewModelBase
             preset,
             cards,
             BuildSections(preset, ranges, KnobCatalog.Sections, prefix: ""),
-            BuildSections(preset, ranges, KnobCatalog.HardwareASections, prefix: "HWParamA_"),
-            BuildSections(preset, ranges, KnobCatalog.HardwareBSections, prefix: "HWParamB_"));
+            BuildSections(preset, ranges, KnobCatalog.HardwareASections, prefix: PrefixHwA),
+            BuildSections(preset, ranges, KnobCatalog.HardwareBSections, prefix: PrefixHwB));
     }
 
     private static IReadOnlyList<SettingSectionViewModel> BuildSections(
@@ -177,7 +186,9 @@ public sealed partial class PresetDetailViewModel : ViewModelBase
 
             string? position = null;
             if (section.PositionParam is not null && settings.HasNumber(section.PositionParam))
-                position = settings.Number(section.PositionParam) > 0 ? "POST" : "PRÉ";
+                position = settings.Number(section.PositionParam) > 0
+                    ? Localizer.Instance["Detail.Position.Post"]
+                    : Localizer.Instance["Detail.Position.Pre"];
 
             sections.Add(new SettingSectionViewModel(section.Key, section.Title, enabled, position, knobs));
         }

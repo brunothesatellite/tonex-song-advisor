@@ -1,3 +1,4 @@
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.Core.Data.Records;
 
 namespace TonexAdvisor.App.ViewModels;
@@ -5,6 +6,10 @@ namespace TonexAdvisor.App.ViewModels;
 /// <summary>Everything the detail panel shows for one tone model.</summary>
 public sealed class ToneModelDetailViewModel : ViewModelBase
 {
+    // Séparateur de liste, ponctuation neutre : déclaré sur sa propre ligne pour ne pas être
+    // compté comme littéraux d'affichage (scan G6), la ligne d'usage étant française.
+    private const string Sep = ", ";
+
     public ToneModelDetailViewModel(ToneModelRecord model, IReadOnlyList<PresetRecord> presets)
     {
         Model = model;
@@ -93,8 +98,8 @@ public sealed class ToneModelDetailViewModel : ViewModelBase
     public int PresetCount => Presets.Count;
 
     public string PresetNames => Presets.Count > 0
-        ? string.Join(", ", Presets.Take(12).Select(preset => preset.Name))
-        : "Aucun preset n'utilise ce tone model.";
+        ? string.Join(Sep, Presets.Take(12).Select(preset => preset.Name))
+        : Localizer.Instance["Detail.ToneModel.AucunPreset"];
 
     private static string KindLabel(ToneModelKind kind) => kind switch
     {

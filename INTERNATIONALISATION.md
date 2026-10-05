@@ -366,7 +366,7 @@ que les garde-fous arrivent **avant** la grande migration, pour l'encadrer.
 | **1 — Socle** ✅ | `Strings.resx` (neutre **EN**, clés créées dès maintenant) + `Strings.fr.resx` (extraction FR **verbatim**), `Localizer` (indexeur, `Get`, `Plural`, `CultureChanged`), extension `loc:Loc`, cadrage culture dans `Program.Main` + **calage de culture de la suite de tests** (fixture xunit) | **ATTEINT** : build 0/0 ; 204/204 tests verts dont **195 inchangés** (§18) |
 | **2 — Garde-fous** ✅ | Test de **parité FR/EN** (clés, non-vides, `{0}` identiques) ; test **scan de littéraux** (XAML + C#) avec **allowlist par fichier** (fichiers pas encore migrés) | **ATTEINT** : deux tests verts (5 au total) ; chaîne en dur ajoutée → **attrapée** (sonde, §18) |
 | **3 — Fenêtre principale + bibliothèque** ✅ | `MainWindow.axaml`, `LibraryView.axaml`, `LibraryViewModel` (y compris sentinelle §8.3, résumés `:N0`, pluriels) | **ATTEINT** : `MainWindow` (11) et `LibraryView` (53) sortis de l'allowlist, `LibraryViewModel` 5 → 1 (sentinelle seule) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
-| **4 — Vues de détail** | `PresetDetailView`, `ToneModelDetailView`, `PresetDetailViewModel` (dont `SettingsNote`) | idem |
+| **4 — Vues de détail** ✅ | `PresetDetailView`, `ToneModelDetailView`, `PresetDetailViewModel` (dont `SettingsNote`) | **ATTEINT** : les 4 fichiers sortis de l'allowlist (13 + 12 + 15 + 2 → 0) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
 | **5 — Réglages (UI + VM)** | `SettingsView.axaml`, `SettingsViewModel` (le plus gros : 32 lignes accentuées), badges §8.4 | idem |
 | **6 — Avis IA (UI)** | `AdviceViewModel` (titres, spinner, états), `AiOpinionRowViewModel`, lignes de réponse | idem |
 | **7 — Protocole IA (le plus délicat)** | `AnswerFormat` unique, invites Core paramétrées en langue (§8.1), marqueurs tolérants (§9), `AnswerLineViewModel` | Tests d'extraction/coloration FR **et** EN verts ; 16 tests français verts non modifiés |
@@ -490,6 +490,7 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
 | 04/10/2026 | **Phase 0 — Baseline + inventaire** | ✅ fait | baseline : `dotnet build` 0 erreur, **195/195 tests verts** ; inventaire : `inventaire-i18n.csv` — **566 lignes**, dont **475 à migrer** (1 sentinelle §8.3) et **91 hors-champ**, **388 clés uniques** ; générateur `tools\inventaire-i18n.ps1` ; brut `inventaire-i18n-raw.csv` (397) conservé pour contrôle de dérive |
 | 04/10/2026 | **Phase 1 — Socle (`Strings.resx` + `Localizer`)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **204/204 tests verts** (195 inchangés + 9 nouveaux socle), **12/12 exécutions consécutives vertes sur le code final** (36/36 pendant la stabilisation, cf. notes dispatcher ci-dessous) ; artefacts : `src\TonexAdvisor.App\Localization\{Strings.resx, Strings.fr.resx, Localizer.cs, LocExtension.cs}`, cadrage culture `Program.FrameCulture` (fr statu quo), `<NeutralResourcesLanguage>en</NeutralResourcesLanguage>`, tests `TestCulture` (ModuleInitializer fr-FR), `CultureGuard`, `LocalisationCollection`, `LocalizerTests` (7), `LocExtensionTests` (2) |
 | 04/10/2026 | **Phase 3 — Fenêtre principale + bibliothèque** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout : 204 socle/garde-fous + 5 de phase 2), **12/12 exécutions consécutives vertes** ; sortie d'allowlist : `MainWindow.axaml` **11 → 0**, `LibraryView.axaml` **53 → 0**, `LibraryViewModel.cs` **5 → 1** (sentinelle §8.3 seule) ; **59 clés FR/EN** ajoutées en paires ordonnées (**71 au total**, parité vérifiée) ; sentinelle : valeur `AnyFilter` intacte + affichage localisé (`FilterLabelConverter`, 3 ComboBox, §8.3) ; artefacts : `xmlns:loc` + `{loc:Loc}` (2 XAML), `Localizer.Instance.Get/[]` (VM), `src\TonexAdvisor.App\Localization\FilterLabelConverter.cs`, allowlist régénérée **38 fichiers / 332 littéraux** |
+| 05/10/2026 | **Phase 4 — Vues de détail** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout), **12/12 exécutions consécutives vertes** ; sortie d'allowlist : `PresetDetailView.axaml` **13 → 0**, `ToneModelDetailView.axaml` **12 → 0**, `PresetDetailViewModel.cs` **15 → 0**, `ToneModelDetailViewModel.cs` **2 → 0** ; **27 clés `Detail.*`** ajoutées en paires ordonnées (**98 au total**, parité vérifiée) ; allowlist **34 fichiers / 290 littéraux** ; artefacts : `xmlns:loc` + `{loc:Loc}` (2 vues), `Localizer.Instance.Get/[]` (2 VM), constantes techniques `Sep`/`SepLarge`/`PrefixHwA`/`PrefixHwB` |
 | 04/10/2026 | **Phase 2 — Garde-fous (parité + scan)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (204 + 5 nouveaux), **12/12 exécutions consécutives vertes** ; garde-fou G6 **prouvé par la sonde** : ajout d'une chaîne en dur (`SondeScanTemporaire.cs`) → test rouge « hors allowlist », sonde retirée → vert ; artefacts : `PariteResxTests` (3 tests : clés, non-vidité, emplacements `{0}`), `ScanLitterauxTests` (2 tests : compteur exact vs allowlist + entrées périmées), `tests\TonexAdvisor.Core.Tests\litteraux-allowlist.txt` (**34 fichiers / 344 littéraux**), `TestPaths.RepoRoot` (racine via `TonexAdvisor.sln`) |
 
 **Notes techniques de la phase 1** (constats mesurés, à connaître pour les phases 3 à 9) :
@@ -584,6 +585,28 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
   `Content="{loc:Loc}"`, sinon l'EN afficherait du français : `Réinitialiser`, `Conseiller`,
   `Ouvrir` ×2, `Demander à l'IA`, `Annuler`.
 
+**Notes techniques de la phase 4** (pour les phases 5 à 10) :
+- **Littéraux techniques sur lignes françaises** : `" · "`, `"  ·  "`, `", "` (séparateurs de
+  listes) et `"HWParamA_"`/`"HWParamB_"` (préfixes de paramètres matériels) étaient comptés
+  parce que **leurs lignes** contiennent `Preset`/`preset` (détection `presets?`) ou
+  `Select(preset => …)` — alors qu'aucun n'est du texte affiché. Traitement : **remontés en
+  `private const` sur leurs propres lignes** (non françaises) → le scan ne les voit plus, la
+  donnée est intacte. Réflexe pour les phases suivantes : *un littéral technique sur une ligne
+  française se hoiste, il ne se migre pas*.
+- **`"—"` de repli** (jamais compté) : 1 caractère, sous le seuil `≥ 2` du scan C# — laissé
+  tel quel, ponctuation neutre FR/EN (ex. : `Folders`, `ChainSummary`).
+- **Guillemets d'affichage** : `« {0} »` autour du titre de chanson est devenu une clé
+  (`Detail.Chanson.Guillemets`) — la phase 10 pourra y mettre des guillemets droits en EN.
+- **`POST`/`PRÉ`** (position de section, affichée par `PositionLabel`) : `PRÉ` étant français,
+  les deux deviennent les clés `Detail.Position.Post`/`.Pre` (EN `PRE`).
+- **Subtilité du dictionnaire `frRe`** : `mod[eè]le` n'accorde que `modèle`/`modele` — `model`
+  et `ToneModelKind` **ne** déclenchent **pas** la détection ; `ToneModelDetailViewModel` ne
+  comptait donc que 2 littéraux (le `", "` de la ligne lambda `preset`, et la phrase
+  `Aucun preset n'utilise ce tone model.`).
+- **Textes concaténés** : `SettingsNote` et `SettingsOriginNote` assemblaient deux littéraux —
+  chaque paire est devenue **une clé unique** avec l'espace interne préservé verbatim
+  (extraction G4 inchangée pour le FR).
+
 **Méthode d'inventaire (phase 0)** — 4 passes de scan :
 1. XAML : tous les littéraux d'attributs texte, **sans filtre de langue** (126 lignes) ;
 2. C# : lignes francophones (accents + mots-clés) → 397 candidats bruts ;
@@ -601,7 +624,7 @@ Contrôles automatiques passés : chaque ligne du brut est couverte dans le cura
 
 ---
 
-*Plan validé ; phases 0 à 3 réalisées sur instruction. Prochaine étape : **phase 4**
-(vues de détail : `PresetDetailView`, `ToneModelDetailView`, `PresetDetailViewModel` —
-sortie de l'allowlist, §12), à lancer sur instruction.
+*Plan validé ; phases 0 à 4 réalisées sur instruction. Prochaine étape : **phase 5**
+(réglages UI + VM : `SettingsView.axaml`, `SettingsViewModel`, badges §8.4 — le plus gros
+fichier du lot, 32 lignes accentuées, §12), à lancer sur instruction.
 Aucun commit effectué.*
