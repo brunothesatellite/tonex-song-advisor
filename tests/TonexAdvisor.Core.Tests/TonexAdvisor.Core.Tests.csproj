@@ -19,6 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- L'installeur est net9.0-windows en single-file : il ne se référence pas. Sa table
+         FR/EN est compilée telle quelle ici — test de couverture G10 (phase 11). -->
+    <Compile Include="..\..\tools\Setup\SetupTexts.cs" Link="Setup\SetupTexts.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\TonexAdvisor.Core\TonexAdvisor.Core.csproj" />
     <!-- View models are Avalonia-free, so the detail panel can be exercised headlessly. -->
     <ProjectReference Include="..\..\src\TonexAdvisor.App\TonexAdvisor.App.csproj" />

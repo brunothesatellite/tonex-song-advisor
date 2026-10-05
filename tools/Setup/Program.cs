@@ -48,7 +48,7 @@ internal static class Program
         }
         catch (Exception exception)
         {
-            Console.Error.WriteLine($"Échec : {exception.Message}");
+            Console.Error.WriteLine(SetupTexts.Get("echec", exception.Message));
             return 1;
         }
     }
@@ -56,7 +56,7 @@ internal static class Program
     private static void Install(bool silent)
     {
         var installDir = InstallDir();
-        Console.WriteLine($"Installation de {AppName} dans {installDir}…");
+        Console.WriteLine(SetupTexts.Get("installation.dans", AppName, installDir));
 
         if (Directory.Exists(installDir))
             Directory.Delete(installDir, recursive: true);
@@ -66,34 +66,37 @@ internal static class Program
 
         var exe = Path.Combine(installDir, ExeName);
         if (!File.Exists(exe))
-            throw new InvalidOperationException($"{ExeName} est absent de la charge utile.");
+            throw new InvalidOperationException(SetupTexts.Get("charge.absente", ExeName));
 
         var uninstaller = Path.Combine(installDir, "uninstall.exe");
         File.Copy(Environment.ProcessPath ?? throw new InvalidOperationException("Chemin de l'installateur inconnu."), uninstaller, overwrite: true);
+
+        // La description des raccourcis est posée dans la langue de l'OS, à l'installation (§12).
+        var description = SetupTexts.Get("raccourci.description");
 
         CreateShortcut(
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), $"{AppName}.lnk"),
             exe,
             installDir,
-            "Conseille le meilleur preset TONEX pour une chanson.");
+            description);
 
         CreateShortcut(
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"{AppName}.lnk"),
             exe,
             installDir,
-            "Conseille le meilleur preset TONEX pour une chanson.");
+            description);
 
         RegisterUninstall(installDir, uninstaller);
 
-        Console.WriteLine("Installation terminée.");
+        Console.WriteLine(SetupTexts.Get("installation.terminee"));
         if (!silent)
-            Console.WriteLine("Raccourcis créés : menu Démarrer et bureau.");
+            Console.WriteLine(SetupTexts.Get("raccourcis.crees"));
     }
 
     private static void Uninstall(bool silent)
     {
         var installDir = InstallDir();
-        Console.WriteLine($"Désinstallation de {AppName}…");
+        Console.WriteLine(SetupTexts.Get("desinstallation.de", AppName));
 
         DeleteIfExists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), $"{AppName}.lnk"));
         DeleteIfExists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"{AppName}.lnk"));
@@ -122,9 +125,9 @@ internal static class Program
             }
         }
 
-        Console.WriteLine("Désinstallation terminée. Vos réglages (%APPDATA%\\TonexAdvisor) sont conservés.");
+        Console.WriteLine(SetupTexts.Get("desinstallation.terminee"));
         if (!silent)
-            Console.WriteLine("Appuyez sur une touche pour fermer.");
+            Console.WriteLine(SetupTexts.Get("appuyez.une.touche"));
         if (!silent)
             Console.ReadKey(intercept: true);
     }
@@ -140,22 +143,21 @@ internal static class Program
     private static void ExtractPayload(string installDir)
     {
         using var payload = Assembly.GetExecutingAssembly().GetManifestResourceStream("payload.zip")
-            ?? throw new InvalidOperationException(
-                "Charge utile absente : construisez l'installateur avec tools\\build-release.ps1.");
+            ?? throw new InvalidOperationException(SetupTexts.Get("charge.utile.absente"));
 
         using var archive = new ZipArchive(payload, ZipArchiveMode.Read);
         archive.ExtractToDirectory(installDir);
-        Console.WriteLine($"{archive.Entries.Count} fichiers extraits.");
+        Console.WriteLine(SetupTexts.Get("fichiers.extraits", archive.Entries.Count));
     }
 
     /// <summary>Raccourci .lnk, créé par le shell Windows (COM WScript.Shell).</summary>
     private static void CreateShortcut(string linkPath, string target, string workingDirectory, string description)
     {
         var shellType = Type.GetTypeFromProgID("WScript.Shell")
-            ?? throw new InvalidOperationException("WScript.Shell indisponible.");
+            ?? throw new InvalidOperationException(SetupTexts.Get("wscript.indisponible"));
 
         dynamic shell = Activator.CreateInstance(shellType)
-            ?? throw new InvalidOperationException("WScript.Shell indisponible.");
+            ?? throw new InvalidOperationException(SetupTexts.Get("wscript.indisponible"));
 
         dynamic shortcut = shell.CreateShortcut(linkPath);
         shortcut.TargetPath = target;
@@ -167,7 +169,7 @@ internal static class Program
     private static void RegisterUninstall(string installDir, string uninstaller)
     {
         using var key = Registry.CurrentUser.CreateSubKey(UninstallKey)
-            ?? throw new InvalidOperationException("Impossible d'écrire la clé de désinstallation.");
+            ?? throw new InvalidOperationException(SetupTexts.Get("cle.impossible"));
 
         key.SetValue("DisplayName", AppName);
         key.SetValue("DisplayVersion", VersionLabel());

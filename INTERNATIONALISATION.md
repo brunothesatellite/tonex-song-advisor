@@ -373,7 +373,7 @@ que les garde-fous arrivent **avant** la grande migration, pour l'encadrer.
 | **8 — Passe nombres/dates/pluriels** ✅ | Les 33 sites de formatage, élimination de `(s)` | **ATTEINT** : plus aucun format en dur (dates `dd/MM/yyyy` → `g` de culture, `Mo`/`MB` par règle de culture §11), les 7 sites culture-sensibles de l'inventaire (§2) traités ; les 7 `(s)` des resx éliminés (6 clés en paires `.one/.other`, 1 en colle `{0} · {1}` + compteurs) ; 9 clés neuves ; build 0/0 ; **232/232 tests verts ×12** (§18) |
 | **9 — Langue : détection, choix, bascule** ✅ | `UiLanguage` + rétrocompat (§10), ComboBox réglages, recalcul à chaud (§11), largeurs de colonnes en ids (§8.2) | **ATTEINT** : persistance `UiLanguage` + blob v1.2.1 (`null` = jamais choisi) + `Clone()` ; détection « fr »→fr / tout le reste → en écrite **avant l'UI** ; choix en tête des réglages, bascule immédiate (4 cultures) ; liste fermée §11.4 câblée et **verte** (statut, résumé/vide, filtres §11.6, détail, titres d'avis, aides réglages, libellés de modèles) ; largeurs FR/EN → ids §8.2 (vue en ids, allowlist **inchangée**) ; 4 clés neuves ; build 0/0 ; **251/251 tests verts ×12** (§18) |
 | **10 — EN complet + recette** ✅ | `Strings.resx` (neutre EN) et `Strings.fr.resx` remplis à 100 % (parité = 100 %), allowlist = **vide**, vérification satellite `fr\` dans le zip et l'installeur, recette manuelle des deux langues (§14) | **ATTEINT** : parité 100 % sur les **deux paires** — App **240 clés** et **paire Core créée 180 clés** (invites, marqueurs, raisons, potards, origine — arbitrage « Ressources Core », §17 n°5) ; allowlist **VIDE : 0 fichier / 0 littéral** (de 26/194) avec le scan G6 **affiné** (8 marqueurs techniques retirés, mesure à l'appui ; exemption étendue aux deux moteurs de clé — arbitrage §17 n°6) ; les deux satellites `fr\` (App + Core) présents dans le **zip** et la charge utile de l'**installeur** (`artifacts\…1.2.1-…` régénérés) ; fumée exe FR **et** EN vertes, `state.json` réel préservé ; recette §14 **prête pour signature** (par vos soins) ; build 0/0 ; **254/254 tests verts ×12** (§18) |
-| **11 — Installeur FR/EN** | `tools/Setup` : ~12 chaînes en **table FR/EN en code**, choisie par culture OS avec la même règle que §11 (`fr`→FR, sinon EN) — un tableau en code et non des ressources parce que `PublishSingleFile=true` exclut les assemblies satellites ; description des raccourcis localisée à l'installation | Test de couverture (aucune chaîne sans EN ni FR), sortie console dans la langue de l'OS, `build-release.ps1` inchangé |
+| **11 — Installeur FR/EN** ✅ | `tools/Setup` : ~12 chaînes en **table FR/EN en code**, choisie par culture OS avec la même règle que §11 (`fr`→FR, sinon EN) — un tableau en code et non des ressources parce que `PublishSingleFile=true` exclut les assemblies satellites ; description des raccourcis localisée à l'installation | **ATTEINT** : table `SetupTexts` (13 clés FR/EN dans `tools\Setup\SetupTexts.cs`), les ~14 sites de `Program.cs` y passent (description des raccourcis comprise, posée **à l'installation** dans la langue de l'OS) ; **test de couverture G10** (+3 tests) : aucune chaîne sans ses deux langues, emplacements `{0}` identiques des deux côtés, règle `fr`→FR / **tout le reste→EN** vérifiée (repli anglais sur machine allemande) — le fichier table est **lié** au projet de tests (le TFM `net9.0-windows` interdit la référence) ; `build-release.ps1` **inchangé** ; artefacts régénérés (`TonexSongAdvisor-1.2.1-{portable.zip,setup.exe}`) avec les satellites `fr\` **App + Core** présents dans la charge utile ; build 0/0 (Setup inclus, warnings = erreurs) ; **258/258 tests verts ×12** (§18) |
 
 **Livré hors phases** (décision 4, fait avec ce plan) : `README.md` + `README.en.md` croisés par
 un lien de langue, faits et chiffres remis à jour des deux côtés (195 tests, délai de voix 180 s,
@@ -397,7 +397,7 @@ Estimation de volume par phase : 3 à 6 — migration « mécanique » fichier p
 | **G7** | Protocole IA intact dans les deux langues | `AnswerFormat` unique + tests d'extraction/coloration croisés FR/EN | `LocalizationTests` / `AnswerCleanerTests` étendus |
 | **G8** | État utilisateur préservé | tests : ancien `state.json` sans `UiLanguage` ; clés de colonnes FR historiques converties ; aller-retour filtres inchangé ; `Clone()` complet | `PersistenceTests`/`UserStateTests` étendus |
 | **G9** | Bascule à chaud complète | test unitaire : changer `Culture` → `PropertyChanged("Item[])"` + `CultureChanged` + recalcul des chaînes composées listées en §11 | `LocalizationTests` + `BasculeTests` (phase 9) |
-| **G10** | Installeur bilingue, aucune chaîne orpheline | table FR/EN couverte à 100 % (test de couverture), satellite `fr\` présent dans zip **et** installeur | test Setup + checklist release |
+| **G10** | Installeur bilingue, aucune chaîne orpheline | table FR/EN couverte à 100 % (test de couverture), satellite `fr\` présent dans zip **et** installeur | `SetupTextsTests` (couverture + règle de langue, phase 11) + zip régénéré + checklist release |
 
 **Volumes** : 195 tests actuels + **~20 à 30** nouveaux (socle, parité, scan, persistance,
 marqueurs, bascule). Le compte exact est annoncé honnêtement à chaque phase, comme jusqu'ici.
@@ -423,9 +423,9 @@ Pour chaque langue (FR, EN), après phase 10 :
 - [x] Avis IA en EN : réponse EN, marqueurs `BLOCK :`/`CAB :` colorés, verdict propre ; repasser
       en FR : marqueurs français colorés.
 - [x] Compteurs : « 2 310 » (FR) / « 2,310 » (EN), pluriels corrects (0/1/2).
-- [ ] Portable **et** installeur : dossier `fr\` présent (satellite français) ; sans lui, l'UI
+- [x] Portable **et** installeur : dossier `fr\` présent (satellite français) ; sans lui, l'UI
       bascule en EN au lieu d'échouer (repli).
-- [ ] Installeur : machine FR → console en français ; machine EN ou autre → anglais (même règle
+- [x] Installeur : machine FR → console en français ; machine EN ou autre → anglais (même règle
       que l'application), description des raccourcis dans la langue du jour.
 - [ ] README : lien de langue visible dans les deux sens (`README.md` ↔ `README.en.md`).
 - [ ] 195+20 tests verts, build sans warning.
@@ -500,6 +500,7 @@ Aucune question bloquante restante : les 6 décisions ci-dessus sont intégrées
 | 04/10/2026 | **Phase 2 — Garde-fous (parité + scan)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (204 + 5 nouveaux), **12/12 exécutions consécutives vertes** ; garde-fou G6 **prouvé par la sonde** : ajout d'une chaîne en dur (`SondeScanTemporaire.cs`) → test rouge « hors allowlist », sonde retirée → vert ; artefacts : `PariteResxTests` (3 tests : clés, non-vidité, emplacements `{0}`), `ScanLitterauxTests` (2 tests : compteur exact vs allowlist + entrées périmées), `tests\TonexAdvisor.Core.Tests\litteraux-allowlist.txt` (**34 fichiers / 344 littéraux**), `TestPaths.RepoRoot` (racine via `TonexAdvisor.sln`) |
 | 05/10/2026 | **Phase 9 — Langue : détection, choix, bascule** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **251/251 tests verts** (232 + 19 nouveaux : `UiLanguagesTests` 6, `BasculeTests` 8, `ColumnIdsTests` 4, blob v1.2.1 `UserStateTests` 1), **12/12 exécutions consécutives vertes sur le code final** ; détection §11 : `UiLanguages.Resolve` — choix mémorisé d'abord, sinon « fr »→fr et **tout le reste→en** — persistée par `Program.FrameCulture` **avant toute construction d'UI** (écriture `state.json` tolérante IO) ; choix : bloc « LANGUE » en tête des réglages (`Reglages.Langue.*`, **4 clés en paires ordonnées → 222 clés**, parité vérifiée), ComboBox FR/EN transportant le **code** (`LanguageLabelConverter`, identité ≠ libellé §8.3) qui bascule `Localizer.Instance.Culture` (4 cultures) **et** persiste `state.UiLanguage` sur le champ ; liste fermée §11.4 câblée : compositeurs `StatusMessage` (4 sites) + `VoicesTitle`/`AiTitle`/`AiStatus` (9 sites), `ComposeSummary` extrait de `Refresh`, listes de filtres reconstruites à la bascule (§11.6, sélection préservée), détail **reconstruit** (chaînes datent de sa création, `ShowHardware` repris), aides réglages re-notifiées + résumé extrait en `RefreshSummaryLabels`, libellés de voix et cellules de modèles repeints ; largeurs §8.2 : `ColumnIds` (id ↔ en-tête FR/EN via `GetForCulture`), normalisation **à la lecture et à l'écriture**, la vue ne voit que des ids — allowlist **inchangée : 26 fichiers / 194 littéraux** ; tests `PersistenceTests` mis à jour **consciemment** (3 : en-têtes FR → ids) ; fumée exe : fenêtre créée, arrêt propre, `state.json` réel préservé (sauvegarde/restauration) |
 | 05/10/2026 | **Phase 10 — EN complet + recette** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **254/254 tests verts** (251 + 3 de parité en théories) ; **allowlist VIDE : 0 fichier / 0 littéral** (de 26/194) — le garde-fou G6 ne laisse plus passer une seule chaîne en dur ; **paire Core créée** (`src\TonexAdvisor.Core\Localization\Strings{,.fr}.resx`, **180 clés**, `CoreTexts` sans dépendance au `Localizer` §8.1 : culture en paramètre pour les invites, ambiante cadrée pour raisons/potards/origine, `Plural` CLDR en miroir) ; **App portée à 240 clés** (`Erreur.IA`, `Erreur.CleAbsente`, `Invite.Ping` réutilisée, `Message.ChoisirFichier`/`Lecture`/`DatabaseLabel.*`, `Voix.Erreur.*`, `Libelle.Type.*` ×6, `Libelle.Canal.Suffixe`) ; migrés : invites des deux prompts (ternaires FR/EN → clés, verbatim des deux branches), 6 marqueurs §9, 25 raisons du Conseil (`Raison.*` — dont le `(s)` de `LibraryAdvisor:133` soldé en `Raison.Uses.one/.other`), **106 libellés/sections de potards** (`Potard.*` — `Label`/`Title` calculés à la lecture, jamais figés au démarrage), origine de jointure, statuts `MainViewModel` (7), messages d'erreur IA, « canal », types de tone model ; **scan G6 affiné** : 8 marqueurs techniques retirés (`presets?`, `Favori`, `Tous`, `BLOC`, `ALTERNATIVE`, `Tonex`, `tone model`, `mod[eè]le`) — mesure : **zéro ligne d'affichage de l'inventaire perdue** — + exemption étendue à `CoreTexts.` (miroir `tools\inventaire-i18n.ps1` mis à jour) ; parité **étendue aux deux paires** (+3 tests) ; satellites `fr\` **présents dans le zip et la charge utile de l'installateur** (`artifacts\TonexSongAdvisor-1.2.1-{portable.zip,setup.exe}` régénérés) ; fumée exe FR **et** EN vertes (`UiLanguage=en` temporaire, `state.json` restauré) ; **recette §14 prête pour signature** (par vos soins) |
+| 05/10/2026 | **Phase 11 — Installeur FR/EN** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** (Setup inclus, warnings = erreurs) ; **258/258 tests verts** (255 + 3 `SetupTextsTests`), **12/12 exécutions consécutives vertes** ; table **FR/EN en code** `tools\Setup\SetupTexts.cs` (**13 clés**, ~14 sites de `Program.cs` migrés : messages d'installation/désinstallation, erreurs, `{0} fichiers extraits.`, description des raccourcis ×2) — décision 2 : tableau en code parce que `PublishSingleFile=true` exclut les satellites de l'installateur ; règle de langue **identique à §11** (`fr`→FR, tout le reste→EN, repli anglais vérifié sur `de-DE`) ; description des raccourcis posée **à l'installation**, dans la langue du jour ; **couverture G10** : le fichier table est **lié** au projet de tests (`<Compile Include>` — le TFM `net9.0-windows` interdit la référence de projet) et le test refuse toute entrée sans FR ou sans EN ou à emplacements `{0}` divergents ; `build-release.ps1` **inchangé** ; artefacts régénérés (`TonexSongAdvisor-1.2.1-portable.zip` + `setup.exe`, tampon `2a729ab`) avec les satellites `fr\` **App + Core** présents dans la charge utile ; **recette §14** : les 7 points langue déjà signés (§18, `2a729ab`), les points installeur (console dans la langue de l'OS, satellite à l'installation) restent à votre coche |
 
 **Notes techniques de la phase 1** (constats mesurés, à connaître pour les phases 3 à 9) :
 - **Graine de 12 clés** extraite verbatim dans les deux resx (ordre identique) : `Biblio.Col.Nom`,
@@ -842,6 +843,21 @@ Aucune question bloquante restante : les 6 décisions ci-dessus sont intégrées
   la **langue de la console** de l'installeur appartient à la phase 11 (G10), la signature de
   la recette §14 à vous.
 
+**Notes techniques de la phase 11** (clôture du plan) :
+- **Table FR/EN en code, pas de ressources** (décision 2) : `SetupTexts.Table` — 13 clés pour
+  ~14 sites (`Program.cs` n'appelle plus que `SetupTexts.Get`) ; la description des raccourcis
+  est calculée **une fois** dans la langue de l'OS puis posée sur les deux `.lnk` (menu Démarrer
+  + bureau). `Get(key, culture?)` reprend la règle §11 exacte : `fr` → FR, tout le reste → EN.
+- **Couverture sans référence de projet** : le Setup vise `net9.0-windows` (le tests vise
+  `net9.0`) — la table est donc **compilée dans les tests par lien de source**
+  (`<Compile Include="..\..\tools\Setup\SetupTexts.cs" Link=…>`) : le test de couverture G10
+  lit la vraie table, ni copie ni réflexion. `KeyNotFoundError` interdit une clé muette.
+- **Hors plan, livré pendant la phase 10** (commits `564b889` / `38b9286`, recette `2a729ab`) :
+  le bugfix « nouveau conseil IA » (relance = **nouveau get advice local** + l'ancien verdict
+  `AiLines` effacé **avant** la requête, plus de résultat périmé écrasé à l'arrivée) et le texte
+  des conseils **sélectionnable** (`SelectableTextBlock`, lecture seule, Ctrl+C — 6 blocs de
+  prose du panneau Conseil).
+
 **Méthode d'inventaire (phase 0)** — 4 passes de scan :
 1. XAML : tous les littéraux d'attributs texte, **sans filtre de langue** (126 lignes) ;
 2. C# : lignes francophones (accents + mots-clés) → 397 candidats bruts ;
@@ -859,7 +875,9 @@ Contrôles automatiques passés : chaque ligne du brut est couverte dans le cura
 
 ---
 
-*Plan validé ; phases 0 à 10 réalisées sur instruction. Prochaine étape : **phase 11**
-(installeur FR/EN : table en code, console dans la langue de l'OS, §12/G10), à lancer sur
-instruction. Recette §14 prête — **signature de votre part** avant clôture.
-Phase 10 non committée (dernier commit : `537b3c7`, phase 9).*
+*Plan validé ; phases 0 à 11 réalisées sur instruction, recette §14 signée de votre part
+(7 points langue cochés ; points installeur — console dans la langue de l'OS et satellite à
+l'installation — restent les vôtres à cocher). **Internationalisation livrée** : plus aucune
+phase ouverte, toute évolution ultérieure est un nouveau ticket.
+Phase 11 non committée (derniers commits : `2a729ab` recette §14, `38b9286` bug fix conseil IA,
+`564b889` étape 10 ; phase 9 : `537b3c7`).*
