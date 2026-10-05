@@ -4,17 +4,22 @@ using System.Xml.Linq;
 namespace TonexAdvisor.Core.Tests;
 
 /// <summary>
-/// Garde-fou G5 (phase 2, §13) : les deux ressources de chaînes restent paritaires —
-/// mêmes clés, valeurs non vides, mêmes emplacements <c>{0}</c> — quel que soit le
-/// volume migré au fil des phases 3 à 10.
+/// Garde-fou G5 (phase 2, §13) : les deux langues restent paritaires — mêmes clés, valeurs
+/// non vides, mêmes emplacements <c>{0}</c> — quel que soit le volume migré au fil des phases
+/// 3 à 10. Phase 10 : la règle court sur les **deux** paires, App (Localizer) et Core
+/// (CoreTexts) — les invites, raisons et potards ont leur propre satellite fr.
 /// </summary>
 public class PariteResxTests
 {
-    private static readonly string Neutre = Path.Combine(
-        TestPaths.RepoRoot, "src", "TonexAdvisor.App", "Localization", "Strings.resx");
+    /// <summary>Les deux paires à vérifier : projet qui porte la paire de ressources.</summary>
+    public const string App = "TonexAdvisor.App";
 
-    private static readonly string Fr = Path.Combine(
-        TestPaths.RepoRoot, "src", "TonexAdvisor.App", "Localization", "Strings.fr.resx");
+    /// <inheritdoc cref="App"/>
+    public const string Core = "TonexAdvisor.Core";
+
+    private static (string Neutre, string Fr) Fichiers(string projet) => (
+        Path.Combine(TestPaths.RepoRoot, "src", projet, "Localization", "Strings.resx"),
+        Path.Combine(TestPaths.RepoRoot, "src", projet, "Localization", "Strings.fr.resx"));
 
     /// <summary>Les données de la ressource : nom → valeur (les resheaders sont ignorés).</summary>
     private static Dictionary<string, string> Lire(string fichier)
@@ -36,11 +41,14 @@ public class PariteResxTests
             .Select(match => int.Parse(match.Groups[1].Value))
             .ToHashSet();
 
-    [Fact]
-    public void Les_jeux_de_cles_FR_et_EN_s_identiques()
+    [Theory]
+    [InlineData(App)]
+    [InlineData(Core)]
+    public void Les_jeux_de_cles_FR_et_EN_s_identiques(string projet)
     {
-        var anglais = Lire(Neutre);
-        var francais = Lire(Fr);
+        var (neutre, fr) = Fichiers(projet);
+        var anglais = Lire(neutre);
+        var francais = Lire(fr);
 
         Assert.NotEmpty(anglais);
         Assert.NotEmpty(francais);
@@ -49,11 +57,14 @@ public class PariteResxTests
         Assert.Empty(francais.Keys.Except(anglais.Keys).OrderBy(key => key));
     }
 
-    [Fact]
-    public void Aucune_valeur_des_deux_langues_n_est_vide()
+    [Theory]
+    [InlineData(App)]
+    [InlineData(Core)]
+    public void Aucune_valeur_des_deux_langues_n_est_vide(string projet)
     {
-        var vides = Lire(Neutre)
-            .Concat(Lire(Fr))
+        var (neutre, fr) = Fichiers(projet);
+        var vides = Lire(neutre)
+            .Concat(Lire(fr))
             .Where(entry => string.IsNullOrWhiteSpace(entry.Value))
             .Select(entry => entry.Key)
             .OrderBy(key => key);
@@ -61,11 +72,14 @@ public class PariteResxTests
         Assert.Empty(vides);
     }
 
-    [Fact]
-    public void Les_emplacements_sont_identiques_dans_les_deux_langues()
+    [Theory]
+    [InlineData(App)]
+    [InlineData(Core)]
+    public void Les_emplacements_sont_identiques_dans_les_deux_langues(string projet)
     {
-        var anglais = Lire(Neutre);
-        var francais = Lire(Fr);
+        var (neutre, fr) = Fichiers(projet);
+        var anglais = Lire(neutre);
+        var francais = Lire(fr);
 
         var divergences = anglais
             .Where(entry => francais.ContainsKey(entry.Key))

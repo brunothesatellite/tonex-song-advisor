@@ -1,4 +1,5 @@
 using TonexAdvisor.Core.Data.Records;
+using TonexAdvisor.Core.Localization;
 
 namespace TonexAdvisor.Core.Data;
 
@@ -20,8 +21,11 @@ namespace TonexAdvisor.Core.Data;
 /// </remarks>
 public static class SettingsJoin
 {
-    /// <summary>The mention shown when the values came from the joined library.</summary>
-    public const string Origin = "une bibliothèque V1 jointe";
+    /// <summary>
+    /// The mention shown when the values came from the joined library — composed in the current
+    /// language when the join runs (in memory only: the libraries are never written to).
+    /// </summary>
+    public static string Origin => CoreTexts.Get("Origine.BiblioV1");
 
     /// <summary>
     /// The generation 1 library to take the values from, when it sits next to the generation 2

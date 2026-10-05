@@ -1,5 +1,6 @@
 using TonexAdvisor.Core.Data;
 using TonexAdvisor.Core.Data.Records;
+using TonexAdvisor.Core.Localization;
 
 namespace TonexAdvisor.Core.Advice;
 
@@ -130,9 +131,9 @@ public sealed class LibraryAdvisor
             var used = _index.PresetsFor(model.Key).Count;
             double bonus = (used > 0 ? UsedPoints : 0) + (model.Favorite ? FavoritePoints : 0);
             if (used > 0)
-                reasons.Add(new ScoreReason($"Utilisé par {used} preset(s)", UsedPoints));
+                reasons.Add(new ScoreReason(CoreTexts.Plural(used, "Raison.Uses"), UsedPoints));
             if (model.Favorite)
-                reasons.Add(new ScoreReason("Favori de la bibliothèque", FavoritePoints));
+                reasons.Add(new ScoreReason(CoreTexts.Get("Raison.Favori"), FavoritePoints));
 
             // The block itself is untouchable: its stomp and its amplifier come from the same
             // capture and may never be mixed with another capture. The cabinet is the one free
@@ -210,17 +211,17 @@ public sealed class LibraryAdvisor
         var cabinets = Cabinets;
 
         if (cabinets.Count == 0)
-            return new CabChoice("", "Aucun baffle dans cette bibliothèque", null);
+            return new CabChoice("", CoreTexts.Get("Raison.NoCab"), null);
 
         if (plan.Profile is not { } profile)
         {
             // No style to satisfy: keep what the capture already provides.
             var own = cabinets.FirstOrDefault(cabinet => IsSame(cabinet.Name, block.CabName));
             if (own is not null)
-                return new CabChoice(own.Name, "Fourni avec la capture, remplaçable par tout autre baffle", null);
+                return new CabChoice(own.Name, CoreTexts.Get("Raison.CabFournie"), null);
 
             var widest = cabinets.OrderByDescending(cabinet => cabinet.Uses).First();
-            return new CabChoice(widest.Name, "Choisi librement : cette capture n'en fournit aucun", null);
+            return new CabChoice(widest.Name, CoreTexts.Get("Raison.CabLibreSansAucun"), null);
         }
 
         Cabinet? best = null;
@@ -245,20 +246,20 @@ public sealed class LibraryAdvisor
         }
 
         if (best is null)
-            return new CabChoice("", "Aucun baffle dans cette bibliothèque", null);
+            return new CabChoice("", CoreTexts.Get("Raison.NoCab"), null);
 
-        var suffix = bestIsOwn ? " — celui de la capture" : "";
+        var suffix = bestIsOwn ? CoreTexts.Get("Raison.BaffleCapture") : "";
 
         var points = Math.Round(ComboCabPoints * bestFit, 1);
         var reason = points >= 1
             ? new ScoreReason(
-                $"Baffle « {best.Name} » : saturation adaptée à « {profile.Label} »{suffix}",
+                CoreTexts.Format("Raison.BaffleSaturation", null, best.Name, profile.Label, suffix),
                 points)
             : null;
 
         var note = bestIsOwn
-            ? "Fourni avec la capture, remplaçable par tout autre baffle"
-            : "Choisi librement : tout baffle se branche sur ce bloc";
+            ? CoreTexts.Get("Raison.CabFournie")
+            : CoreTexts.Get("Raison.CabLibre");
 
         return new CabChoice(best.Name, note, reason);
     }
@@ -355,7 +356,7 @@ public sealed class LibraryAdvisor
 
         if (normalizedArtist.Length > 0 && string.Equals(normalizedArtist, plan.ArtistText, StringComparison.Ordinal))
         {
-            reasons.Add(new ScoreReason($"Artiste identique : « {artist} »", ArtistPoints));
+            reasons.Add(new ScoreReason(CoreTexts.Format("Raison.ArtisteIdentique", null, artist), ArtistPoints));
             return ArtistPoints;
         }
 
@@ -364,12 +365,16 @@ public sealed class LibraryAdvisor
         if (plan.ArtistText.Length > 0 && haystack.Contains(plan.ArtistText, StringComparison.Ordinal))
         {
             reasons.Add(new ScoreReason(
-                $"Artiste cité par le preset ou son dossier{(artist.Length > 0 ? $" : « {artist} »" : "")}",
+                artist.Length > 0
+                    ? CoreTexts.Format("Raison.ArtisteCiteAvec", null, artist)
+                    : CoreTexts.Get("Raison.ArtisteCite"),
                 ArtistOwnerPoints));
             return ArtistOwnerPoints;
         }
 
-        return PartialMatch(plan.ArtistTokens, haystack, ArtistPartialPoints, ArtistHalfPoints, "Artiste", reasons);
+        return PartialMatch(
+            plan.ArtistTokens, haystack, ArtistPartialPoints, ArtistHalfPoints,
+            CoreTexts.Get("Raison.Label.Artiste"), reasons);
     }
 
     private static double ScoreSong(Plan plan, PresetRecord preset, List<ScoreReason> reasons)
@@ -378,24 +383,26 @@ public sealed class LibraryAdvisor
 
         if (normalizedSong.Length > 0 && string.Equals(normalizedSong, plan.SongText, StringComparison.Ordinal))
         {
-            reasons.Add(new ScoreReason($"Chanson identique : « {preset.Song} »", SongPoints));
+            reasons.Add(new ScoreReason(CoreTexts.Format("Raison.ChansonIdentique", null, preset.Song), SongPoints));
             return SongPoints;
         }
 
         if (normalizedSong.Length > 0 && ContainsAll(normalizedSong, plan.SongTokens))
         {
-            reasons.Add(new ScoreReason($"Chanson « {preset.Song} »", SongFieldPoints));
+            reasons.Add(new ScoreReason(CoreTexts.Format("Raison.ChansonChamp", null, preset.Song), SongFieldPoints));
             return SongFieldPoints;
         }
 
         var context = Join(preset.Name, preset.Album, preset.Description, string.Join(' ', preset.Folders));
         if (ContainsAll(context, plan.SongTokens))
         {
-            reasons.Add(new ScoreReason($"Le nom du preset évoque « {plan.SongText} »", SongContextPoints));
+            reasons.Add(new ScoreReason(CoreTexts.Format("Raison.ChansonContexte", null, plan.SongText), SongContextPoints));
             return SongContextPoints;
         }
 
-        return PartialMatch(plan.SongTokens, context, SongHalfPoints, SongHalfPoints, "Chanson", reasons);
+        return PartialMatch(
+            plan.SongTokens, context, SongHalfPoints, SongHalfPoints,
+            CoreTexts.Get("Raison.Label.Chanson"), reasons);
     }
 
     private double ScoreStyle(Plan plan, PresetRecord preset, List<ScoreReason> reasons)
@@ -412,7 +419,7 @@ public sealed class LibraryAdvisor
             {
                 points += fitPoints;
                 reasons.Add(new ScoreReason(
-                    $"Catégorie « {preset.Category} » : saturation adaptée à « {profile.Label} »",
+                    CoreTexts.Format("Raison.CategorieSaturation", null, preset.Category, profile.Label),
                     fitPoints));
             }
         }
@@ -421,7 +428,7 @@ public sealed class LibraryAdvisor
         if (genre.Length > 0 && plan.StyleTokens.Any(token => genre.Contains(token, StringComparison.Ordinal)))
         {
             points += GenrePoints;
-            reasons.Add(new ScoreReason($"Genre « {preset.Genre} »", GenrePoints));
+            reasons.Add(new ScoreReason(CoreTexts.Format("Raison.Genre", null, preset.Genre), GenrePoints));
         }
 
         var keywords = Tokenizer.Normalize(string.Join(' ',
@@ -433,7 +440,10 @@ public sealed class LibraryAdvisor
         {
             var textPoints = Math.Min(TextPoints, matched.Count * TextPerToken);
             points += textPoints;
-            reasons.Add(new ScoreReason($"Mots-clés : « {string.Join(" », « ", matched)} »", textPoints));
+            reasons.Add(new ScoreReason(
+                CoreTexts.Format("Raison.MotsCles", null,
+                    string.Join(CoreTexts.Get("Raison.SepCitation"), matched)),
+                textPoints));
         }
 
         return points;
@@ -473,7 +483,7 @@ public sealed class LibraryAdvisor
                 {
                     points += fitPoints;
                     reasons.Add(new ScoreReason(
-                        $"Catégorie « {model.Category} » : saturation adaptée à « {profile.Label} »",
+                        CoreTexts.Format("Raison.CategorieSaturation", null, model.Category, profile.Label),
                         fitPoints));
                 }
             }
@@ -485,14 +495,17 @@ public sealed class LibraryAdvisor
             {
                 var textPoints = Math.Min(ComboTextPoints, matched.Count * ComboTextPerToken);
                 points += textPoints;
-                reasons.Add(new ScoreReason($"Mots-clés : « {string.Join(" », « ", matched)} »", textPoints));
+                reasons.Add(new ScoreReason(
+                    CoreTexts.Format("Raison.MotsCles", null,
+                        string.Join(CoreTexts.Get("Raison.SepCitation"), matched)),
+                    textPoints));
             }
 
             if (plan.Profile is { TargetSaturation: >= 0.9 } && StyleVocabulary.IsFrontBoost(model.StompName))
             {
                 points += FrontBoostPoints;
                 reasons.Add(new ScoreReason(
-                    $"{model.StompName} devant l'ampli : le boost qui resserre le bas du spectre en saturation",
+                    CoreTexts.Format("Raison.Boost", null, model.StompName),
                     FrontBoostPoints));
             }
         }
@@ -509,13 +522,13 @@ public sealed class LibraryAdvisor
         if (preset.Favorite)
         {
             points += FavoritePoints;
-            reasons.Add(new ScoreReason("Favori de la bibliothèque", FavoritePoints));
+            reasons.Add(new ScoreReason(CoreTexts.Get("Raison.Favori"), FavoritePoints));
         }
 
         if (preset.HasKnobSettings)
         {
             points += SettingsPoints;
-            reasons.Add(new ScoreReason("Réglages numériques exploitables", SettingsPoints));
+            reasons.Add(new ScoreReason(CoreTexts.Get("Raison.Reglages"), SettingsPoints));
         }
 
         return points;
@@ -543,7 +556,7 @@ public sealed class LibraryAdvisor
 
         if (ratio >= 0.999)
         {
-            reasons.Add(new ScoreReason($"{label} reconnu", allPoints));
+            reasons.Add(new ScoreReason(CoreTexts.Format("Raison.Partial", null, label), allPoints));
             return allPoints;
         }
 
@@ -551,7 +564,9 @@ public sealed class LibraryAdvisor
         // ("zzz personne" happily lands inside "fuzzzzy"): the weaker tier needs two of them.
         if (ratio >= 0.5 && hits >= 2)
         {
-            reasons.Add(new ScoreReason($"{label} en partie reconnu ({hits}/{tokens.Count} mots)", halfPoints));
+            reasons.Add(new ScoreReason(
+                CoreTexts.Format("Raison.PartialPartiel", null, label, hits, tokens.Count),
+                halfPoints));
             return halfPoints;
         }
 

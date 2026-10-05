@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using TonexAdvisor.App.Config;
+using TonexAdvisor.App.Localization;
 
 namespace TonexAdvisor.App.Services;
 
@@ -84,7 +85,7 @@ public sealed class OpenCodeClient : IAiClient
     public Task<string> PingAsync(string model, CancellationToken cancellationToken = default)
         // Généreux en tokens : les modèles de raisonnement sortent d'abord leur chaîne de pensée
         // et n'arrivent au texte final qu'après (sinon la réponse « vide » n'est que du raisonnement).
-        => AskAsync(model, "Réponds uniquement par le mot OK.", maxTokens: 1000, cancellationToken);
+        => AskAsync(model, Localizer.Instance["Invite.Ping"], maxTokens: 1000, cancellationToken);
 
     /// <summary>Envoie un prompt et renvoie le texte de la réponse.</summary>
     public async Task<string> AskAsync(
@@ -97,7 +98,7 @@ public sealed class OpenCodeClient : IAiClient
         ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
 
         if (string.IsNullOrWhiteSpace(_apiKey))
-            throw new InvalidOperationException("Aucune clé API OpenCode enregistrée (réglages → IA).");
+            throw new InvalidOperationException(Localizer.Instance["Erreur.CleAbsente"]);
 
         var payload = JsonSerializer.Serialize(new
         {
@@ -143,7 +144,7 @@ public sealed class OpenCodeClient : IAiClient
         ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
 
         if (string.IsNullOrWhiteSpace(_apiKey))
-            throw new InvalidOperationException("Aucune clé API OpenCode enregistrée (réglages → IA).");
+            throw new InvalidOperationException(Localizer.Instance["Erreur.CleAbsente"]);
 
         var payload = JsonSerializer.Serialize(new
         {
@@ -243,9 +244,9 @@ public sealed class OpenCodeClient : IAiClient
             if (document.RootElement.TryGetProperty("error", out var error))
             {
                 if (error.ValueKind == JsonValueKind.Object && error.TryGetProperty("message", out var message))
-                    return $"Erreur IA ({(int)status}) : {message.GetString()}";
+                    return Localizer.Instance.Get("Erreur.IA", (int)status, message.GetString());
                 if (error.ValueKind == JsonValueKind.String)
-                    return $"Erreur IA ({(int)status}) : {error.GetString()}";
+                    return Localizer.Instance.Get("Erreur.IA", (int)status, error.GetString());
             }
         }
         catch (JsonException)
@@ -254,6 +255,7 @@ public sealed class OpenCodeClient : IAiClient
         }
 
         var text = body.Trim();
-        return $"Erreur IA ({(int)status}) : {(text.Length > 300 ? text[..300] : text)}";
+        return Localizer.Instance.Get(
+            "Erreur.IA", (int)status, text.Length > 300 ? text[..300] : text);
     }
 }

@@ -372,7 +372,7 @@ que les garde-fous arrivent **avant** la grande migration, pour l'encadrer.
 | **7 — Protocole IA (le plus délicat)** ✅ | `AnswerFormat` unique, invites Core paramétrées en langue (§8.1), marqueurs tolérants (§9), `AnswerLineViewModel` | **ATTEINT** : extraction/coloration FR **et** EN verts (**19 nouveaux tests** : `AnswerFormatTests` 17 dont 8 de coloration, `EnglishPromptTests` 2) ; les tests français de protocole **non modifiés et verts** ; build 0/0 ; **228/228 tests verts ×12** (§18) |
 | **8 — Passe nombres/dates/pluriels** ✅ | Les 33 sites de formatage, élimination de `(s)` | **ATTEINT** : plus aucun format en dur (dates `dd/MM/yyyy` → `g` de culture, `Mo`/`MB` par règle de culture §11), les 7 sites culture-sensibles de l'inventaire (§2) traités ; les 7 `(s)` des resx éliminés (6 clés en paires `.one/.other`, 1 en colle `{0} · {1}` + compteurs) ; 9 clés neuves ; build 0/0 ; **232/232 tests verts ×12** (§18) |
 | **9 — Langue : détection, choix, bascule** ✅ | `UiLanguage` + rétrocompat (§10), ComboBox réglages, recalcul à chaud (§11), largeurs de colonnes en ids (§8.2) | **ATTEINT** : persistance `UiLanguage` + blob v1.2.1 (`null` = jamais choisi) + `Clone()` ; détection « fr »→fr / tout le reste → en écrite **avant l'UI** ; choix en tête des réglages, bascule immédiate (4 cultures) ; liste fermée §11.4 câblée et **verte** (statut, résumé/vide, filtres §11.6, détail, titres d'avis, aides réglages, libellés de modèles) ; largeurs FR/EN → ids §8.2 (vue en ids, allowlist **inchangée**) ; 4 clés neuves ; build 0/0 ; **251/251 tests verts ×12** (§18) |
-| **10 — EN complet + recette** | `Strings.resx` (neutre EN) et `Strings.fr.resx` remplis à 100 % (parité = 100 %), allowlist = **vide**, vérification satellite `fr\` dans le zip et l'installeur, recette manuelle des deux langues (§14) | Parité 100 %, scan sans allowlist, recette signée |
+| **10 — EN complet + recette** ✅ | `Strings.resx` (neutre EN) et `Strings.fr.resx` remplis à 100 % (parité = 100 %), allowlist = **vide**, vérification satellite `fr\` dans le zip et l'installeur, recette manuelle des deux langues (§14) | **ATTEINT** : parité 100 % sur les **deux paires** — App **240 clés** et **paire Core créée 180 clés** (invites, marqueurs, raisons, potards, origine — arbitrage « Ressources Core », §17 n°5) ; allowlist **VIDE : 0 fichier / 0 littéral** (de 26/194) avec le scan G6 **affiné** (8 marqueurs techniques retirés, mesure à l'appui ; exemption étendue aux deux moteurs de clé — arbitrage §17 n°6) ; les deux satellites `fr\` (App + Core) présents dans le **zip** et la charge utile de l'**installeur** (`artifacts\…1.2.1-…` régénérés) ; fumée exe FR **et** EN vertes, `state.json` réel préservé ; recette §14 **prête pour signature** (par vos soins) ; build 0/0 ; **254/254 tests verts ×12** (§18) |
 | **11 — Installeur FR/EN** | `tools/Setup` : ~12 chaînes en **table FR/EN en code**, choisie par culture OS avec la même règle que §11 (`fr`→FR, sinon EN) — un tableau en code et non des ressources parce que `PublishSingleFile=true` exclut les assemblies satellites ; description des raccourcis localisée à l'installation | Test de couverture (aucune chaîne sans EN ni FR), sortie console dans la langue de l'OS, `build-release.ps1` inchangé |
 
 **Livré hors phases** (décision 4, fait avec ce plan) : `README.md` + `README.en.md` croisés par
@@ -392,8 +392,8 @@ Estimation de volume par phase : 3 à 6 — migration « mécanique » fichier p
 | **G2** | Les **195 tests existants** restent verts **sans modification** | FR par défaut dans le service + extraction verbatim | rapport `dotnet test` inchangé, fichiers de tests non touchés (sauf fixture culture, ajout) |
 | **G3** | Tests indépendants de la machine | fixture culture = `fr-FR` pinée pour toute la suite (AUJOURD'HUI la suite suppose implicitement une machine FR) | nouveau `CultureFixture` |
 | **G4** | FR ≡ UI actuelle caractère pour caractère | extraction verbatim + **test golden** sur un échantillon de clés critiques (messages d'état, en-têtes, marqueurs) | `LocalizationTests` |
-| **G5** | FR **et** EN complets et cohérents (EN = ressource neutre, maillon de repli final) | parité de clés, non-vidité, parité des placeholders `{0}` | test de parité (phase 2) |
-| **G6** | Aucune nouvelle chaîne en dur | scan de littéraux XAML/C# avec allowlist par fichier → **vide** en phase 10 | test scan (phase 2) |
+| **G5** | FR **et** EN complets et cohérents (EN = ressource neutre, maillon de repli final) | parité de clés, non-vidité, parité des placeholders `{0}` | test de parité (phase 2), **étendu en phase 10 aux deux paires : App 240 clés + Core 180 clés** |
+| **G6** | Aucune nouvelle chaîne en dur | scan de littéraux XAML/C# avec allowlist par fichier → **vide** en phase 10 | test scan — allowlist **vide depuis la phase 10** (0 fichier / 0 littéral), regex affinée sur mesure + exemption des deux moteurs de clé (`Localizer.`, `CoreTexts.`) |
 | **G7** | Protocole IA intact dans les deux langues | `AnswerFormat` unique + tests d'extraction/coloration croisés FR/EN | `LocalizationTests` / `AnswerCleanerTests` étendus |
 | **G8** | État utilisateur préservé | tests : ancien `state.json` sans `UiLanguage` ; clés de colonnes FR historiques converties ; aller-retour filtres inchangé ; `Clone()` complet | `PersistenceTests`/`UserStateTests` étendus |
 | **G9** | Bascule à chaud complète | test unitaire : changer `Culture` → `PropertyChanged("Item[])"` + `CultureChanged` + recalcul des chaînes composées listées en §11 | `LocalizationTests` + `BasculeTests` (phase 9) |
@@ -477,8 +477,10 @@ intégrées dans le plan (les sections ci-dessus sont à jour).
 | 2 | Langue de l'installeur | **Français et anglais** | §12 phase 11 (table FR/EN en code, single-file), G10, §14, §16 |
 | 3 | Repli pour une 3ᵉ langue | **Anglais** (et non français) | §4.2 — ressource **neutre = EN** ; §11 — détection `fr`→FR, tout le reste → EN |
 | 4 | README anglais | **Immédiatement** | `README.en.md` livré avec ce plan + lien croisé dans les deux fichiers |
+| 5 | Où vivent les textes construits en Core (invites IA, raisons, libellés de potards, marqueurs) | **Ressources Core** : paire `Strings.resx`/`Strings.fr.resx` dans Core, lue sans le `Localizer` de l'App — culture en paramètre pour les invites (§8.1 intact), culture ambiante cadrée pour le reste | §12 phase 10, G5 (parité des deux paires), satellite `fr\TonexAdvisor.Core.resources.dll` ajouté au zip |
+| 6 | Faux positifs techniques du scan G6 (SQL, identifiants, chemins, user-agent, sentinelle « Tous », « TextBlock », vocabulaire) | **Affinage de la regex** : 8 marqueurs retirés après mesure (zéro ligne d'affichage de l'inventaire perdue) + exemption étendue aux lignes `CoreTexts.` comme `Localizer.` | §13 G6 (allowlist vidée), `ScanLitterauxTests` + miroir `tools\inventaire-i18n.ps1` |
 
-Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées dans le plan.
+Aucune question bloquante restante : les 6 décisions ci-dessus sont intégrées dans le plan.
 
 ---
 
@@ -497,6 +499,7 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
 | 05/10/2026 | **Phase 8 — Nombres/dates/pluriels** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **232/232 tests verts** (228 + 4 nouveaux `PluralisationTests`), **12/12 exécutions consécutives vertes sur le code final** ; dates : `Reglages.Fichier.Info` `{1:dd/MM/yyyy HH:mm}` → `{1:g}` (date courte + heure de la culture ; rendu fr identique) et `LibraryFile.ModifiedLabel` → `ToString("g", CultureInfo.CurrentCulture)` ; unité `Mo`/`MB` par règle de culture §11 (`LibraryFile.SizeUnit`, pas de `Localizer` dans Core) ; pluriels : les **7 `(s)` des resx éliminés** — 6 clés en paires `.one/.other` (`Conseil.Avis.SansArbitre`, `Conseil.Indice.Combinaison`, `Conseil.Indice.PresetSeul`, `Detail.BlocsActifs`, `Reglages.Avis.VoixDisparues`, `Reglages.Bases.Trouvees`), `Message.Resume.Bibliotheque` et `Reglages.Compteurs` réduites à la colle `{0} · {1}` ; **9 clés neuves en paires ordonnées** (`Compteur.Presets`/`Compteur.ToneModels` `.one/.other`, `Message.Resume.Chargement`/`.Jointe`/`.NonDispo`, `Conseil.Score.Pourcent`, `Voix.Duree`) → **218 clés au total**, parité vérifiée ; `Plural(n, baseKey, params args)` étendu pour les clés à `{1}` ; sites migrés : ligne de statut `MainViewModel` (allowlist **11 → 7**, total **26 fichiers / 194 littéraux**), `CountsLabel`, `TonexFolderHint`, `VoiceModelsStatus`, `Summary`, `ActiveBlockLine` (passé en `int`), `ScoreLabel` ×2, `ElapsedLabel` ; tests mis à jour **consciemment** : `LocalizerTests.Formatage_…` recomposé via `Plural` (son objet — le `:N0` de culture — intact), `VoiceAndModelTests` à l'accord singulier ; reste en `(s)` : `LibraryAdvisor:133` (raisons Core, phase 10) |
 | 04/10/2026 | **Phase 2 — Garde-fous (parité + scan)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (204 + 5 nouveaux), **12/12 exécutions consécutives vertes** ; garde-fou G6 **prouvé par la sonde** : ajout d'une chaîne en dur (`SondeScanTemporaire.cs`) → test rouge « hors allowlist », sonde retirée → vert ; artefacts : `PariteResxTests` (3 tests : clés, non-vidité, emplacements `{0}`), `ScanLitterauxTests` (2 tests : compteur exact vs allowlist + entrées périmées), `tests\TonexAdvisor.Core.Tests\litteraux-allowlist.txt` (**34 fichiers / 344 littéraux**), `TestPaths.RepoRoot` (racine via `TonexAdvisor.sln`) |
 | 05/10/2026 | **Phase 9 — Langue : détection, choix, bascule** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **251/251 tests verts** (232 + 19 nouveaux : `UiLanguagesTests` 6, `BasculeTests` 8, `ColumnIdsTests` 4, blob v1.2.1 `UserStateTests` 1), **12/12 exécutions consécutives vertes sur le code final** ; détection §11 : `UiLanguages.Resolve` — choix mémorisé d'abord, sinon « fr »→fr et **tout le reste→en** — persistée par `Program.FrameCulture` **avant toute construction d'UI** (écriture `state.json` tolérante IO) ; choix : bloc « LANGUE » en tête des réglages (`Reglages.Langue.*`, **4 clés en paires ordonnées → 222 clés**, parité vérifiée), ComboBox FR/EN transportant le **code** (`LanguageLabelConverter`, identité ≠ libellé §8.3) qui bascule `Localizer.Instance.Culture` (4 cultures) **et** persiste `state.UiLanguage` sur le champ ; liste fermée §11.4 câblée : compositeurs `StatusMessage` (4 sites) + `VoicesTitle`/`AiTitle`/`AiStatus` (9 sites), `ComposeSummary` extrait de `Refresh`, listes de filtres reconstruites à la bascule (§11.6, sélection préservée), détail **reconstruit** (chaînes datent de sa création, `ShowHardware` repris), aides réglages re-notifiées + résumé extrait en `RefreshSummaryLabels`, libellés de voix et cellules de modèles repeints ; largeurs §8.2 : `ColumnIds` (id ↔ en-tête FR/EN via `GetForCulture`), normalisation **à la lecture et à l'écriture**, la vue ne voit que des ids — allowlist **inchangée : 26 fichiers / 194 littéraux** ; tests `PersistenceTests` mis à jour **consciemment** (3 : en-têtes FR → ids) ; fumée exe : fenêtre créée, arrêt propre, `state.json` réel préservé (sauvegarde/restauration) |
+| 05/10/2026 | **Phase 10 — EN complet + recette** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **254/254 tests verts** (251 + 3 de parité en théories) ; **allowlist VIDE : 0 fichier / 0 littéral** (de 26/194) — le garde-fou G6 ne laisse plus passer une seule chaîne en dur ; **paire Core créée** (`src\TonexAdvisor.Core\Localization\Strings{,.fr}.resx`, **180 clés**, `CoreTexts` sans dépendance au `Localizer` §8.1 : culture en paramètre pour les invites, ambiante cadrée pour raisons/potards/origine, `Plural` CLDR en miroir) ; **App portée à 240 clés** (`Erreur.IA`, `Erreur.CleAbsente`, `Invite.Ping` réutilisée, `Message.ChoisirFichier`/`Lecture`/`DatabaseLabel.*`, `Voix.Erreur.*`, `Libelle.Type.*` ×6, `Libelle.Canal.Suffixe`) ; migrés : invites des deux prompts (ternaires FR/EN → clés, verbatim des deux branches), 6 marqueurs §9, 25 raisons du Conseil (`Raison.*` — dont le `(s)` de `LibraryAdvisor:133` soldé en `Raison.Uses.one/.other`), **106 libellés/sections de potards** (`Potard.*` — `Label`/`Title` calculés à la lecture, jamais figés au démarrage), origine de jointure, statuts `MainViewModel` (7), messages d'erreur IA, « canal », types de tone model ; **scan G6 affiné** : 8 marqueurs techniques retirés (`presets?`, `Favori`, `Tous`, `BLOC`, `ALTERNATIVE`, `Tonex`, `tone model`, `mod[eè]le`) — mesure : **zéro ligne d'affichage de l'inventaire perdue** — + exemption étendue à `CoreTexts.` (miroir `tools\inventaire-i18n.ps1` mis à jour) ; parité **étendue aux deux paires** (+3 tests) ; satellites `fr\` **présents dans le zip et la charge utile de l'installateur** (`artifacts\TonexSongAdvisor-1.2.1-{portable.zip,setup.exe}` régénérés) ; fumée exe FR **et** EN vertes (`UiLanguage=en` temporaire, `state.json` restauré) ; **recette §14 prête pour signature** (par vos soins) |
 
 **Notes techniques de la phase 1** (constats mesurés, à connaître pour les phases 3 à 9) :
 - **Graine de 12 clés** extraite verbatim dans les deux resx (ordre identique) : `Biblio.Col.Nom`,
@@ -781,6 +784,64 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
   chaque bascule, sélection capturée/restaurée) — c'est ce `Reset` que le test observe, la
   sentinelle affichée repartant du `FilterLabelConverter` dans la langue courante.
 
+**Notes techniques de la phase 10** (pour la phase 11 et au-delà) :
+- **Décision §17 n°5 — une paire de ressources Core** : `CoreTexts` (sans dépendance au
+  `Localizer` de l'App, §8.1) lit `src\TonexAdvisor.Core\Localization\Strings{,.fr}.resx`
+  (180 clés, `NeutralResourcesLanguage=en` ajouté au csproj). La langue entre **par paramètre**
+  pour les invites (les tests FR d'invites sont restés verts sans modification : extraction
+  verbatim des deux branches du code) et par la **culture ambiante** (cadrée par l'App, pinée
+  par `CultureGuard`/`TestCulture`) pour les raisons, les potards et l'origine de jointure.
+  Le satellite `fr\TonexAdvisor.Core.resources.dll` double celui de l'App : la recette §14
+  (« dossier fr\ présent ») porte désormais sur les **deux** DLL.
+- **Décision §17 n°6 — le scan affiné, mesuré avant d'être coupé** : les huit marqueurs
+  retirés (`presets?`, `Favori/favori`, `Tous`, `BLOC`, `ALTERNATIVE`, `Tonex`, `tone model`,
+  `mod[eè]le` — le « ModelE » de `ModelEnable` mordait le motif) ne servaient qu'au hors-champ :
+  SQL `Presets`/`Favorite`, chemins et user-agents « Tonex », « TextBlock » pris pour BLOC,
+  sentinelle « Tous » (§8.3 : sa valeur est **restée** « Tous », c'est le scan qui a bougé),
+  vocabulaire de style, identifiants `ModelEnable`. Mesure faite sur l'inventaire : **zéro
+  ligne d'affichage** ne dépendait d'eux seuls. Le miroir `tools\inventaire-i18n.ps1` a suivi.
+- **Exemption des deux moteurs de clé** : la règle « une clé n'est pas une chaîne
+  d'affichage » s'applique aux lignes contenant `Localizer.` **ou** `CoreTexts.` — sans quoi
+  une clé Core portant un mot de protocole (`…Regles.Bloc`, `…Baffle`) serait comptée comme du
+  texte. Piège de code rencontré : factoriser l'appel dans un alias local (`Raison(...)`)
+  **retire** l'exemption (la ligne ne porte plus `CoreTexts.`) — chaque site appelle le moteur
+  directement.
+- **Allowlist vidée, garde reformulée** : `Assert.NotEmpty(autorise)` (« l'allowlist livrée
+  n'est pas vide ») serait devenu faux — remplacé par « le fichier **existe**, même vide » ;
+  le fichier ne contient plus qu'un commentaire de phase. Toute chaîne qui se re-remplit le
+  fait échouer (G6).
+- **`Potard.*` : la clé comme donnée, le texte à la lecture** : `KnobDefinition.LabelKey`/
+  `SettingSection.TitleKey` + propriétés calculées `Label`/`Title` — les libellés ne sont
+  **jamais figés** au démarrage (une valeur composée en `static readonly` serait restée dans
+  la langue du premier affichage). 106 clés extraites de l'inventaire par script (FR = valeur,
+  EN = statut « EN = … », sinon identique) ; `Potard.Cab.Baffle` renommée
+  **`Potard.Cab.Model`** — le mot « Baffle » dans une clé re-déclencherait le scan (`BAFFLE`).
+- **Raisons composées en culture ambiante** : `CoreTexts.Format(key, null, args)` — la raison
+  se fige à l'instant de l'`Advise()` ; passer en anglais puis relancer le Conseil produit des
+  raisons anglaises, et un conseil **déjà affiché** reste dans sa langue (recette §14, point 2
+  : « conseils IA déjà affichés : inchangés, normal »). Le `(s)` de `LibraryAdvisor:133`
+  (report phase 8) est soldé : `Raison.Uses.one/.other` via `CoreTexts.Plural` (règles
+  fr/en en miroir du `Localizer`).
+- **Origine de jointure = propriété, pas constante** : `SettingsJoin.Origin` est écrit dans
+  les enregistrements **en mémoire** uniquement (les bases ne sont jamais ouvertes en
+  écriture) — la changer en `static string => CoreTexts.Get(...)` la compose dans la langue
+  de la session de jointure sans toucher au contrat « lecture seule ».
+- **« Non compté ≠ non affiché », seconde vague** : `Erreur.IA` (6 sites), `canal`,
+  `Rig complet` et les autres types de tone model échappaient au scan (ni accent ni mot-clé)
+  mais restaient français en EN — inventaire pris au mot ; idem pour les `Debug.Fail` du
+  `Localizer` passés en anglais (messages dev, guillemets droits : les `« »` eux-mêmes
+  comptaient comme marqueur français !).
+- **Nuance recette — lignes de grille** : les rangées (dont le libellé « Rig complet ») sont
+  reconstruites au **prochain filtre/chargement**, pas à la bascule (reconstruire 2 500 rangées
+  à chaque changement ferait tomber la sélection ouverte — arbitrage aligné sur la liste
+  fermée §11.4, qui ne cite ni les rangées ni leur contenu). En-têtes, résumé, détails,
+  réglages et statuts basculent, eux, instantanément.
+- **Artefacts de vérification** : `artifacts\TonexSongAdvisor-1.2.1-portable.zip` (+ `setup.exe`)
+  régénérés par `tools\build-release.ps1` — les deux satellites `fr\` y sont présents (le
+  fichier `payload.zip` de l'installateur est l'archive portable elle-même). La vérification de
+  la **langue de la console** de l'installeur appartient à la phase 11 (G10), la signature de
+  la recette §14 à vous.
+
 **Méthode d'inventaire (phase 0)** — 4 passes de scan :
 1. XAML : tous les littéraux d'attributs texte, **sans filtre de langue** (126 lignes) ;
 2. C# : lignes francophones (accents + mots-clés) → 397 candidats bruts ;
@@ -798,6 +859,7 @@ Contrôles automatiques passés : chaque ligne du brut est couverte dans le cura
 
 ---
 
-*Plan validé ; phases 0 à 9 réalisées sur instruction. Prochaine étape : **phase 10**
-(EN complet et recette manuelle des deux langues, §14), à lancer sur instruction.
-Phase 9 non committée (dernier commit : `a82a0d9`, phase 8).*
+*Plan validé ; phases 0 à 10 réalisées sur instruction. Prochaine étape : **phase 11**
+(installeur FR/EN : table en code, console dans la langue de l'OS, §12/G10), à lancer sur
+instruction. Recette §14 prête — **signature de votre part** avant clôture.
+Phase 10 non committée (dernier commit : `537b3c7`, phase 9).*

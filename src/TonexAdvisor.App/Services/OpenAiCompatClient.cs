@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using TonexAdvisor.App.Localization;
 
 namespace TonexAdvisor.App.Services;
 
@@ -202,9 +203,9 @@ public sealed class OpenAiCompatClient : IAiClient
                 && document.RootElement.TryGetProperty("error", out var error))
             {
                 if (error.ValueKind == JsonValueKind.Object && error.TryGetProperty("message", out var message))
-                    return $"Erreur IA ({(int)status}) : {message.GetString()}";
+                    return Localizer.Instance.Get("Erreur.IA", (int)status, message.GetString());
                 if (error.ValueKind == JsonValueKind.String)
-                    return $"Erreur IA ({(int)status}) : {error.GetString()}";
+                    return Localizer.Instance.Get("Erreur.IA", (int)status, error.GetString());
             }
         }
         catch (JsonException)
@@ -213,6 +214,7 @@ public sealed class OpenAiCompatClient : IAiClient
         }
 
         var text = body.Trim();
-        return $"Erreur IA ({(int)status}) : {(text.Length > 300 ? text[..300] : text)}";
+        return Localizer.Instance.Get(
+            "Erreur.IA", (int)status, text.Length > 300 ? text[..300] : text);
     }
 }

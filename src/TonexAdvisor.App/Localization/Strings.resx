@@ -374,6 +374,12 @@
   <data name="Detail.ToneModel.UtilisePar" xml:space="preserve">
     <value>USED BY</value>
   </data>
+  <data name="Erreur.CleAbsente" xml:space="preserve">
+    <value>No OpenCode API key saved (Settings → AI).</value>
+  </data>
+  <data name="Erreur.IA" xml:space="preserve">
+    <value>AI error ({0}) : {1}</value>
+  </data>
   <data name="Fenetre.Badge.Tx" xml:space="preserve">
     <value>TX</value>
   </data>
@@ -413,6 +419,27 @@
   <data name="Invite.Ping" xml:space="preserve">
     <value>Reply with the single word OK.</value>
   </data>
+  <data name="Libelle.Canal.Suffixe" xml:space="preserve">
+    <value> - channel {0}</value>
+  </data>
+  <data name="Libelle.Type.Amp" xml:space="preserve">
+    <value>Amp</value>
+  </data>
+  <data name="Libelle.Type.AmpCab" xml:space="preserve">
+    <value>Amp + Cab</value>
+  </data>
+  <data name="Libelle.Type.IRCab" xml:space="preserve">
+    <value>IR / Cab</value>
+  </data>
+  <data name="Libelle.Type.RigComplet" xml:space="preserve">
+    <value>Full rig</value>
+  </data>
+  <data name="Libelle.Type.Stomp" xml:space="preserve">
+    <value>Stomp</value>
+  </data>
+  <data name="Libelle.Type.StompAmp" xml:space="preserve">
+    <value>Stomp + Amp</value>
+  </data>
   <data name="Marqueur.Bloc" xml:space="preserve">
     <value>BLOCK :</value>
   </data>
@@ -422,8 +449,26 @@
   <data name="Message.AucuneBibliotheque" xml:space="preserve">
     <value>No library loaded.</value>
   </data>
+  <data name="Message.ChoisirFichier" xml:space="preserve">
+    <value>Choose a Library.db or Library2.db file.</value>
+  </data>
+  <data name="Message.DatabaseLabel.Aucune" xml:space="preserve">
+    <value>No database</value>
+  </data>
+  <data name="Message.DatabaseLabel.Inconnu" xml:space="preserve">
+    <value>Unknown format</value>
+  </data>
+  <data name="Message.DatabaseLabel.V1" xml:space="preserve">
+    <value>Full digital settings</value>
+  </data>
+  <data name="Message.DatabaseLabel.V2" xml:space="preserve">
+    <value>Metadata only</value>
+  </data>
   <data name="Message.Echec" xml:space="preserve">
     <value>Error: {0}</value>
+  </data>
+  <data name="Message.Lecture" xml:space="preserve">
+    <value>Loading {0}…</value>
   </data>
   <data name="Message.Resume.Bibliotheque" xml:space="preserve">
     <value>{0} · {1}</value>
@@ -682,5 +727,14 @@
   </data>
   <data name="Voix.Duree" xml:space="preserve">
     <value>{0} s</value>
+  </data>
+  <data name="Voix.Erreur.Annule" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="Voix.Erreur.Delay" xml:space="preserve">
+    <value>Timed out after {0:0} s</value>
+  </data>
+  <data name="Voix.Erreur.Retry" xml:space="preserve">
+    <value>Still failing after a second try</value>
   </data>
 </root>

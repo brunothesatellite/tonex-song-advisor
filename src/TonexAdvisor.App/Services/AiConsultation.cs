@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using TonexAdvisor.App.Config;
+using TonexAdvisor.App.Localization;
 
 namespace TonexAdvisor.App.Services;
 
@@ -162,13 +163,15 @@ public static class AiConsultation
                 return Publish(new AiOpinion(
                     voice.Label,
                     "",
-                    $"Délai dépassé ({timeout.TotalSeconds:0} s)",
+                    Localizer.Instance.Get("Voix.Erreur.Delay", timeout.TotalSeconds),
                     stopwatch.ElapsedMilliseconds), onOpinion);
             }
             catch (OperationCanceledException)
             {
                 stopwatch.Stop();
-                return Publish(new AiOpinion(voice.Label, "", "Annulé", stopwatch.ElapsedMilliseconds), onOpinion);
+                return Publish(new AiOpinion(
+                    voice.Label, "", Localizer.Instance["Voix.Erreur.Annule"], stopwatch.ElapsedMilliseconds),
+                    onOpinion);
             }
             catch (AiRequestException exception) when (exception.IsTransient && attempt == 0)
             {
@@ -183,7 +186,7 @@ public static class AiConsultation
 
         stopwatch.Stop();
         return Publish(
-            new AiOpinion(voice.Label, "", "Toujours en erreur après un second essai", stopwatch.ElapsedMilliseconds),
+            new AiOpinion(voice.Label, "", Localizer.Instance["Voix.Erreur.Retry"], stopwatch.ElapsedMilliseconds),
             onOpinion);
     }
 

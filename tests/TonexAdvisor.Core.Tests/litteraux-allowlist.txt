@@ -1,26 +1,4 @@
-src\TonexAdvisor.App\Config\AppConfig.cs;1
-src\TonexAdvisor.App\Localization\Localizer.cs;3
-src\TonexAdvisor.App\Services\AiConsultation.cs;3
-src\TonexAdvisor.App\Services\OpenAiCompatClient.cs;1
-src\TonexAdvisor.App\Services\OpenCodeClient.cs;4
-src\TonexAdvisor.App\Services\UserState.cs;1
-src\TonexAdvisor.App\ViewLocator.cs;1
-src\TonexAdvisor.App\ViewModels\LibraryViewModel.cs;1
-src\TonexAdvisor.App\ViewModels\MainViewModel.cs;7
-src\TonexAdvisor.App\ViewModels\PresetRowViewModel.cs;1
-src\TonexAdvisor.Core\Advice\AnswerFormat.cs;12
-src\TonexAdvisor.Core\Advice\ArbitrationPrompt.cs;29
-src\TonexAdvisor.Core\Advice\CataloguePrompt.cs;34
-src\TonexAdvisor.Core\Advice\LibraryAdvisor.cs;25
-src\TonexAdvisor.Core\Advice\StyleVocabulary.cs;7
-src\TonexAdvisor.Core\Data\ReadOnlyConnection.cs;5
-src\TonexAdvisor.Core\Data\Readers\LibraryLookups.cs;2
-src\TonexAdvisor.Core\Data\Readers\LibraryReaders.cs;1
-src\TonexAdvisor.Core\Data\Readers\V1PresetReader.cs;10
-src\TonexAdvisor.Core\Data\Readers\V1ToneModelReader.cs;2
-src\TonexAdvisor.Core\Data\Readers\V2PresetReader.cs;9
-src\TonexAdvisor.Core\Data\Readers\V2ToneModelReader.cs;1
-src\TonexAdvisor.Core\Data\Records\KnobCatalog.cs;29
-src\TonexAdvisor.Core\Data\SchemaSniffer.cs;3
-src\TonexAdvisor.Core\Data\SettingsJoin.cs;1
-src\TonexAdvisor.Core\Data\TonexLibraryFolder.cs;1
+# Allowlist du scan G6 — phase 10 : le fichier est VIDE, et doit le rester.
+# Toute chaîne en dur sous src doit être passée par une clé (Localizer / CoreTexts) ;
+# une entrée ici signifierait une régression du garde-fou (G6, §13).
+# Historique : 26 fichiers / 194 littéraux au début de la phase 10, 34 / 344 en phase 2.

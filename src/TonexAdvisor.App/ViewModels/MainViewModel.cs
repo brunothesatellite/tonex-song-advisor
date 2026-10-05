@@ -30,7 +30,7 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
     /// </summary>
     private Func<string> _statusBuilder = InitialStatus;
 
-    private static string InitialStatus() => "Aucune bibliothèque chargée.";
+    private static string InitialStatus() => Localizer.Instance["Message.AucuneBibliotheque"];
 
     [ObservableProperty]
     private string _statusMessage = InitialStatus();
@@ -52,7 +52,15 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
         StatusMessage = build();
     }
 
-    private void RebuildStatus() => StatusMessage = _statusBuilder();
+    private void RebuildStatus()
+    {
+        StatusMessage = _statusBuilder();
+
+        // Libellés composés sur le Localizer depuis la phase 10 : notifiés avec le statut,
+        // sinon la fenêtre garderait le texte de l'ancienne langue.
+        OnPropertyChanged(nameof(DatabaseLabel));
+        OnPropertyChanged(nameof(FormatDescription));
+    }
 
     public LibraryViewModel Library { get; }
 
@@ -67,7 +75,7 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
     public bool HasDatabase => _currentDatabase is not null;
 
     public string DatabaseLabel => _currentDatabase is null
-        ? "Aucune base"
+        ? Localizer.Instance["Message.DatabaseLabel.Aucune"]
         : System.IO.Path.GetFileName(_currentDatabase.Path);
 
     public string FormatLabel => _currentDatabase?.Format.ToString() ?? "";
@@ -75,9 +83,9 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
     public string FormatDescription => _currentDatabase switch
     {
         null => "",
-        { Format: DatabaseFormat.V1 } => "Réglages numériques complets",
-        { Format: DatabaseFormat.V2 } => "Métadonnées uniquement",
-        _ => "Format non reconnu",
+        { Format: DatabaseFormat.V1 } => Localizer.Instance["Message.DatabaseLabel.V1"],
+        { Format: DatabaseFormat.V2 } => Localizer.Instance["Message.DatabaseLabel.V2"],
+        _ => Localizer.Instance["Message.DatabaseLabel.Inconnu"],
     };
 
     [RelayCommand]
@@ -105,7 +113,7 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
         var candidate = Settings.EffectiveDatabasePath ?? AppPaths.FindDefaultDatabase();
         if (string.IsNullOrWhiteSpace(candidate))
         {
-            SetStatus(static () => "Choisissez un fichier Library.db ou Library2.db.");
+            SetStatus(static () => Localizer.Instance["Message.ChoisirFichier"]);
             ShowSettings();
             return;
         }
@@ -121,7 +129,7 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
             return;
 
         IsBusy = true;
-        SetStatus(() => $"Lecture de {System.IO.Path.GetFileName(path)}…");
+        SetStatus(() => Localizer.Instance.Get("Message.Lecture", System.IO.Path.GetFileName(path)));
 
         try
         {
@@ -156,7 +164,7 @@ public partial class MainViewModel : ViewModelBase, IDatabaseHost
         }
         catch (Exception exception)
         {
-            SetStatus(() => $"Échec : {exception.Message}");
+            SetStatus(() => Localizer.Instance.Get("Message.Echec", exception.Message));
             Settings.ErrorMessage = exception.Message;
             Settings.ClearSummary();
             if (_currentDatabase is null)

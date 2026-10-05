@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Ressources neutres de Core — langue de référence : anglais (§17, décision 3).
+    Le français vit dans Strings.fr.resx (satellite). Mêmes clés, même ordre dans les deux
+    fichiers (contrôle de parité). Textes extraits verbatim des deux branches de code des
+    invites (§8.1) — voir INTERNATIONALISATION.md §12 phase 10.
+  -->
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Invite.Arbitre.Avis" xml:space="preserve">
+    <value>The opinions received:</value>
+  </data>
+  <data name="Invite.Arbitre.Format.Libre" xml:space="preserve">
+    <value>  {0} : what you would use yourself, with no library constraint — the real</value>
+  </data>
+  <data name="Invite.Arbitre.Format.LibreSuite" xml:space="preserve">
+    <value>            gear of the track or the style if you know it, and the typical settings that go with it.</value>
+  </data>
+  <data name="Invite.Arbitre.Format.Ouverture" xml:space="preserve">
+    <value>Start at "{0} :", write nothing before it: no preamble, no analysis of the opinions.</value>
+  </data>
+  <data name="Invite.Arbitre.Format.Verdict" xml:space="preserve">
+    <value>  {0} : the 3 best ranked proposals — for each: the block, the cabinet,</value>
+  </data>
+  <data name="Invite.Arbitre.Format.VerdictPreuves" xml:space="preserve">
+    <value>            quote what does not add up for each one (a name absent from the catalogue, a stomp</value>
+  </data>
+  <data name="Invite.Arbitre.Format.VerdictPreuvesSuite" xml:space="preserve">
+    <value>            paired with another block's amp, a cabinet that does not fit the style).</value>
+  </data>
+  <data name="Invite.Arbitre.Format.VerdictSuite" xml:space="preserve">
+    <value>            why, and the level of consensus (3/3, 2/3, 1/3). Challenge the opinions on the way:</value>
+  </data>
+  <data name="Invite.Arbitre.Langue" xml:space="preserve">
+    <value>Answer in English, direct, in 10 to 15 sentences.</value>
+  </data>
+  <data name="Invite.Arbitre.Mission" xml:space="preserve">
+    <value>Your mission, in this exact format:</value>
+  </data>
+  <data name="Invite.Arbitre.Requete.Artiste" xml:space="preserve">
+    <value>artist "{0}"</value>
+  </data>
+  <data name="Invite.Arbitre.Requete.Chanson" xml:space="preserve">
+    <value>song "{0}"</value>
+  </data>
+  <data name="Invite.Arbitre.Requete.Style" xml:space="preserve">
+    <value>style "{0}"</value>
+  </data>
+  <data name="Invite.Arbitre.Requete.Titre" xml:space="preserve">
+    <value>The request: </value>
+  </data>
+  <data name="Invite.Arbitre.Regles.Catalogue" xml:space="preserve">
+    <value>Invent no block nor cabinet absent from the catalogue for the ranked proposals — the {0}, however, is open to everything you know.</value>
+  </data>
+  <data name="Invite.Arbitre.Regles.Consensus" xml:space="preserve">
+    <value>If every opinion is wrong, say so and decide with your own arguments: a unanimous agreement is no proof.</value>
+  </data>
+  <data name="Invite.Arbitre.Regles.Style" xml:space="preserve">
+    <value>Write the verdict directly: no list evaluation of the opinions, no draft, no checking of your own format, no commentary on what you are about to answer.</value>
+  </data>
+  <data name="Invite.Arbitre.Role" xml:space="preserve">
+    <value>You are the referee of a committee of rock/metal guitar advisors.</value>
+  </data>
+  <data name="Invite.Arbitre.Role.Suite" xml:space="preserve">
+    <value>Each of them gave an opinion on the same request and the same catalogue.</value>
+  </data>
+  <data name="Invite.Catalogue.Baffles.Titre" xml:space="preserve">
+    <value>Cabinets available — interchangeable:</value>
+  </data>
+  <data name="Invite.Catalogue.Blocs.Regle" xml:space="preserve">
+    <value>Each line = an amp, with the stomps captured with it. A block = an amp plus at most one of its stomps.</value>
+  </data>
+  <data name="Invite.Catalogue.Blocs.Titre" xml:space="preserve">
+    <value>Captured blocks — stomp + amp, inseparable:</value>
+  </data>
+  <data name="Invite.Catalogue.Champ.Artiste" xml:space="preserve">
+    <value>artist</value>
+  </data>
+  <data name="Invite.Catalogue.Champ.Chanson" xml:space="preserve">
+    <value>song</value>
+  </data>
+  <data name="Invite.Catalogue.Champ.Style" xml:space="preserve">
+    <value>style</value>
+  </data>
+  <data name="Invite.Catalogue.Format.Alternative" xml:space="preserve">
+    <value>  {0} : &lt;another block&gt;</value>
+  </data>
+  <data name="Invite.Catalogue.Format.Baffle" xml:space="preserve">
+    <value>  {0} : &lt;name of the chosen cabinet&gt;</value>
+  </data>
+  <data name="Invite.Catalogue.Format.Bloc" xml:space="preserve">
+    <value>  {0} : &lt;stomp&gt; -&gt; &lt;amp&gt;, or &lt;amp&gt; when there is no stomp</value>
+  </data>
+  <data name="Invite.Catalogue.Format.Contrainte" xml:space="preserve">
+    <value>Write only the lines of the format below: no draft, no checking of your own format, no sentence counting, no commentary on what you are about to answer.</value>
+  </data>
+  <data name="Invite.Catalogue.Format.Libre" xml:space="preserve">
+    <value>  {0} : what you would use yourself, with no library constraint — the real gear of the track or the style if you know it (amp, cabinet, pedals, tuning), and the typical settings that go with it.</value>
+  </data>
+  <data name="Invite.Catalogue.Format.Reglages" xml:space="preserve">
+    <value>  {0} : 2 to 3 concrete settings (gain, EQ, reverb/delay)</value>
+  </data>
+  <data name="Invite.Catalogue.Format.Titre" xml:space="preserve">
+    <value>- Answer exactly in this format, keeping the names as they are:</value>
+  </data>
+  <data name="Invite.Catalogue.Langue" xml:space="preserve">
+    <value>Answer in English, in 8 to 12 sentences, direct and concrete.</value>
+  </data>
+  <data name="Invite.Catalogue.Requete" xml:space="preserve">
+    <value>The request:</value>
+  </data>
+  <data name="Invite.Catalogue.Regles" xml:space="preserve">
+    <value>Rules:</value>
+  </data>
+  <data name="Invite.Catalogue.Regles.Baffle" xml:space="preserve">
+    <value>- The cabinet is free: pick the one that serves the style best, from the list.</value>
+  </data>
+  <data name="Invite.Catalogue.Regles.Bloc" xml:space="preserve">
+    <value>- A block = one amp from the list plus at most one of the stomps captured with it. Never mix a stomp of another amp: they were captured together.</value>
+  </data>
+  <data name="Invite.Catalogue.Regles.Contrainte" xml:space="preserve">
+    <value>- Invent no name absent from the lists above: this constraint covers only {0}, {1} and {2}. {3}, however, is open to everything you know.</value>
+  </data>
+  <data name="Invite.Catalogue.Role" xml:space="preserve">
+    <value>You are a rock/metal guitar advisor who knows the TONEX libraries.</value>
+  </data>
+  <data name="Invite.Catalogue.SansStomp" xml:space="preserve">
+    <value>(no stomp)</value>
+  </data>
+  <data name="Invite.Catalogue.Style" xml:space="preserve">
+    <value>Get straight to the point: no preamble, no analysis of the request.</value>
+  </data>
+  <data name="Invite.Citation" xml:space="preserve">
+    <value>{0} "{1}"</value>
+  </data>
+  <data name="Marqueur.Alternative" xml:space="preserve">
+    <value>ALTERNATIVE</value>
+  </data>
+  <data name="Marqueur.Baffle" xml:space="preserve">
+    <value>CAB</value>
+  </data>
+  <data name="Marqueur.Bloc" xml:space="preserve">
+    <value>BLOCK</value>
+  </data>
+  <data name="Marqueur.ConseilLibre" xml:space="preserve">
+    <value>FREE ADVICE</value>
+  </data>
+  <data name="Marqueur.Reglages" xml:space="preserve">
+    <value>SETTINGS</value>
+  </data>
+  <data name="Marqueur.Verdict" xml:space="preserve">
+    <value>VERDICT</value>
+  </data>
+  <data name="Origine.BiblioV1" xml:space="preserve">
+    <value>a joined V1 library</value>
+  </data>
+  <data name="Potard.Cab.Blend" xml:space="preserve">
+    <value>Mic blend</value>
+  </data>
+  <data name="Potard.Cab.Mic1" xml:space="preserve">
+    <value>Mic 1</value>
+  </data>
+  <data name="Potard.Cab.Mic1Distance" xml:space="preserve">
+    <value>Mic 1 distance</value>
+  </data>
+  <data name="Potard.Cab.Mic1Position" xml:space="preserve">
+    <value>Mic 1 position</value>
+  </data>
+  <data name="Potard.Cab.Mic2" xml:space="preserve">
+    <value>Mic 2</value>
+  </data>
+  <data name="Potard.Cab.Mic2Distance" xml:space="preserve">
+    <value>Mic 2 distance</value>
+  </data>
+  <data name="Potard.Cab.Mic2Position" xml:space="preserve">
+    <value>Mic 2 position</value>
+  </data>
+  <data name="Potard.Cab.Model" xml:space="preserve">
+    <value>Cab, §17</value>
+  </data>
+  <data name="Potard.Cab.Resonance" xml:space="preserve">
+    <value>Résonance</value>
+  </data>
+  <data name="Potard.Cab.Type" xml:space="preserve">
+    <value>Cab type</value>
+  </data>
+  <data name="Potard.Comp.Attaque" xml:space="preserve">
+    <value>Attack</value>
+  </data>
+  <data name="Potard.Comp.MakeUp" xml:space="preserve">
+    <value>Make-up</value>
+  </data>
+  <data name="Potard.Comp.Seuil" xml:space="preserve">
+    <value>Threshold</value>
+  </data>
+  <data name="Potard.Delay.DigitalFeedback" xml:space="preserve">
+    <value>Digital feedback</value>
+  </data>
+  <data name="Potard.Delay.DigitalMix" xml:space="preserve">
+    <value>Digital mix</value>
+  </data>
+  <data name="Potard.Delay.DigitalMode" xml:space="preserve">
+    <value>Digital mode</value>
+  </data>
+  <data name="Potard.Delay.DigitalSync" xml:space="preserve">
+    <value>Digital sync</value>
+  </data>
+  <data name="Potard.Delay.DigitalTime" xml:space="preserve">
+    <value>Digital time</value>
+  </data>
+  <data name="Potard.Delay.DigitalTypeSync" xml:space="preserve">
+    <value>Digital sync type</value>
+  </data>
+  <data name="Potard.Delay.TapeFeedback" xml:space="preserve">
+    <value>Tape feedback</value>
+  </data>
+  <data name="Potard.Delay.TapeMix" xml:space="preserve">
+    <value>Tape mix</value>
+  </data>
+  <data name="Potard.Delay.TapeMode" xml:space="preserve">
+    <value>Tape mode</value>
+  </data>
+  <data name="Potard.Delay.TapeSync" xml:space="preserve">
+    <value>Tape sync</value>
+  </data>
+  <data name="Potard.Delay.TapeTime" xml:space="preserve">
+    <value>Tape time</value>
+  </data>
+  <data name="Potard.Delay.TapeTypeSync" xml:space="preserve">
+    <value>Tape sync type</value>
+  </data>
+  <data name="Potard.Delay.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Potard.Eq.Aigus" xml:space="preserve">
+    <value>Treble</value>
+  </data>
+  <data name="Potard.Eq.FreqGraves" xml:space="preserve">
+    <value>Bass freq</value>
+  </data>
+  <data name="Potard.Eq.FreqMids" xml:space="preserve">
+    <value>Mid freq</value>
+  </data>
+  <data name="Potard.Eq.FreqTrebles" xml:space="preserve">
+    <value>Treble freq</value>
+  </data>
+  <data name="Potard.Eq.Graves" xml:space="preserve">
+    <value>Bass</value>
+  </data>
+  <data name="Potard.Eq.Mids" xml:space="preserve">
+    <value>Mids</value>
+  </data>
+  <data name="Potard.Eq.QMids" xml:space="preserve">
+    <value>Mid Q</value>
+  </data>
+  <data name="Potard.Gate.Profondeur" xml:space="preserve">
+    <value>Depth</value>
+  </data>
+  <data name="Potard.Gate.Relachement" xml:space="preserve">
+    <value>Release</value>
+  </data>
+  <data name="Potard.Gate.Seuil" xml:space="preserve">
+    <value>Threshold</value>
+  </data>
+  <data name="Potard.HwExt.Controller" xml:space="preserve">
+    <value>External controller</value>
+  </data>
+  <data name="Potard.Mod.ChorusDepth" xml:space="preserve">
+    <value>Chorus depth</value>
+  </data>
+  <data name="Potard.Mod.ChorusLevel" xml:space="preserve">
+    <value>Chorus level</value>
+  </data>
+  <data name="Potard.Mod.ChorusRate" xml:space="preserve">
+    <value>Chorus rate</value>
+  </data>
+  <data name="Potard.Mod.ChorusSync" xml:space="preserve">
+    <value>Chorus sync</value>
+  </data>
+  <data name="Potard.Mod.ChorusTypeSync" xml:space="preserve">
+    <value>Chorus sync type</value>
+  </data>
+  <data name="Potard.Mod.FlangerDepth" xml:space="preserve">
+    <value>Flanger depth</value>
+  </data>
+  <data name="Potard.Mod.FlangerFeedback" xml:space="preserve">
+    <value>Flanger feedback</value>
+  </data>
+  <data name="Potard.Mod.FlangerLevel" xml:space="preserve">
+    <value>Flanger level</value>
+  </data>
+  <data name="Potard.Mod.FlangerRate" xml:space="preserve">
+    <value>Flanger rate</value>
+  </data>
+  <data name="Potard.Mod.FlangerSync" xml:space="preserve">
+    <value>Flanger sync</value>
+  </data>
+  <data name="Potard.Mod.FlangerTypeSync" xml:space="preserve">
+    <value>Flanger sync type</value>
+  </data>
+  <data name="Potard.Mod.PhaserDepth" xml:space="preserve">
+    <value>Phaser depth</value>
+  </data>
+  <data name="Potard.Mod.PhaserLevel" xml:space="preserve">
+    <value>Phaser level</value>
+  </data>
+  <data name="Potard.Mod.PhaserRate" xml:space="preserve">
+    <value>Phaser rate</value>
+  </data>
+  <data name="Potard.Mod.PhaserSync" xml:space="preserve">
+    <value>Phaser sync</value>
+  </data>
+  <data name="Potard.Mod.PhaserTypeSync" xml:space="preserve">
+    <value>Phaser sync type</value>
+  </data>
+  <data name="Potard.Mod.RotaryLevel" xml:space="preserve">
+    <value>Rotary level</value>
+  </data>
+  <data name="Potard.Mod.RotaryRadius" xml:space="preserve">
+    <value>Rotary radius</value>
+  </data>
+  <data name="Potard.Mod.RotarySpeed" xml:space="preserve">
+    <value>Rotary speed</value>
+  </data>
+  <data name="Potard.Mod.RotarySpread" xml:space="preserve">
+    <value>Rotary spread</value>
+  </data>
+  <data name="Potard.Mod.RotarySync" xml:space="preserve">
+    <value>Rotary sync</value>
+  </data>
+  <data name="Potard.Mod.RotaryTypeSync" xml:space="preserve">
+    <value>Rotary sync type</value>
+  </data>
+  <data name="Potard.Mod.Tempo" xml:space="preserve">
+    <value>Tempo</value>
+  </data>
+  <data name="Potard.Mod.TremoloLevel" xml:space="preserve">
+    <value>Tremolo level</value>
+  </data>
+  <data name="Potard.Mod.TremoloRate" xml:space="preserve">
+    <value>Tremolo rate</value>
+  </data>
+  <data name="Potard.Mod.TremoloShape" xml:space="preserve">
+    <value>Tremolo shape</value>
+  </data>
+  <data name="Potard.Mod.TremoloSpread" xml:space="preserve">
+    <value>Tremolo spread</value>
+  </data>
+  <data name="Potard.Mod.TremoloSync" xml:space="preserve">
+    <value>Tremolo sync</value>
+  </data>
+  <data name="Potard.Mod.TremoloTypeSync" xml:space="preserve">
+    <value>Tremolo sync type</value>
+  </data>
+  <data name="Potard.Mod.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Potard.Reverb.PlateColor" xml:space="preserve">
+    <value>Plate color</value>
+  </data>
+  <data name="Potard.Reverb.PlateMix" xml:space="preserve">
+    <value>Plate mix</value>
+  </data>
+  <data name="Potard.Reverb.PlatePreDelay" xml:space="preserve">
+    <value>Plate predelay</value>
+  </data>
+  <data name="Potard.Reverb.PlateTime" xml:space="preserve">
+    <value>Plate time</value>
+  </data>
+  <data name="Potard.Reverb.RoomColor" xml:space="preserve">
+    <value>Room color</value>
+  </data>
+  <data name="Potard.Reverb.RoomMix" xml:space="preserve">
+    <value>Room mix</value>
+  </data>
+  <data name="Potard.Reverb.RoomPreDelay" xml:space="preserve">
+    <value>Room predelay</value>
+  </data>
+  <data name="Potard.Reverb.RoomTime" xml:space="preserve">
+    <value>Room time</value>
+  </data>
+  <data name="Potard.Reverb.Spring1Color" xml:space="preserve">
+    <value>Spring 1 color</value>
+  </data>
+  <data name="Potard.Reverb.Spring1Mix" xml:space="preserve">
+    <value>Spring 1 mix</value>
+  </data>
+  <data name="Potard.Reverb.Spring1PreDelay" xml:space="preserve">
+    <value>Spring 1 predelay</value>
+  </data>
+  <data name="Potard.Reverb.Spring1Time" xml:space="preserve">
+    <value>Spring 1 time</value>
+  </data>
+  <data name="Potard.Reverb.Spring2Color" xml:space="preserve">
+    <value>Spring 2 color</value>
+  </data>
+  <data name="Potard.Reverb.Spring2Mix" xml:space="preserve">
+    <value>Spring 2 mix</value>
+  </data>
+  <data name="Potard.Reverb.Spring2PreDelay" xml:space="preserve">
+    <value>Spring 2 predelay</value>
+  </data>
+  <data name="Potard.Reverb.Spring2Time" xml:space="preserve">
+    <value>Spring 2 time</value>
+  </data>
+  <data name="Potard.Reverb.Spring3Color" xml:space="preserve">
+    <value>Spring 3 color</value>
+  </data>
+  <data name="Potard.Reverb.Spring3Mix" xml:space="preserve">
+    <value>Spring 3 mix</value>
+  </data>
+  <data name="Potard.Reverb.Spring3PreDelay" xml:space="preserve">
+    <value>Spring 3 predelay</value>
+  </data>
+  <data name="Potard.Reverb.Spring3Time" xml:space="preserve">
+    <value>Spring 3 time</value>
+  </data>
+  <data name="Potard.Reverb.Spring4Color" xml:space="preserve">
+    <value>Spring 4 color</value>
+  </data>
+  <data name="Potard.Reverb.Spring4Mix" xml:space="preserve">
+    <value>Spring 4 mix</value>
+  </data>
+  <data name="Potard.Reverb.Spring4PreDelay" xml:space="preserve">
+    <value>Spring 4 predelay</value>
+  </data>
+  <data name="Potard.Reverb.Spring4Time" xml:space="preserve">
+    <value>Spring 4 time</value>
+  </data>
+  <data name="Potard.Reverb.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Potard.Section.Cab" xml:space="preserve">
+    <value>Cab &amp; mics</value>
+  </data>
+  <data name="Potard.Section.Compresseur" xml:space="preserve">
+    <value>Compressor</value>
+  </data>
+  <data name="Potard.Section.Delay" xml:space="preserve">
+    <value>Delay</value>
+  </data>
+  <data name="Potard.Section.Eq" xml:space="preserve">
+    <value>EQ</value>
+  </data>
+  <data name="Potard.Section.HwExt" xml:space="preserve">
+    <value>External controller</value>
+  </data>
+  <data name="Potard.Section.Modulation" xml:space="preserve">
+    <value>Modulation</value>
+  </data>
+  <data name="Potard.Section.NoiseGate" xml:space="preserve">
+    <value>Noise gate</value>
+  </data>
+  <data name="Potard.Section.Reverb" xml:space="preserve">
+    <value>Reverb</value>
+  </data>
+  <data name="Potard.Section.ToneModel" xml:space="preserve">
+    <value>Tone model</value>
+  </data>
+  <data name="Potard.Tone.Depth" xml:space="preserve">
+    <value>Depth</value>
+  </data>
+  <data name="Potard.Tone.Gain" xml:space="preserve">
+    <value>Gain</value>
+  </data>
+  <data name="Potard.Tone.Mix" xml:space="preserve">
+    <value>Mix</value>
+  </data>
+  <data name="Potard.Tone.Presence" xml:space="preserve">
+    <value>Presence</value>
+  </data>
+  <data name="Potard.Tone.Volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+
+
+  <data name="Raison.ArtisteCite" xml:space="preserve">
+    <value>Artist mentioned by the preset or its folder</value>
+  </data>
+  <data name="Raison.ArtisteCiteAvec" xml:space="preserve">
+    <value>Artist mentioned by the preset or its folder: "{0}"</value>
+  </data>
+  <data name="Raison.ArtisteIdentique" xml:space="preserve">
+    <value>Identical artist: "{0}"</value>
+  </data>
+  <data name="Raison.BaffleCapture" xml:space="preserve">
+    <value> — the capture's own</value>
+  </data>
+  <data name="Raison.BaffleSaturation" xml:space="preserve">
+    <value>Cabinet "{0}" — saturation matching "{1}"{2}</value>
+  </data>
+  <data name="Raison.Boost" xml:space="preserve">
+    <value>{0} in front of the amp: the boost tightening the low end at high saturation</value>
+  </data>
+  <data name="Raison.CabFournie" xml:space="preserve">
+    <value>Comes with the capture, replaceable by any other cabinet</value>
+  </data>
+  <data name="Raison.CabLibre" xml:space="preserve">
+    <value>Chosen freely: any cabinet fits this block</value>
+  </data>
+  <data name="Raison.CabLibreSansAucun" xml:space="preserve">
+    <value>Chosen freely: this capture provides none</value>
+  </data>
+  <data name="Raison.CategorieSaturation" xml:space="preserve">
+    <value>Category "{0}" — saturation matching "{1}"</value>
+  </data>
+  <data name="Raison.ChansonChamp" xml:space="preserve">
+    <value>Song "{0}"</value>
+  </data>
+  <data name="Raison.ChansonContexte" xml:space="preserve">
+    <value>The preset name evokes "{0}"</value>
+  </data>
+  <data name="Raison.ChansonIdentique" xml:space="preserve">
+    <value>Identical song: "{0}"</value>
+  </data>
+  <data name="Raison.Favori" xml:space="preserve">
+    <value>Library favorite</value>
+  </data>
+  <data name="Raison.Genre" xml:space="preserve">
+    <value>Genre "{0}"</value>
+  </data>
+  <data name="Raison.Label.Artiste" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="Raison.Label.Chanson" xml:space="preserve">
+    <value>Song</value>
+  </data>
+  <data name="Raison.MotsCles" xml:space="preserve">
+    <value>Keywords: "{0}"</value>
+  </data>
+  <data name="Raison.NoCab" xml:space="preserve">
+    <value>No cabinet in this library</value>
+  </data>
+  <data name="Raison.Partial" xml:space="preserve">
+    <value>{0} recognized</value>
+  </data>
+  <data name="Raison.PartialPartiel" xml:space="preserve">
+    <value>{0} partly recognized ({1}/{2} words)</value>
+  </data>
+  <data name="Raison.Reglages" xml:space="preserve">
+    <value>Usable digital settings</value>
+  </data>
+  <data name="Raison.SepCitation" xml:space="preserve">
+    <value>", "</value>
+  </data>
+  <data name="Raison.Uses.one" xml:space="preserve">
+    <value>Used by {0} preset</value>
+  </data>
+  <data name="Raison.Uses.other" xml:space="preserve">
+    <value>Used by {0} presets</value>
+  </data>
+</root>

@@ -35,7 +35,7 @@ foreach ($f in $axams) {
 }
 
 # --- 2. C# : literales dont la ligne sent le francais --------------------------
-$frRe = '[éèêàçùôîï«»]|Aucun|Aucune|Echec|Échec|\bcl[ée]s?\b|mod[eè]le|presets?|Favori|favori|dossier|catég|régl|Conseil|conseil|arbitre|voix|lecture|Recherche|recherche|Réinitialiser|\bTous\b|gratuit|payant|SUGGESTION|VERDICT|BLOC|BAFFLE|ALTERNATIVE|CONSEIL LIBRE|joint|extraits|touche|Installation|Désinstallation|Tonex|charg|\bVous\b|\bvotre\b|\bVotre\b|fichier|Délai|indisponible|Annuler|annuler|preset\(s\)|tone model'
+$frRe = '[éèêàçùôîï«»]|Aucun|Aucune|Echec|Échec|\bcl[ée]s?\b|dossier|catég|régl|Conseil|conseil|arbitre|voix|lecture|Recherche|recherche|Réinitialiser|gratuit|payant|SUGGESTION|VERDICT|BAFFLE|CONSEIL LIBRE|joint|extraits|touche|Installation|Désinstallation|charg|\bVous\b|\bvotre\b|\bVotre\b|fichier|Délai|indisponible|Annuler|annuler|preset\(s\)'
 $csFiles = Get-ChildItem -Path (Join-Path $Root 'src') -Recurse -Filter '*.cs' |
     Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' }
 foreach ($f in $csFiles) {
@@ -44,7 +44,7 @@ foreach ($f in $csFiles) {
     foreach ($line in Get-Content -Path $f.FullName) {
         $n++
         if ($line -match '^\s*(//|/\*|\*)') { continue }   # commentaire pur
-        if ($line -match 'Localizer\.') { continue }        # références de clés, pas des chaînes d'affichage
+        if ($line -match 'Localizer\.|CoreTexts\.') { continue }   # références de clés, pas des chaînes d'affichage
         if ($line -notmatch $frRe) { continue }
         foreach ($m in [regex]::Matches($line, '"([^"\\]*(?:\\.[^"\\]*)*)"')) {
             $val = $m.Groups[1].Value

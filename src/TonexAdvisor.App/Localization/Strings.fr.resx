@@ -375,6 +375,12 @@
   <data name="Detail.ToneModel.UtilisePar" xml:space="preserve">
     <value>UTILISÉ PAR</value>
   </data>
+  <data name="Erreur.CleAbsente" xml:space="preserve">
+    <value>Aucune clé API OpenCode enregistrée (réglages → IA).</value>
+  </data>
+  <data name="Erreur.IA" xml:space="preserve">
+    <value>Erreur IA ({0}) : {1}</value>
+  </data>
   <data name="Fenetre.Badge.Tx" xml:space="preserve">
     <value>TX</value>
   </data>
@@ -414,6 +420,27 @@
   <data name="Invite.Ping" xml:space="preserve">
     <value>Réponds uniquement par le mot OK.</value>
   </data>
+  <data name="Libelle.Canal.Suffixe" xml:space="preserve">
+    <value> - canal {0}</value>
+  </data>
+  <data name="Libelle.Type.Amp" xml:space="preserve">
+    <value>Amp</value>
+  </data>
+  <data name="Libelle.Type.AmpCab" xml:space="preserve">
+    <value>Amp + Cab</value>
+  </data>
+  <data name="Libelle.Type.IRCab" xml:space="preserve">
+    <value>IR / Cab</value>
+  </data>
+  <data name="Libelle.Type.RigComplet" xml:space="preserve">
+    <value>Rig complet</value>
+  </data>
+  <data name="Libelle.Type.Stomp" xml:space="preserve">
+    <value>Stomp</value>
+  </data>
+  <data name="Libelle.Type.StompAmp" xml:space="preserve">
+    <value>Stomp + Amp</value>
+  </data>
   <data name="Marqueur.Bloc" xml:space="preserve">
     <value>BLOC :</value>
   </data>
@@ -423,8 +450,26 @@
   <data name="Message.AucuneBibliotheque" xml:space="preserve">
     <value>Aucune bibliothèque chargée.</value>
   </data>
+  <data name="Message.ChoisirFichier" xml:space="preserve">
+    <value>Choisissez un fichier Library.db ou Library2.db.</value>
+  </data>
+  <data name="Message.DatabaseLabel.Aucune" xml:space="preserve">
+    <value>Aucune base</value>
+  </data>
+  <data name="Message.DatabaseLabel.Inconnu" xml:space="preserve">
+    <value>Format non reconnu</value>
+  </data>
+  <data name="Message.DatabaseLabel.V1" xml:space="preserve">
+    <value>Réglages numériques complets</value>
+  </data>
+  <data name="Message.DatabaseLabel.V2" xml:space="preserve">
+    <value>Métadonnées uniquement</value>
+  </data>
   <data name="Message.Echec" xml:space="preserve">
     <value>Échec : {0}</value>
+  </data>
+  <data name="Message.Lecture" xml:space="preserve">
+    <value>Lecture de {0}…</value>
   </data>
   <data name="Message.Resume.Bibliotheque" xml:space="preserve">
     <value>{0} · {1}</value>
@@ -683,5 +728,14 @@
   </data>
   <data name="Voix.Duree" xml:space="preserve">
     <value>{0} s</value>
+  </data>
+  <data name="Voix.Erreur.Annule" xml:space="preserve">
+    <value>Annulé</value>
+  </data>
+  <data name="Voix.Erreur.Delay" xml:space="preserve">
+    <value>Délai dépassé ({0:0} s)</value>
+  </data>
+  <data name="Voix.Erreur.Retry" xml:space="preserve">
+    <value>Toujours en erreur après un second essai</value>
   </data>
 </root>

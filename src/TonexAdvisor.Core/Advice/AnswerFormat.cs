@@ -1,4 +1,5 @@
 using System.Globalization;
+using TonexAdvisor.Core.Localization;
 
 namespace TonexAdvisor.Core.Advice;
 
@@ -16,15 +17,22 @@ namespace TonexAdvisor.Core.Advice;
 /// </remarks>
 public sealed class AnswerFormat
 {
-    /// <summary>The six markers: French name first, English name second.</summary>
+    /// <summary>
+    /// The six markers: French name first, English name second — both read from the Core
+    /// resources (§9), fixed for the life of the process whatever the session speaks.
+    /// </summary>
+    private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
+
+    private static readonly CultureInfo En = CultureInfo.GetCultureInfo("en-US");
+
     private static readonly (string Fr, string En)[] Pairs =
     [
-        ("BLOC", "BLOCK"),
-        ("BAFFLE", "CAB"),
-        ("RÉGLAGES", "SETTINGS"),
-        ("ALTERNATIVE", "ALTERNATIVE"),
-        ("CONSEIL LIBRE", "FREE ADVICE"),
-        ("VERDICT", "VERDICT"),
+        (CoreTexts.Get("Marqueur.Bloc", Fr), CoreTexts.Get("Marqueur.Bloc", En)),
+        (CoreTexts.Get("Marqueur.Baffle", Fr), CoreTexts.Get("Marqueur.Baffle", En)),
+        (CoreTexts.Get("Marqueur.Reglages", Fr), CoreTexts.Get("Marqueur.Reglages", En)),
+        (CoreTexts.Get("Marqueur.Alternative", Fr), CoreTexts.Get("Marqueur.Alternative", En)),
+        (CoreTexts.Get("Marqueur.ConseilLibre", Fr), CoreTexts.Get("Marqueur.ConseilLibre", En)),
+        (CoreTexts.Get("Marqueur.Verdict", Fr), CoreTexts.Get("Marqueur.Verdict", En)),
     ];
 
     /// <summary>

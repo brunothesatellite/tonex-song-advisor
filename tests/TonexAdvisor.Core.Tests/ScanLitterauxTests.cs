@@ -15,12 +15,18 @@ public class ScanLitterauxTests
     private const string AttributsXaml =
         @"\s(?:Text|Header|Content|ToolTip\.Tip|Watermark|PlaceholderText)=""([^""{][^""]*)""";
 
+    // Affinage phase 10 (mesure à l'appui, §18) : sept marqueurs qui ne servaient qu'au
+    // hors-champ technique (SQL « Presets »/« Favorite », chemins « TonexAdvisor », user-agent,
+    // « TextBlock » pris pour BLOC, sentinelle « Tous », vocabulaire, `mod[eè]le` qui mordait
+    // les identifiants « ModelEnable ») sont retirés — aucune ligne d'affichage de
+    // l'inventaire ne dépendait d'eux seuls. Les marqueurs de texte restants (accents +
+    // mots FR non ambigus) couvrent tout l'affichable.
     private const string LigneFrancaise =
-        "[éèêàçùôîï«»]|Aucun|Aucune|Echec|Échec|\\bcl[ée]s?\\b|mod[eè]le|presets?|Favori|favori|" +
+        "[éèêàçùôîï«»]|Aucun|Aucune|Echec|Échec|\\bcl[ée]s?\\b|" +
         "dossier|catég|régl|Conseil|conseil|arbitre|voix|lecture|Recherche|recherche|Réinitialiser|" +
-        "\\bTous\\b|gratuit|payant|SUGGESTION|VERDICT|BLOC|BAFFLE|ALTERNATIVE|CONSEIL LIBRE|joint|" +
-        "extraits|touche|Installation|Désinstallation|Tonex|charg|\\bVous\\b|\\bvotre\\b|\\bVotre\\b|" +
-        "fichier|Délai|indisponible|Annuler|annuler|preset\\(s\\)|tone model";
+        "gratuit|payant|SUGGESTION|VERDICT|BAFFLE|CONSEIL LIBRE|joint|" +
+        "extraits|touche|Installation|Désinstallation|charg|\\bVous\\b|\\bvotre\\b|\\bVotre\\b|" +
+        "fichier|Délai|indisponible|Annuler|annuler|preset\\(s\\)";
 
     private const string LitteralCsharp = @"""([^""\\]*(?:\\.[^""\\]*)*)""";
 
@@ -64,10 +70,11 @@ public class ScanLitterauxTests
             {
                 if (Regex.IsMatch(ligne, LigneCommentaire))
                     continue;
-                // Références de clés (Localizer.Get/Instance[...]) : une clé n'est pas une
-                // chaîne d'affichage. Cette exclusion existe aussi dans le script d'inventaire
-                // — miroir préservé.
-                if (ligne.Contains("Localizer.", StringComparison.Ordinal))
+                // Références de clés (Localizer.Get/Instance[...], CoreTexts.Get/Format[...]) :
+                // une clé n'est pas une chaîne d'affichage. Cette exclusion existe aussi dans le
+                // script d'inventaire — miroir préservé.
+                if (ligne.Contains("Localizer.", StringComparison.Ordinal)
+                    || ligne.Contains("CoreTexts.", StringComparison.Ordinal))
                     continue;
                 // IgnoreCase : miroir exact de « -match » (PowerShell, insensible à la casse).
                 if (!Regex.IsMatch(ligne, LigneFrancaise, RegexOptions.IgnoreCase))
@@ -118,8 +125,9 @@ public class ScanLitterauxTests
         var reel = Scanner();
         var autorise = LireAllowlist();
 
-        // Garde contre un scan vide (chemin src cassé) : l'allowlist livrée n'est pas vide.
-        Assert.NotEmpty(autorise);
+        // Garde contre un scan vide (chemin src cassé) : le fichier d'allowlist existe, et la
+        // phase 10 l'a vidé — il ne doit plus jamais se remplir (G6).
+        Assert.True(File.Exists(CheminAllowlist), "l'allowlist du scan doit exister, même vide");
 
         var ecarts = reel
             .Where(entry => !autorise.TryGetValue(entry.Key, out var nombre) || nombre != entry.Value)

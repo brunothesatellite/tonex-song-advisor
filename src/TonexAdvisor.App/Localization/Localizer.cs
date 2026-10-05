@@ -80,8 +80,8 @@ public sealed class Localizer : INotifyPropertyChanged
 #if DEBUG
         // Clé inconnue = bug d'inventaire : échec visible en debug, mais jamais d'écran
         // cassé ni de boucle inférieure en exécution normale (§5). Non testé sous xunit
-        // au regard des boîtes de dialogue de Debug.Fail.
-        Debug.Fail($"Clé de localisation inconnue : « {key} » (inventaire-i18n.csv ?).");
+        // au regard des boîtes de dialogue de Debug.Fail. Message dev en anglais (phase 10).
+        Debug.Fail($"Unknown localization key: '{key}' (missing from the resx?).");
 #endif
         return key;
     }
@@ -133,7 +133,7 @@ public sealed class Localizer : INotifyPropertyChanged
         }
 
 #if DEBUG
-        Debug.Fail($"Pluriel manquant : « {baseKey}.one / {baseKey}.other » (§6).");
+        Debug.Fail($"Missing plural pair: '{baseKey}.one / {baseKey}.other' (§6).");
 #endif
         return baseKey;
     }

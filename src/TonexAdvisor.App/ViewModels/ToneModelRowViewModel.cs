@@ -1,3 +1,4 @@
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.Core.Data.Records;
 
 namespace TonexAdvisor.App.ViewModels;
@@ -61,12 +62,12 @@ public sealed class ToneModelRowViewModel
 
     private static string KindLabel(ToneModelKind kind) => kind switch
     {
-        ToneModelKind.Stomp => "Stomp",
-        ToneModelKind.StompAndAmp => "Stomp + Amp",
-        ToneModelKind.Amp => "Amp",
-        ToneModelKind.AmpAndCab => "Amp + Cab",
-        ToneModelKind.ComplexRig => "Rig complet",
-        ToneModelKind.CustomIR => "IR / Cab",
+        ToneModelKind.Stomp => Localizer.Instance["Libelle.Type.Stomp"],
+        ToneModelKind.StompAndAmp => Localizer.Instance["Libelle.Type.StompAmp"],
+        ToneModelKind.Amp => Localizer.Instance["Libelle.Type.Amp"],
+        ToneModelKind.AmpAndCab => Localizer.Instance["Libelle.Type.AmpCab"],
+        ToneModelKind.ComplexRig => Localizer.Instance["Libelle.Type.RigComplet"],
+        ToneModelKind.CustomIR => Localizer.Instance["Libelle.Type.IRCab"],
         _ => kind.ToString(),
     };
 }
