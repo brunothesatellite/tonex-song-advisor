@@ -5,10 +5,8 @@ src\TonexAdvisor.App\Services\OpenAiCompatClient.cs;1
 src\TonexAdvisor.App\Services\OpenCodeClient.cs;4
 src\TonexAdvisor.App\Services\UserState.cs;1
 src\TonexAdvisor.App\ViewLocator.cs;1
-src\TonexAdvisor.App\ViewModels\AdviceCombinationRowViewModel.cs;4
-src\TonexAdvisor.App\ViewModels\AdvicePresetRowViewModel.cs;3
-src\TonexAdvisor.App\ViewModels\AdviceViewModel.cs;29
-src\TonexAdvisor.App\ViewModels\AiOpinionRowViewModel.cs;4
+src\TonexAdvisor.App\ViewModels\AdviceViewModel.cs;4
+src\TonexAdvisor.App\ViewModels\AiOpinionRowViewModel.cs;2
 src\TonexAdvisor.App\ViewModels\AnswerLineViewModel.cs;6
 src\TonexAdvisor.App\ViewModels\LibraryViewModel.cs;1
 src\TonexAdvisor.App\ViewModels\MainViewModel.cs;11

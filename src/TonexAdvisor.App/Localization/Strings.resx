@@ -116,14 +116,41 @@
   <data name="Biblio.Vide.AucunResultat" xml:space="preserve">
     <value>No result for these filters.</value>
   </data>
+  <data name="Conseil.Arbitre.Ecoule" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
   <data name="Conseil.Arbitre.Tranche" xml:space="preserve">
     <value>The arbitrator decides.</value>
+  </data>
+  <data name="Conseil.Avis.Ecoule" xml:space="preserve">
+    <value>{0:0.0} s</value>
+  </data>
+  <data name="Conseil.Avis.Indispo" xml:space="preserve">
+    <value>unavailable</value>
+  </data>
+  <data name="Conseil.Avis.Indisponibles" xml:space="preserve">
+    <value>Voices unavailable ({0}) — the local ranking stays on screen.</value>
+  </data>
+  <data name="Conseil.Avis.Interrompu" xml:space="preserve">
+    <value>Interrupted</value>
+  </data>
+  <data name="Conseil.Avis.SansArbitre" xml:space="preserve">
+    <value>{0} suggestion(s) — no arbiter: the OpenCode key is not set.</value>
+  </data>
+  <data name="Conseil.Avis.Statut" xml:space="preserve">
+    <value>AI advice — {0}</value>
   </data>
   <data name="Conseil.Avis.Texte" xml:space="preserve">
     <value>Each voice receives the request plus the full catalogue of blocks (stomp → amp) and cabinets, names only. The voices challenge the reference, then an arbitrator ranks the top 3 picks.</value>
   </data>
   <data name="Conseil.Avis.Titre" xml:space="preserve">
     <value>CROSS-CHECKED OPINIONS — OPENCODE, GEMINI, MISTRAL, GROQ</value>
+  </data>
+  <data name="Conseil.Avis.Verdict.Sur" xml:space="preserve">
+    <value>Verdict on {0} opinions ({1})</value>
+  </data>
+  <data name="Conseil.Avis.Verdict.Vide" xml:space="preserve">
+    <value>The arbiter sent nothing: the opinions stay on screen.</value>
   </data>
   <data name="Conseil.Bouton.Annuler" xml:space="preserve">
     <value>Cancel</value>
@@ -137,11 +164,20 @@
   <data name="Conseil.Bouton.Thinking" xml:space="preserve">
     <value>thinking</value>
   </data>
+  <data name="Conseil.Combination.BaffleComplet" xml:space="preserve">
+    <value>Cab : {0} — {1}</value>
+  </data>
+  <data name="Conseil.Combination.BaffleSimple" xml:space="preserve">
+    <value>Cab : {0}</value>
+  </data>
   <data name="Conseil.Combination.Texte" xml:space="preserve">
     <value>The stomp and amp come from the same capture: they are inseparable. Only the cabinet changes.</value>
   </data>
   <data name="Conseil.Combination.Titre" xml:space="preserve">
     <value>BEST COMBINATION — CAPTURED BLOCK + CABINET</value>
+  </data>
+  <data name="Conseil.Combination.Uses.none" xml:space="preserve">
+    <value>No preset uses it yet</value>
   </data>
   <data name="Conseil.Combination.Uses.one" xml:space="preserve">
     <value>Used by {0} preset in the library</value>
@@ -149,8 +185,53 @@
   <data name="Conseil.Combination.Uses.other" xml:space="preserve">
     <value>Used by {0} presets in the library</value>
   </data>
+  <data name="Conseil.EnCours" xml:space="preserve">
+    <value>in progress…</value>
+  </data>
+  <data name="Conseil.Erreur.Annule" xml:space="preserve">
+    <value>AI advice cancelled.</value>
+  </data>
+  <data name="Conseil.Erreur.AucuneBiblio" xml:space="preserve">
+    <value>No library loaded.</value>
+  </data>
+  <data name="Conseil.Erreur.DecrireDabord" xml:space="preserve">
+    <value>Describe the song first: an artist, a title or a style.</value>
+  </data>
+  <data name="Conseil.Erreur.RequeteVide" xml:space="preserve">
+    <value>Enter at least an artist, a song or a style.</value>
+  </data>
+  <data name="Conseil.Erreur.SansCle" xml:space="preserve">
+    <value>API key missing: fill in at least one voice (OpenCode, Gemini, Mistral or Groq) in Settings → Databases &amp; settings. The local ranking still stands.</value>
+  </data>
+  <data name="Conseil.Erreur.Suite" xml:space="preserve">
+    <value>{0} — the local ranking stays on screen.</value>
+  </data>
+  <data name="Conseil.Indice.AucunPreset" xml:space="preserve">
+    <value>No preset matches, but an amp combination is worth a look.</value>
+  </data>
+  <data name="Conseil.Indice.Combinaison" xml:space="preserve">
+    <value>{0} preset(s) ranked and a captured block (stomp + amp) with its cabinet to try first.</value>
+  </data>
+  <data name="Conseil.Indice.Defaut" xml:space="preserve">
+    <value>Describe the song: an artist, a title, or simply the mood you're after (« metal », « blues », « clean funk »).</value>
+  </data>
+  <data name="Conseil.Indice.PresetSeul" xml:space="preserve">
+    <value>{0} preset(s) ranked: the first is the closest to your request.</value>
+  </data>
+  <data name="Conseil.Indice.Vide" xml:space="preserve">
+    <value>Nothing in this library matches this search. Try a shorter keyword, or look up that title in the Presets tab first.</value>
+  </data>
+  <data name="Conseil.Presets.Song" xml:space="preserve">
+    <value>« {0} »</value>
+  </data>
   <data name="Conseil.Presets.Titre" xml:space="preserve">
     <value>TOP PRESETS</value>
+  </data>
+  <data name="Conseil.Reponse.Suggestion" xml:space="preserve">
+    <value>SUGGESTION — {0}</value>
+  </data>
+  <data name="Conseil.Reponse.Verdict" xml:space="preserve">
+    <value>VERDICT — ARBITRATED BY {0}</value>
   </data>
   <data name="Conseil.Requete.Artiste" xml:space="preserve">
     <value>ARTIST</value>
@@ -178,6 +259,12 @@
   </data>
   <data name="Conseil.Tooltip.VoirThinking" xml:space="preserve">
     <value>Show the full model output</value>
+  </data>
+  <data name="Conseil.Voix.Suggestions" xml:space="preserve">
+    <value>VOICE SUGGESTIONS</value>
+  </data>
+  <data name="Conseil.Voix.Titre" xml:space="preserve">
+    <value>VOICE OPINIONS</value>
   </data>
   <data name="Detail.BlocsActifs" xml:space="preserve">
     <value>{0} active block(s) in the chain</value>

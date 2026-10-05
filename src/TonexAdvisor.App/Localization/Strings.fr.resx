@@ -117,14 +117,41 @@
   <data name="Biblio.Vide.AucunResultat" xml:space="preserve">
     <value>Aucun résultat pour ces filtres.</value>
   </data>
+  <data name="Conseil.Arbitre.Ecoule" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
   <data name="Conseil.Arbitre.Tranche" xml:space="preserve">
     <value>L'arbitre tranche.</value>
+  </data>
+  <data name="Conseil.Avis.Ecoule" xml:space="preserve">
+    <value>{0:0.0} s</value>
+  </data>
+  <data name="Conseil.Avis.Indispo" xml:space="preserve">
+    <value>indisponible</value>
+  </data>
+  <data name="Conseil.Avis.Indisponibles" xml:space="preserve">
+    <value>Voix indisponibles ({0}) — le classement local reste affiché.</value>
+  </data>
+  <data name="Conseil.Avis.Interrompu" xml:space="preserve">
+    <value>Interrompu</value>
+  </data>
+  <data name="Conseil.Avis.SansArbitre" xml:space="preserve">
+    <value>{0} suggestion(s) — aucun arbitre : la clé OpenCode n'est pas renseignée.</value>
+  </data>
+  <data name="Conseil.Avis.Statut" xml:space="preserve">
+    <value>Conseil IA — {0}</value>
   </data>
   <data name="Conseil.Avis.Texte" xml:space="preserve">
     <value>Chaque voix reçoit la demande et le catalogue complet des blocs (stomp → ampli) et des baffles, noms uniquement. Les voix challengent la référence, puis un arbitre classe les 3 meilleures propositions.</value>
   </data>
   <data name="Conseil.Avis.Titre" xml:space="preserve">
     <value>AVIS CROISÉS — OPENCODE, GEMINI, MISTRAL, GROQ</value>
+  </data>
+  <data name="Conseil.Avis.Verdict.Sur" xml:space="preserve">
+    <value>Verdict sur {0} avis ({1})</value>
+  </data>
+  <data name="Conseil.Avis.Verdict.Vide" xml:space="preserve">
+    <value>L'arbitre n'a rien renvoyé : les avis restent affichés.</value>
   </data>
   <data name="Conseil.Bouton.Annuler" xml:space="preserve">
     <value>Annuler</value>
@@ -138,11 +165,20 @@
   <data name="Conseil.Bouton.Thinking" xml:space="preserve">
     <value>thinking</value>
   </data>
+  <data name="Conseil.Combination.BaffleComplet" xml:space="preserve">
+    <value>Baffle : {0} — {1}</value>
+  </data>
+  <data name="Conseil.Combination.BaffleSimple" xml:space="preserve">
+    <value>Baffle : {0}</value>
+  </data>
   <data name="Conseil.Combination.Texte" xml:space="preserve">
     <value>Le stomp et l’ampli viennent d’une même capture : ils sont inséparables. Seul le baffle se change.</value>
   </data>
   <data name="Conseil.Combination.Titre" xml:space="preserve">
     <value>MEILLEURE COMBINAISON — BLOC CAPTURÉ + BAFFLE</value>
+  </data>
+  <data name="Conseil.Combination.Uses.none" xml:space="preserve">
+    <value>Aucun preset ne l'utilise encore</value>
   </data>
   <data name="Conseil.Combination.Uses.one" xml:space="preserve">
     <value>Utilisé par {0} preset de la bibliothèque</value>
@@ -150,8 +186,53 @@
   <data name="Conseil.Combination.Uses.other" xml:space="preserve">
     <value>Utilisé par {0} presets de la bibliothèque</value>
   </data>
+  <data name="Conseil.EnCours" xml:space="preserve">
+    <value>en cours…</value>
+  </data>
+  <data name="Conseil.Erreur.Annule" xml:space="preserve">
+    <value>Conseil IA annulé.</value>
+  </data>
+  <data name="Conseil.Erreur.AucuneBiblio" xml:space="preserve">
+    <value>Aucune bibliothèque chargée.</value>
+  </data>
+  <data name="Conseil.Erreur.DecrireDabord" xml:space="preserve">
+    <value>Décrivez d'abord la chanson : un artiste, un titre ou un style.</value>
+  </data>
+  <data name="Conseil.Erreur.RequeteVide" xml:space="preserve">
+    <value>Indiquez au moins un artiste, une chanson ou un style.</value>
+  </data>
+  <data name="Conseil.Erreur.SansCle" xml:space="preserve">
+    <value>Clé API absente : renseigne au moins une voix (OpenCode, Gemini, Mistral ou Groq) dans Réglages → Bases &amp; réglages. Le classement local reste valable.</value>
+  </data>
+  <data name="Conseil.Erreur.Suite" xml:space="preserve">
+    <value>{0} — le classement local reste affiché.</value>
+  </data>
+  <data name="Conseil.Indice.AucunPreset" xml:space="preserve">
+    <value>Aucun preset ne correspond, mais une combinaison d'ampli mérite le détour.</value>
+  </data>
+  <data name="Conseil.Indice.Combinaison" xml:space="preserve">
+    <value>{0} preset(s) classé(s) et un bloc capturé (stomp + ampli) avec son baffle à tester en premier.</value>
+  </data>
+  <data name="Conseil.Indice.Defaut" xml:space="preserve">
+    <value>Décrivez la chanson : un artiste, un titre, ou simplement l'ambiance recherchée (« metal », « blues », « clean funk »).</value>
+  </data>
+  <data name="Conseil.Indice.PresetSeul" xml:space="preserve">
+    <value>{0} preset(s) classé(s) : le premier est le plus proche de votre demande.</value>
+  </data>
+  <data name="Conseil.Indice.Vide" xml:space="preserve">
+    <value>Rien dans cette bibliothèque ne correspond à cette recherche. Essayez un mot-clé plus court, ou cherchez d'abord ce titre dans l'onglet Presets.</value>
+  </data>
+  <data name="Conseil.Presets.Song" xml:space="preserve">
+    <value>« {0} »</value>
+  </data>
   <data name="Conseil.Presets.Titre" xml:space="preserve">
     <value>MEILLEURS PRESETS</value>
+  </data>
+  <data name="Conseil.Reponse.Suggestion" xml:space="preserve">
+    <value>SUGGESTION — {0}</value>
+  </data>
+  <data name="Conseil.Reponse.Verdict" xml:space="preserve">
+    <value>VERDICT — ARBITRÉ PAR {0}</value>
   </data>
   <data name="Conseil.Requete.Artiste" xml:space="preserve">
     <value>ARTISTE</value>
@@ -179,6 +260,12 @@
   </data>
   <data name="Conseil.Tooltip.VoirThinking" xml:space="preserve">
     <value>Afficher la sortie complète du modèle</value>
+  </data>
+  <data name="Conseil.Voix.Suggestions" xml:space="preserve">
+    <value>SUGGESTIONS DES VOIX</value>
+  </data>
+  <data name="Conseil.Voix.Titre" xml:space="preserve">
+    <value>AVIS DES VOIX</value>
   </data>
   <data name="Detail.BlocsActifs" xml:space="preserve">
     <value>{0} bloc(s) actif(s) sur la chaîne</value>

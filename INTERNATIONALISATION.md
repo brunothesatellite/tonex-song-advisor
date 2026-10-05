@@ -368,7 +368,7 @@ que les garde-fous arrivent **avant** la grande migration, pour l'encadrer.
 | **3 — Fenêtre principale + bibliothèque** ✅ | `MainWindow.axaml`, `LibraryView.axaml`, `LibraryViewModel` (y compris sentinelle §8.3, résumés `:N0`, pluriels) | **ATTEINT** : `MainWindow` (11) et `LibraryView` (53) sortis de l'allowlist, `LibraryViewModel` 5 → 1 (sentinelle seule) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
 | **4 — Vues de détail** ✅ | `PresetDetailView`, `ToneModelDetailView`, `PresetDetailViewModel` (dont `SettingsNote`) | **ATTEINT** : les 4 fichiers sortis de l'allowlist (13 + 12 + 15 + 2 → 0) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
 | **5 — Réglages (UI + VM)** ✅ | `SettingsView.axaml`, `SettingsViewModel` (le plus gros : 32 lignes accentuées), badges §8.4 | **ATTEINT** : les 4 fichiers sortis de l'allowlist (37 + 37 + 2 + 4 → 0) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
-| **6 — Avis IA (UI)** | `AdviceViewModel` (titres, spinner, états), `AiOpinionRowViewModel`, lignes de réponse | idem |
+| **6 — Avis IA (UI)** ✅ | `AdviceViewModel` (titres, spinner, états), `AiOpinionRowViewModel`, lignes de réponse | **ATTEINT** : les 2 fichiers de lignes sortis de l'allowlist (`AdviceCombinationRowViewModel` 4 → 0, `AdvicePresetRowViewModel` 3 → 0) et les 2 autres réduits à leurs seuls littéraux de protocole (`AdviceViewModel` 29 → 4, `AiOpinionRowViewModel` 4 → 2 — extraction `BLOC :`/`VERDICT :` reportée à la phase 7) ; build 0/0 ; **209/209 tests verts ×12** (§18) |
 | **7 — Protocole IA (le plus délicat)** | `AnswerFormat` unique, invites Core paramétrées en langue (§8.1), marqueurs tolérants (§9), `AnswerLineViewModel` | Tests d'extraction/coloration FR **et** EN verts ; 16 tests français verts non modifiés |
 | **8 — Passe nombres/dates/pluriels** | Les 33 sites de formatage, élimination de `(s)` | Plus aucun format en dur ; tests verts |
 | **9 — Langue : détection, choix, bascule** | `UiLanguage` + rétrocompat (§10), ComboBox réglages, recalcul à chaud (§11), largeurs de colonnes en ids (§8.2) | Tests persistance + compat + bascule verts |
@@ -492,6 +492,7 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
 | 04/10/2026 | **Phase 3 — Fenêtre principale + bibliothèque** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout : 204 socle/garde-fous + 5 de phase 2), **12/12 exécutions consécutives vertes** ; sortie d'allowlist : `MainWindow.axaml` **11 → 0**, `LibraryView.axaml` **53 → 0**, `LibraryViewModel.cs` **5 → 1** (sentinelle §8.3 seule) ; **59 clés FR/EN** ajoutées en paires ordonnées (**71 au total**, parité vérifiée) ; sentinelle : valeur `AnyFilter` intacte + affichage localisé (`FilterLabelConverter`, 3 ComboBox, §8.3) ; artefacts : `xmlns:loc` + `{loc:Loc}` (2 XAML), `Localizer.Instance.Get/[]` (VM), `src\TonexAdvisor.App\Localization\FilterLabelConverter.cs`, allowlist régénérée **38 fichiers / 332 littéraux** |
 | 05/10/2026 | **Phase 4 — Vues de détail** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout), **12/12 exécutions consécutives vertes** ; sortie d'allowlist : `PresetDetailView.axaml` **13 → 0**, `ToneModelDetailView.axaml` **12 → 0**, `PresetDetailViewModel.cs` **15 → 0**, `ToneModelDetailViewModel.cs` **2 → 0** ; **27 clés `Detail.*`** ajoutées en paires ordonnées (**98 au total**, parité vérifiée) ; allowlist **34 fichiers / 290 littéraux** ; artefacts : `xmlns:loc` + `{loc:Loc}` (2 vues), `Localizer.Instance.Get/[]` (2 VM), constantes techniques `Sep`/`SepLarge`/`PrefixHwA`/`PrefixHwB` |
 | 05/10/2026 | **Phase 5 — Réglages (UI + VM)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout), **12/12 exécutions consécutives vertes** ; sortie d'allowlist : `SettingsView.axaml` **37 → 0**, `SettingsViewModel.cs` **37 → 0**, `SettingsView.axaml.cs` **2 → 0**, `OpenCodeModels.cs` **4 → 0** (badges §8.4) ; **76 clés** ajoutées en paires ordonnées (**174 au total**, parité vérifiée) ; allowlist **30 fichiers / 210 littéraux** ; artefacts : 43 sites `{loc:Loc}` (dont 6 boutons à texte élément), `Localizer.Instance.Get/[]` (VM + code-behind), `OpenCodeModel.TierLabel` → `Model.Tier.Free`/`.Paid`, clé d'invite `Invite.Ping` |
+| 05/10/2026 | **Phase 6 — Avis IA (UI)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (aucun ajout), **12/12 exécutions consécutives vertes sur le code final** (course de culture corrigée en cours de route, cf. notes) ; sortie d'allowlist : `AdviceCombinationRowViewModel.cs` **4 → 0**, `AdvicePresetRowViewModel.cs` **3 → 0** ; réduits aux seuls littéraux de protocole : `AdviceViewModel.cs` **29 → 4**, `AiOpinionRowViewModel.cs` **4 → 2** (extraction `BLOC :`/`VERDICT :` laissée à la phase 7) ; **29 clés `Conseil.*`** ajoutées en paires ordonnées (**203 au total**, parité vérifiée) ; allowlist **28 fichiers / 176 littéraux** ; artefacts : `Localizer.Instance.Get/[]` (4 VM), `Plural` branché sur `Conseil.Combination.Uses.one/.other` (graines phase 1), constante `GenreSentinelle`, `tests\TonexAdvisor.Core.Tests\AssemblyInfo.cs` (parallélisme xunit désactivé) |
 | 04/10/2026 | **Phase 2 — Garde-fous (parité + scan)** | ✅ fait | `dotnet build` **0 erreur / 0 avertissement** ; **209/209 tests verts** (204 + 5 nouveaux), **12/12 exécutions consécutives vertes** ; garde-fou G6 **prouvé par la sonde** : ajout d'une chaîne en dur (`SondeScanTemporaire.cs`) → test rouge « hors allowlist », sonde retirée → vert ; artefacts : `PariteResxTests` (3 tests : clés, non-vidité, emplacements `{0}`), `ScanLitterauxTests` (2 tests : compteur exact vs allowlist + entrées périmées), `tests\TonexAdvisor.Core.Tests\litteraux-allowlist.txt` (**34 fichiers / 344 littéraux**), `TestPaths.RepoRoot` (racine via `TonexAdvisor.sln`) |
 
 **Notes techniques de la phase 1** (constats mesurés, à connaître pour les phases 3 à 9) :
@@ -637,6 +638,38 @@ Aucune question bloquante restante : les 4 décisions ci-dessus sont intégrées
   `oc_sk_…`, `SHA-256` deviennent des clés à valeurs identiques FR/EN — le scan exige une
   clé (lettres dans l'attribut), le contenu est neutre.
 
+**Notes techniques de la phase 6** (pour les phases 7 à 10) :
+- **Protocole laissé à la phase 7** : `AdviceViewModel:347,405` et `AiOpinionRowViewModel:114`
+  extraient les marqueurs que le modèle écrit (`BLOC :`, `VERDICT :`, `CONSEIL LIBRE`) — ce
+  ne sont pas des textes affichés mais des motifs d'analyse : leur tolérance FR/EN est le
+  contrat `AnswerFormat` (§9). Les deux fichiers restent donc dans l'allowlist, réduits à
+  ces seuls littéraux (4 et 2) ; la phase 7 les fera sortir.
+- **Course de culture entre tests (l'aléa de la phase)** : `SettingsDatabaseChoiceTests`
+  (`Aucune base trouvée`) a échoué 2 fois en 25 exécutions en fin de phase 5 : le test
+  construit `SettingsViewModel` (indice `Reglages.Bases.Aucune` localisé depuis la phase 5)
+  pendant qu'un test de la collection `Localisation` tient le `Localizer` en `en-US` →
+  `No database found…` à la place du FR. Cette collection ne sérialisait que les tests qui
+  **bascule** la culture entre eux, pas ceux qui la **lisent** ; `AdviceViewTests` (clés de
+  cette phase) et `DetailPanelTests` (phase 4) étaient dans le même cas, et chaque phase
+  migrera d'autres lecteurs. Remède : `[assembly: CollectionBehavior(DisableTestParallelization
+  = true)]` dans `tests\TonexAdvisor.Core.Tests\AssemblyInfo.cs` — la suite partage des
+  singletons mondiaux (culture du `Localizer`, dispatcher Avalonia) → exécution sérialisée,
+  12/12 vertes ensuite ; les tests ajoutés par les phases 7 à 10 sont sûrs par construction.
+- **`Conseil.Avis.Titre` existait déjà** (« AVIS CROISÉS — OPENCODE, GEMINI, MISTRAL, GROQ »,
+  titre statique du panneau, phase 1) : les titres dynamiques du VM ont pris
+  `Conseil.Voix.Titre` (`AVIS DES VOIX`) et `Conseil.Voix.Suggestions`
+  (`SUGGESTIONS DES VOIX`) — collision évitée, ordre des clés préservé.
+- **`Plural` enfin branché** : `Usage` de la ligne combinaison appelle
+  `Plural(PresetCount, "Conseil.Combination.Uses")` — les paires `.one/.other` existaient
+  depuis la phase 1 sans consommateur — et `Uses.none` couvre le cas 0 : le `(s)` de cette
+  ligne disparaît avant la passe pluriels de la phase 8 (qui traitera les sites restants).
+- **Hoist `GenreSentinelle`** : la sentinelle de données `"None"` (`preset.Genre`) était sur
+  une ligne française (`preset`) — remontée en `private const` sur sa propre ligne (réflexe
+  de la phase 4) : la donnée est intacte et le scan ne la voit plus.
+- **Non compté ≠ non affiché (bis)** : `Indiquez au moins un artiste…`, `Interrompu` et
+  `en cours…` sortent des passes 3-4 de l'inventaire (ni accent ni mot-clé) — migrés quand
+  même, en clés `Conseil.Erreur.RequeteVide`, `Conseil.Avis.Interrompu`, `Conseil.EnCours`.
+
 **Méthode d'inventaire (phase 0)** — 4 passes de scan :
 1. XAML : tous les littéraux d'attributs texte, **sans filtre de langue** (126 lignes) ;
 2. C# : lignes francophones (accents + mots-clés) → 397 candidats bruts ;
@@ -654,7 +687,7 @@ Contrôles automatiques passés : chaque ligne du brut est couverte dans le cura
 
 ---
 
-*Plan validé ; phases 0 à 5 réalisées sur instruction. Prochaine étape : **phase 6**
-(avis IA (UI) : `AdviceViewModel` — titres, spinner, états —, `AiOpinionRowViewModel`,
-lignes de réponse, §12), à lancer sur instruction.
-Phase 5 non committée (dernier commit : `e58be66`, phases 0-4).*
+*Plan validé ; phases 0 à 6 réalisées sur instruction. Prochaine étape : **phase 7**
+(protocole IA : `AnswerFormat` unique, invites Core paramétrées en langue §8.1,
+marqueurs tolérants §9, `AnswerLineViewModel`, §12), à lancer sur instruction.
+Phase 6 non committée (dernier commit : `0ea7e73`, phases 0-5).*

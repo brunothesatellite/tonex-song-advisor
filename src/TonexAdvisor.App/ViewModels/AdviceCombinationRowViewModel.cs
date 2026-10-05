@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.Core.Advice;
 
 namespace TonexAdvisor.App.ViewModels;
@@ -26,13 +27,13 @@ public sealed class AdviceCombinationRowViewModel
             : scored.Amp;
 
         CabLine = scored.Cab.Length > 0
-            ? $"Baffle : {scored.Cab} — {scored.CabNote}"
-            : $"Baffle : {scored.CabNote}";
+            ? Localizer.Instance.Get("Conseil.Combination.BaffleComplet", scored.Cab, scored.CabNote)
+            : Localizer.Instance.Get("Conseil.Combination.BaffleSimple", scored.CabNote);
 
         PresetCount = scored.PresetCount;
         Usage = PresetCount > 0
-            ? $"Utilisé par {PresetCount} preset(s) de la bibliothèque"
-            : "Aucun preset ne l'utilise encore";
+            ? Localizer.Instance.Plural(PresetCount, "Conseil.Combination.Uses")
+            : Localizer.Instance["Conseil.Combination.Uses.none"];
 
         Reasons = scored.Reasons.Take(3).Select(reason => reason.Text).ToList();
         ReasonsText = string.Join("  ·  ", Reasons);

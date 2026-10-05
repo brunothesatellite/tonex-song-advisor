@@ -3,6 +3,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TonexAdvisor.App.Config;
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.App.Services;
 using TonexAdvisor.Core.Advice;
 
@@ -24,9 +25,8 @@ public partial class AdviceViewModel : ViewModelBase
     private const int CombinationCount = 1;
 
     /// <summary>Shown before the tab has been asked anything.</summary>
-    private const string DefaultHint =
-        "Décrivez la chanson : un artiste, un titre, ou simplement l'ambiance recherchée " +
-        "(« metal », « blues », « clean funk »).";
+    private static string DefaultHint =>
+        Localizer.Instance["Conseil.Indice.Defaut"];
 
     /// <summary>
     /// Deadline for one voice. Generous on purpose: a prompt carrying the whole catalogue is
@@ -103,7 +103,8 @@ public partial class AdviceViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(ArbitreElapsedLabel))]
     private int _arbitreElapsed;
 
-    public string ArbitreElapsedLabel => IsArbitreWorking ? $"{ArbitreElapsed} s" : "";
+    public string ArbitreElapsedLabel =>
+        IsArbitreWorking ? Localizer.Instance.Get("Conseil.Arbitre.Ecoule", ArbitreElapsed) : "";
 
     private readonly DispatcherTimer _ticker = new DispatcherTimer
     {
@@ -174,7 +175,7 @@ public partial class AdviceViewModel : ViewModelBase
     /// Title of the voices block: they propose when an arbitre will decide, they suggest when
     /// nobody will.
     /// </summary>
-    public string VoicesTitle { get; private set; } = "AVIS DES VOIX";
+    public string VoicesTitle { get; private set; } = Localizer.Instance["Conseil.Voix.Titre"];
 
     /// <summary>
     /// The referee's thinking streams live while it works — hidden unless the user asks for it —
@@ -226,14 +227,14 @@ public partial class AdviceViewModel : ViewModelBase
         var index = _owner.Index;
         if (index is null)
         {
-            ErrorMessage = "Aucune bibliothèque chargée.";
+            ErrorMessage = Localizer.Instance["Conseil.Erreur.AucuneBiblio"];
             return;
         }
 
         var query = AdviceQuery.Create(Artist, Song, Style);
         if (query.IsBlank)
         {
-            ErrorMessage = "Indiquez au moins un artiste, une chanson ou un style.";
+            ErrorMessage = Localizer.Instance["Conseil.Erreur.RequeteVide"];
             Hint = "";
             return;
         }
@@ -279,7 +280,7 @@ public partial class AdviceViewModel : ViewModelBase
         var query = AdviceQuery.Create(Artist, Song, Style);
         if (query.IsBlank)
         {
-            AiStatus = "Décrivez d'abord la chanson : un artiste, un titre ou un style.";
+            AiStatus = Localizer.Instance["Conseil.Erreur.DecrireDabord"];
             return;
         }
 
@@ -294,12 +295,13 @@ public partial class AdviceViewModel : ViewModelBase
         var voices = AiConsultation.BuildVoices(config, state);
         var arbitre = AiConsultation.BuildArbitre(config);
 
-        VoicesTitle = arbitre is null ? "SUGGESTIONS DES VOIX" : "AVIS DES VOIX";
+        VoicesTitle = arbitre is null
+            ? Localizer.Instance["Conseil.Voix.Suggestions"]
+            : Localizer.Instance["Conseil.Voix.Titre"];
 
         if (voices.Count == 0 && arbitre is null)
         {
-            AiStatus = "Clé API absente : renseigne au moins une voix (OpenCode, Gemini, Mistral " +
-                       "ou Groq) dans Réglages → Bases & réglages. Le classement local reste valable.";
+            AiStatus = Localizer.Instance["Conseil.Erreur.SansCle"];
             return;
         }
 
@@ -346,8 +348,8 @@ public partial class AdviceViewModel : ViewModelBase
 
                 AiText = AnswerCleaner.Extract(AiText, "BLOC :", "CONSEIL LIBRE");
                 RebuildAiLines();
-                AiTitle = $"SUGGESTION — {arbitre.Model}";
-                AiStatus = $"Conseil IA — {arbitre.Model}";
+                AiTitle = Localizer.Instance.Get("Conseil.Reponse.Suggestion", arbitre.Model);
+                AiStatus = Localizer.Instance.Get("Conseil.Avis.Statut", arbitre.Model);
                 return;
             }
 
@@ -364,15 +366,15 @@ public partial class AdviceViewModel : ViewModelBase
 
             if (usable.Count == 0)
             {
-                var names = string.Join(", ", opinions.Select(opinion => opinion.Provider));
-                AiStatus = $"Voix indisponibles ({names}) — le classement local reste affiché.";
+                AiStatus = Localizer.Instance.Get("Conseil.Avis.Indisponibles",
+                    string.Join(", ", opinions.Select(opinion => opinion.Provider)));
                 return;
             }
 
             // Pas d'arbitre (clé OpenCode absente) : les voix restent des suggestions.
             if (arbitre is null)
             {
-                AiStatus = $"{usable.Count} suggestion(s) — aucun arbitre : la clé OpenCode n'est pas renseignée.";
+                AiStatus = Localizer.Instance.Get("Conseil.Avis.SansArbitre", usable.Count);
                 return;
             }
 
@@ -404,25 +406,26 @@ public partial class AdviceViewModel : ViewModelBase
             // ne garde que son verdict, du marqueur à la fin du CONSEIL LIBRE.
             AiText = AnswerCleaner.Extract(AiText, "VERDICT :", "CONSEIL LIBRE");
             RebuildAiLines();
-            AiTitle = $"VERDICT — ARBITRÉ PAR {arbitre.Model}";
+            AiTitle = Localizer.Instance.Get("Conseil.Reponse.Verdict", arbitre.Model);
 
             AiStatus = AiText.Length > 0
-                ? $"Verdict sur {usable.Count} avis ({string.Join(", ", usable.Select(opinion => opinion.Provider))})"
-                : "L'arbitre n'a rien renvoyé : les avis restent affichés.";
+                ? Localizer.Instance.Get("Conseil.Avis.Verdict.Sur", usable.Count,
+                    string.Join(", ", usable.Select(opinion => opinion.Provider)))
+                : Localizer.Instance["Conseil.Avis.Verdict.Vide"];
         }
         catch (OperationCanceledException)
         {
-            AiStatus = "Conseil IA annulé.";
+            AiStatus = Localizer.Instance["Conseil.Erreur.Annule"];
         }
         catch (Exception exception)
         {
-            AiStatus = $"{exception.Message} — le classement local reste affiché.";
+            AiStatus = Localizer.Instance.Get("Conseil.Erreur.Suite", exception.Message);
         }
         finally
         {
             // Une voix jamais revenue ne doit pas rester à tourner.
             foreach (var row in Opinions.Where(candidate => candidate.IsPending).ToList())
-                row.Complete(new AiOpinion(row.Provider, "", "Interrompu", 0));
+                row.Complete(new AiOpinion(row.Provider, "", Localizer.Instance["Conseil.Avis.Interrompu"], 0));
 
             IsArbitreWorking = false;
             IsAiBusy = false;
@@ -487,14 +490,13 @@ public partial class AdviceViewModel : ViewModelBase
     private static string BuildHint(int presets, int combinations)
     {
         if (presets == 0 && combinations == 0)
-            return "Rien dans cette bibliothèque ne correspond à cette recherche. Essayez un mot-clé " +
-                   "plus court, ou cherchez d'abord ce titre dans l'onglet Presets.";
+            return Localizer.Instance["Conseil.Indice.Vide"];
 
         if (presets == 0)
-            return "Aucun preset ne correspond, mais une combinaison d'ampli mérite le détour.";
+            return Localizer.Instance["Conseil.Indice.AucunPreset"];
 
         return combinations > 0
-            ? $"{presets} preset(s) classé(s) et un bloc capturé (stomp + ampli) avec son baffle à tester en premier."
-            : $"{presets} preset(s) classé(s) : le premier est le plus proche de votre demande.";
+            ? Localizer.Instance.Get("Conseil.Indice.Combinaison", presets)
+            : Localizer.Instance.Get("Conseil.Indice.PresetSeul", presets);
     }
 }

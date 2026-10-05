@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.Core.Advice;
 using TonexAdvisor.Core.Data.Records;
 
@@ -8,6 +9,9 @@ namespace TonexAdvisor.App.ViewModels;
 /// <summary>One recommendation of the « Conseils » tab, ready to render.</summary>
 public sealed class AdvicePresetRowViewModel
 {
+    /// <summary>The catalogue's « no genre » sentinel — a value, not a label.</summary>
+    private const string GenreSentinelle = "None";
+
     public AdvicePresetRowViewModel(
         ScoredPreset scored,
         IReadOnlyList<ToneModelRecord> toneModels,
@@ -19,7 +23,7 @@ public sealed class AdvicePresetRowViewModel
         var preset = scored.Preset;
         Name = preset.Name;
         Category = preset.Category;
-        Genre = preset.Genre is "None" or "" ? "" : preset.Genre;
+        Genre = preset.Genre is GenreSentinelle or "" ? "" : preset.Genre;
         Artist = preset.Artist;
         Song = preset.Song;
 
@@ -35,7 +39,8 @@ public sealed class AdvicePresetRowViewModel
         Score = (int)Math.Round(scored.Score);
         ScoreLabel = $"{Score} %";
 
-        Meta = string.Join(" · ", new[] { Category, Genre, Amp, Cab, Song.Length > 0 ? $"« {Song} »" : "" }
+        var songLabel = Song.Length > 0 ? Localizer.Instance.Get("Conseil.Presets.Song", Song) : "";
+        Meta = string.Join(" · ", new[] { Category, Genre, Amp, Cab, songLabel }
             .Where(value => value.Length > 0));
 
         // Three reasons are plenty on a card; the rest would be noise.

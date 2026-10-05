@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using TonexAdvisor.App.Localization;
 using TonexAdvisor.App.Services;
 using TonexAdvisor.Core.Advice;
 
@@ -62,7 +63,7 @@ public partial class AiOpinionRowViewModel : ViewModelBase
     public AiOpinionRowViewModel(string provider)
     {
         Provider = provider;
-        Status = "en cours…";
+        Status = Localizer.Instance["Conseil.EnCours"];
     }
 
     /// <summary>A voice that has already answered.</summary>
@@ -106,7 +107,9 @@ public partial class AiOpinionRowViewModel : ViewModelBase
     {
         IsPending = false;
         HasError = opinion.Error is not null;
-        Status = HasError ? "indisponible" : $"{opinion.ElapsedMs / 1000d:0.0} s";
+        Status = HasError
+            ? Localizer.Instance["Conseil.Avis.Indispo"]
+            : Localizer.Instance.Get("Conseil.Avis.Ecoule", opinion.ElapsedMs / 1000d);
 
         // Un modèle raisonneur écrit son travail dans sa réponse : brouillons, vérifications,
         // comptages. On ne garde que le bloc de réponse, du marqueur de format à la fin du
